@@ -1434,6 +1434,16 @@ public class ViewResultsAction extends DispatchAction {
 			}
 		}
 
+		if (Constants.SITE_IS_DESY()) {
+			LOG.debug("In DESY block");
+			String[] archivePathDir = archivePath.split("/");
+			String beamLineName = dc.getDataCollectionGroupVO().getSessionVO().getBeamlineName().toLowerCase();
+			archivePath = Constants.DATA_FILEPATH_START + beamLineName + "/";
+			for (int k = 4; k < archivePathDir.length; k++) {
+				archivePath = archivePath + archivePathDir[k] + "/";
+			}
+		}
+
 		if (Constants.SITE_IS_ALBA()) {
 			LOG.debug("In ALBA block");
 			String[] archivePathDir = archivePath.split("/");

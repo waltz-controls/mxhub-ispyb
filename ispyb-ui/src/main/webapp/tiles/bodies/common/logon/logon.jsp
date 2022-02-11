@@ -63,7 +63,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	          		  <!-- Password -->
 	          		  <layout:column styleClass="MESSAGE_GREY">
 <c:choose>
-<c:when test="${SITE_ATTRIBUTE eq 'ESRF'|| SITE_ATTRIBUTE eq 'MAXIV'|| SITE_ATTRIBUTE eq 'SOLEIL' || SITE_ATTRIBUTE eq 'ALBA'}">
+<c:when test="${SITE_ATTRIBUTE eq 'ESRF'|| SITE_ATTRIBUTE eq 'MAXIV'|| SITE_ATTRIBUTE eq 'SOLEIL' || SITE_ATTRIBUTE eq 'ALBA' || SITE_ATTRIBUTE eq 'DESY'}">
 	          		    <bean:message key="label.password"/>&nbsp;(*)
 </c:when>
 <c:otherwise>
@@ -90,7 +90,13 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	          		    <div align=justify>(*): Your DUO password.
 	          		    </div>
 	                  </layout:column>
-</c:if>	              	                
+</c:if>
+<c:if test="${SITE_ATTRIBUTE eq 'DESY'}">
+   <layout:column styleClass="MESSAGE_GREY">
+	   <div align=justify>(*): Your DOOR password.
+	   </div>
+   </layout:column>
+</c:if>
 <c:if test="${SITE_ATTRIBUTE eq 'SOLEIL'}">
 	          		  <layout:column styleClass="MESSAGE_GREY">
 	          		    <div align=justify>(*): Your SUN set password.</div>
@@ -148,6 +154,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	<a href="http://www.synchrotron-soleil.fr"><img src="<%=request.getContextPath()%>/images/soleil-logo.gif" border=0></a>
 	<a href="http://www.maxiv.se"><img src="<%=request.getContextPath()%>/images/max_iv_logo.gif" border=0></a>
 	<a href="http://www.cells.es"><img src="<%=request.getContextPath()%>/images/alba.png" border=0></a>
+	<a href="http://www.desy.de"><img src="<%=request.getContextPath()%>/images/desy.png" border=0></a>
 
     </DIV>
 
@@ -168,7 +175,8 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 		  <A href="http://www.synchrotron-soleil.fr">SOLEIL</A> | 
 		  <A href="http://www.embl-grenoble.fr/">EMBL</A> |
 		  <A href="http://www.maxiv.se/">MAXIV</A> |
-		  <A href="http://www.cells.es/">ALBA</A>
+		  <A href="http://www.cells.es/">ALBA</A> |
+		  <A href="http://www.desy.de/">DESY</A>
       </P>
       <P class=x-small>
       		Copyright &copy; 2004 ISPyB All rights reserved. <br/>

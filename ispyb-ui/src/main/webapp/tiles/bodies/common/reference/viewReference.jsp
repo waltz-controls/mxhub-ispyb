@@ -38,6 +38,9 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	if (Constants.SITE_IS_ALBA()){
 		reportingText = "When reporting data from the ALBA MX beamlines please cite the appropriate references:";
 	}
+	if (Constants.SITE_IS_DESY()){
+		reportingText = "When reporting data from the DESY MX beamlines please cite the appropriate references:";
+	}
 %>	
 	
 <%-- Reference--%>

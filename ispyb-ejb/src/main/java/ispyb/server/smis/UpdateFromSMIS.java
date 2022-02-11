@@ -201,6 +201,10 @@ public class UpdateFromSMIS {
 				SMISWebService wsALBA = SMISWebServiceGenerator.getWs();
 				pk = wsALBA.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
 				break;
+			case DESY:
+				SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
+				pk = wsDESY.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
+				break;
 			case EMBL:
 				SMISWebService wsEMBL = SMISWebServiceGenerator.getWs();
 				pk = wsEMBL.getProposalPK("SAXS", 225L);
@@ -728,6 +732,14 @@ public class UpdateFromSMIS {
 				}
 
 				if (Constants.getSite().equals(SITE.EMBL)) {
+					if (!StringUtils.matchString(mainProp.getBllogin(), currentPerson.getLogin())) {
+						currentPerson.setLogin(mainProp.getBllogin());
+						currentPerson = person.merge(currentPerson);
+						LOG.debug("Update person with bllogin");
+					}
+				}
+
+				if (Constants.getSite().equals(SITE.DESY)) {
 					if (!StringUtils.matchString(mainProp.getBllogin(), currentPerson.getLogin())) {
 						currentPerson.setLogin(mainProp.getBllogin());
 						currentPerson = person.merge(currentPerson);

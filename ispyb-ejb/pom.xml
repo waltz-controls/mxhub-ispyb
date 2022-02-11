@@ -608,7 +608,66 @@
 			<shipment.upload.populatedTemplate>ispyb-template6.2_shipment.xls</shipment.upload.populatedTemplate>
 		</properties>
 	</profile>
-  	
+	  <profile>
+		  <id>ispyb.site-DESY</id>
+		  <activation>
+			  <property>
+				  <name>ispyb.site</name>
+				  <value>DESY</value>
+			  </property>
+		  </activation>
+		  <properties>
+			  <ispyb.dbDialect>MYSQL</ispyb.dbDialect>
+			  <ispyb.dbJndiName.direct>java:jboss/ispyb_db_direct</ispyb.dbJndiName.direct>
+			  <ispyb.authentication.method>SIMPLE</ispyb.authentication.method>
+			  <ispyb.authorisation.proposals.source>database</ispyb.authorisation.proposals.source>
+
+			  <ispyb.root.folder>/asap3/petra3/gpfs</ispyb.root.folder>
+			  <ispyb.uploaded.root.folder>/home/web/desy/</ispyb.uploaded.root.folder>
+			  <ispyb.upload.folder.pdf>/home/web/desy/pdf</ispyb.upload.folder.pdf>
+
+			  <ispyb.server.name.prod>localhost</ispyb.server.name.prod>
+			  <ispyb.server.name.prod.alias>localhost</ispyb.server.name.prod.alias>
+			  <ispyb.server.name.prod.ext>127.0.0.1</ispyb.server.name.prod.ext>
+			  <ispyb.server.name.test>localhost</ispyb.server.name.test>
+
+			  <protein.allowedToCreate>true</protein.allowedToCreate>
+
+			  <shipping.container.capacity>16</shipping.container.capacity>
+			  <samplechanger.container.capacity>16</samplechanger.container.capacity>
+			  <samplechanger.locations>9</samplechanger.locations>
+
+			  <ispyb.dataprocessing.denzo>true</ispyb.dataprocessing.denzo>
+			  <ispyb.path.mappingstyle>DESY</ispyb.path.mappingstyle>
+			  <ispyb.bcm>mxcube</ispyb.bcm>
+
+			  <mail.smtp.host>xxxx.desy.de</mail.smtp.host>
+			  <mail.admin>xxxx@desy.de</mail.admin>
+			  <mail.dev>xxxx@desy.de</mail.dev>
+			  <mail.ispyb>xxxx@desy.de</mail.ispyb>
+			  <mail.stores>xxxx@desy.de</mail.stores>
+
+			  <mail.report.industry.from>xxxx@desy.de</mail.report.industry.from>
+			  <mail.report.industry.cc>xxxx@desy.de</mail.report.industry.cc>
+			  <mail.report.industry.cc.fx12>xxxx@desy.de</mail.report.industry.cc.fx12>
+			  <mail.report.industry.bcc></mail.report.industry.bcc>
+
+			  <dictionary.site>DESY</dictionary.site>
+			  <dictionary.bcm>mxCuBE</dictionary.bcm>
+
+			  <ispyb.authorisation.active>true</ispyb.authorisation.active>
+
+			  <userportal.webservices.url>https://doordev.desy.de/api/v1.0</userportal.webservices.url>
+			  <userportal.webservices.token>xxxxxxx</userportal.webservices.token>
+			  <ispyb.userportal.link>DOOR</ispyb.userportal.link>
+			  <userportal.url>https://door.desy.de/</userportal.url>
+
+			  <ispyb.shipping.reimburseddewars>false</ispyb.shipping.reimburseddewars>
+
+			  <shipment.upload.template>ispyb-template6.2_shipment.xlt</shipment.upload.template>
+			  <shipment.upload.populatedTemplate>ispyb-template6.2_shipment.xls</shipment.upload.populatedTemplate>
+		  </properties>
+	  </profile>
   	<profile>
   		<id>ispyb.site-GENERIC</id>
 		<activation>

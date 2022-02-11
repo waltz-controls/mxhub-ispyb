@@ -28,6 +28,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
           <A href="http://www.ebi.ac.uk/pdbe/" target=_blank>MSD</A> | 
           <a href="http://www.maxiv.se/">MAX IV</a> |
           <A href="http://www.cells.es/">ALBA</A> |
+          <A href="http://www.desy.de/">DESY</A> |
           <c:if test="${SITE_ATTRIBUTE eq 'DLS'}">
            	| <A href="http://www.diamond.ac.uk/" target=_blank>DLS</A> 
           </c:if>
@@ -43,7 +44,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
       		Copyright � 2008 ISPyB All rights reserved. <br/>
       </P>
     </c:if>
-    <c:if test="${SITE_ATTRIBUTE eq 'EMBL' or SITE_ATTRIBUTE eq 'ALBA'}">
+    <c:if test="${SITE_ATTRIBUTE eq 'EMBL' or SITE_ATTRIBUTE eq 'ALBA' or SITE_ATTRIBUTE eq 'DESY'}">
       <P class=small>
       		Copyright � 2014 ISPyB All rights reserved. <br/>
       </P>

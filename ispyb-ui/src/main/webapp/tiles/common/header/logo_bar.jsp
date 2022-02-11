@@ -68,7 +68,25 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	     	</font></H2></TD>
 	   </TR>
 </c:if>
+<c:if test="${SITE_ATTRIBUTE eq 'DESY'}">
+	<!-- bar with image -->
+	<bean:define scope="page" id="serverName" value="<%=request.getLocalName()%>" 	type="java.lang.String"/>
+	<TR bgColor=#6888a8>
+		<TD class= "ispybgen"><IMG src="<%=request.getContextPath()%>/images/ISPyB_Logo_02.gif" align=left></TD>
+		<TD class= "ispybgen" align=right>
+			<H2 style="text-decoration: blink;"><font color="FFFFFF">
+				<%=adminVar.getValue("warningMessage")%>&nbsp;
+				<!-- WARNING MESSAGES ON LOCALHOST AND PYTEST -->
+				<!-- <logic:equal name="serverName" value="<%=Constants.getProperty(\"ISPyB.server.name.test\")%>"  scope="page">
+			 		TEST SERVER on <%=adminVar.getValue("databaseName")%>&nbsp;
+			</logic:equal>
+			<logic:equal name="serverName" value="<%=Constants.getProperty(\"ISPyB.server.name.localhost\")%>"  scope="page">
+			 		LOCAL TEST SERVER on <%=adminVar.getValue("databaseName")%>&nbsp;
+			</logic:equal> -->
 
+			</font></H2></TD>
+	</TR>
+</c:if>
 <c:if test="${SITE_ATTRIBUTE eq 'DLS'}">
 		<%-- bar with image --%>
 	    <tr bgColor="#6888a8">

@@ -27,6 +27,7 @@ import ispyb.common.util.beamlines.ESRFBeamlineEnum;
 import ispyb.common.util.beamlines.MAXIVBeamlineEnum;
 import ispyb.common.util.beamlines.SOLEILBeamlineEnum;
 import ispyb.common.util.beamlines.ALBABeamlineEnum;
+import ispyb.common.util.beamlines.DESYBeamlineEnum;
 import ispyb.server.common.services.shipping.Container3Service;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 import ispyb.server.common.vos.shipping.Container3VO;
@@ -142,6 +143,9 @@ public class FillSampleChanger extends org.apache.struts.actions.DispatchAction 
 				List<OptionValue> beamlineValueList = new ArrayList<OptionValue>();
 
 				String[] beamlineList = Constants.BEAMLINE_LOCATION;
+				if(Constants.SITE_IS_DESY()){
+					beamlineList = DESYBeamlineEnum.getBeamlineNamesInActivity();
+				}
 				if(Constants.SITE_IS_ALBA()){
 					beamlineList = ALBABeamlineEnum.getBeamlineNamesInActivity();
 				}

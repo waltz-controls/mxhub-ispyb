@@ -123,7 +123,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
 	</TABLE>
 </c:if>
 
-<c:if test="${SITE_ATTRIBUTE eq 'EMBL'}">
+<c:if test="${SITE_ATTRIBUTE eq 'EMBL' or SITE_ATTRIBUTE eq 'DESY'}">
 	<!-- ****************** begin Body of the page: menu left + content + footer *********************** -->
 	<TABLE cellSpacing="0" cellPadding="0" width="100%" border="0">
 	  <TBODY>

@@ -32,7 +32,7 @@ public final class Constants {
 	private static Properties mProp = PropertyLoader.loadProperties("ISPyB");
 
 	public enum SITE {
-		SOLEIL, EMBL, ESRF, MAXIV, ALBA, GENERIC
+		SOLEIL, EMBL, ESRF, MAXIV, ALBA, DESY, GENERIC
 	}
 
 	/*
@@ -98,6 +98,8 @@ public final class Constants {
 
 	public static final String SITE_ALBA = "ALBA";
 
+	public static final String SITE_DESY = "DESY";
+
 	public static final String SITE_GENERIC = "GENERIC";
 
 	public static final boolean SITE_IS_ESRF() {
@@ -133,6 +135,9 @@ public final class Constants {
 		if (SITE_IS_ALBA()) {
 			return SITE.ALBA;
 		}
+		if (SITE_IS_DESY()) {
+			return SITE.DESY;
+		}
         if (SITE_IS_ESRF()) {
             return SITE.ESRF;
         }
@@ -145,6 +150,10 @@ public final class Constants {
 
 	public static final boolean SITE_IS_ALBA() {
 		return getProperty(SITE_PROPERTY).equals(SITE_ALBA);
+	}
+
+	public static final boolean SITE_IS_DESY() {
+		return getProperty(SITE_PROPERTY).equals(SITE_DESY);
 	}
 
 	public static final String DBDIALECT_PROPERTY = "ISPyB.dbDialect";
@@ -866,6 +875,8 @@ public final class Constants {
 
 	public static final String[] BEAMLINE_LOCATION_ALBA = { "XALOC" };
 
+	public static final String[] BEAMLINE_LOCATION_DESY = { "P11" };
+
 	public static final String[] BEAMLINE_LOCATION_DEFAULT = { "Not", "yet", "defined", "for", "this", "site" };
 
 	public static String getSAXSBeamline() {
@@ -905,9 +916,12 @@ public final class Constants {
 
 	public static final String[] CONTAINER_CAPACITY_ALBA = { "10", "6", "0" };
 
+	public static final String[] CONTAINER_CAPACITY_DESY = { "16", "16", "6", "0" };
+
 	public static final String[] CONTAINER_CAPACITY = (SITE_IS_ESRF()) ? CONTAINER_CAPACITY_ESRF
 			: (SITE_IS_DLS()) ? CONTAINER_CAPACITY_DLS : (SITE_IS_MAXIV()) ? CONTAINER_CAPACITY_MAXIV
 					: (SITE_IS_SOLEIL()) ? CONTAINER_CAPACITY_SOLEIL
+			: (SITE_IS_DESY()) ? CONTAINER_CAPACITY_DESY
 			: (SITE_IS_ALBA()) ? CONTAINER_CAPACITY_ALBA : CONTAINER_CAPACITY_ESRF;
 
 	public static final String[] LIST_EXPERIMENT_KIND_MAXIV = { "Default", "OSC", "SAD", "MAD", "Fixed", "Ligand binding",

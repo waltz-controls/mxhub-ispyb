@@ -57,6 +57,7 @@ import ispyb.common.util.beamlines.ESRFBeamlineEnum;
 import ispyb.common.util.beamlines.MAXIVBeamlineEnum;
 import ispyb.common.util.beamlines.SOLEILBeamlineEnum;
 import ispyb.common.util.beamlines.ALBABeamlineEnum;
+import ispyb.common.util.beamlines.DESYBeamlineEnum;
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.services.proposals.Proposal3Service;
 import ispyb.server.common.services.sessions.Session3Service;
@@ -266,7 +267,7 @@ public class ViewSessionAction extends ParentIspybAction {
 			// beamLine operator email
 
 			List<SessionInformation> listSessionInformation = new ArrayList<SessionInformation>();
-			if (Constants.SITE_IS_ALBA() || Constants.SITE_IS_ESRF() || Constants.SITE_IS_EMBL() || Constants.SITE_IS_MAXIV() || Constants.SITE_IS_SOLEIL()) { // connection to ldap only for the
+			if (Constants.SITE_IS_DESY() || Constants.SITE_IS_ALBA() || Constants.SITE_IS_ESRF() || Constants.SITE_IS_EMBL() || Constants.SITE_IS_MAXIV() || Constants.SITE_IS_SOLEIL()) { // connection to ldap only for the
 																										// esrf
 				for (Iterator<Session3VO> i = sessionList.iterator(); i.hasNext();) {
 					Object info = i.next();
@@ -532,7 +533,7 @@ public class ViewSessionAction extends ParentIspybAction {
 
 			// beamLine operator email
 
-			if (Constants.SITE_IS_ALBA() || Constants.SITE_IS_ESRF() || Constants.SITE_IS_EMBL() || Constants.SITE_IS_MAXIV() || Constants.SITE_IS_SOLEIL()) { // connection to ldap only for the
+			if (Constants.SITE_IS_DESY() || Constants.SITE_IS_ALBA() || Constants.SITE_IS_ESRF() || Constants.SITE_IS_EMBL() || Constants.SITE_IS_MAXIV() || Constants.SITE_IS_SOLEIL()) { // connection to ldap only for the
 																										// esrf
 				for (Iterator<Session3VO> i = sessionList.iterator(); i.hasNext();) {
 					Object info = i.next();
@@ -613,6 +614,9 @@ public class ViewSessionAction extends ParentIspybAction {
 		data.put("listSessionInformation", listSessionInformation);
 		// beamlines names (search)
 		String[] beamlineList = Constants.BEAMLINE_LOCATION;
+		if (Constants.SITE_IS_DESY()) {
+			beamlineList = DESYBeamlineEnum.getBeamlineNames();
+		}
 		if (Constants.SITE_IS_ALBA()) {
 			beamlineList = ALBABeamlineEnum.getBeamlineNames();
 		}

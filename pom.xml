@@ -168,6 +168,15 @@
 			</activation>
 		</profile>
 		<profile>
+			<id>ispyb.site-DESY</id>
+			<activation>
+				<property>
+					<name>ispyb.site</name>
+					<value>DESY</value>
+				</property>
+			</activation>
+		</profile>
+		<profile>
 			<id>ispyb.site-GENERIC</id>
 			<activation>
 				<property>
