@@ -94,7 +94,7 @@ Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Bren
    				</A>
    			</TD>
      	</TR>    
-     	<c:if test="${SITE_ATTRIBUTE == 'EMBL'}">
+     	<c:if test="${SITE_ATTRIBUTE == 'EMBL' or SITE_ATTRIBUTE == 'DESY'}">
 		    <TR>
    				<TD vAlign=top align=right><IMG height=9 alt="" src="<%=request.getContextPath()%>/images/navbar_arrow2.gif" width=6 border=0></TD>
 				<TD vAlign=top align=left colSpan=2>

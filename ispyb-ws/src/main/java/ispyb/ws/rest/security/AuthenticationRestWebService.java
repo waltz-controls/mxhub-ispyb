@@ -92,6 +92,9 @@ public class AuthenticationRestWebService extends RestWebService {
 					case "ALBA":
 						roles = ALBALoginModule.authenticate(login, password);
 						break;
+					case "DESY":
+						roles = DESYLoginModule.authenticate(login, password);
+						break;
 					case "GENERIC":
 						roles = PropertyLoginModule.authenticate(login, password);
 						break;

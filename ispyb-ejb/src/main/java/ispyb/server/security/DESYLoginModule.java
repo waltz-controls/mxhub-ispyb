@@ -38,7 +38,6 @@ import ispyb.common.util.Constants;
 import ispyb.common.util.PropertyLoader;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -55,36 +54,18 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.acl.Group;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
- * An implementation of LoginModule that authenticates against an LDAP server using JNDI, based on the configuration
- * properties.
- * <p>
- * The LoginModule options include whatever options your LDAP JNDI provider supports. Examples of standard property
- * names are:
- * <ul>
- * <li>
- * <code>Context.INITIAL_CONTEXT_FACTORY = "java.naming.factory.initial"</code>
- * <li><code>Context.SECURITY_PROTOCOL = "java.naming.security.protocol"</code>
- * <li><code>Context.PROVIDER_URL = "java.naming.provider.url"</code>
- * <li>
- * <code>Context.SECURITY_AUTHENTICATION = "java.naming.security.authentication"</code>
- * </ul>
- * <p>
+ * An implementation of LoginModule that authenticates against DESY DOOR user portal.
  *
- * @author LEAL
+ * @author BORGES
  * @version
  */
 public class DESYLoginModule extends UsernamePasswordLoginModule {
@@ -129,7 +110,7 @@ public class DESYLoginModule extends UsernamePasswordLoginModule {
 	}
 
 	/**
-	 * Validate the inputPassword by creating a ldap InitialContext with the SECURITY_CREDENTIALS set to the password.
+	 * Validate the inputPassword by calling the doorAuthentication method.
 	 * 
 	 * @param inputPassword
 	 *            the password to validate.
