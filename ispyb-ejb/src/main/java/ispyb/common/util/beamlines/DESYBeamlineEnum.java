@@ -30,7 +30,7 @@ import java.util.List;
  *
  */
 public enum DESYBeamlineEnum {
-	PE2("P11", "p11", new String[]{"P11"}, "<font style='color:#000080;font-size:90%'>+49 40 89902<font style='color:#0000FF;font-weight:bold;'>314</font></font>", null, true, true);
+	P11("P11", "p11", new String[]{"P11"}, "<font style='color:#000080;font-size:90%'>+49 40 89902<font style='color:#0000FF;font-weight:bold;'>314</font></font>", null, true, true);
 
 	private DESYBeamlineEnum(String beamlineName, String directoryName, String[] associatedName, String phoneNumber, String[] correctionFiles, boolean emailNotification, boolean inActivity){
 		this.beamlineName = beamlineName;
