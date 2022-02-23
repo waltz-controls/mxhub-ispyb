@@ -47,6 +47,7 @@ import ispyb.common.util.beamlines.EMBLBeamlineEnum;
 import ispyb.common.util.beamlines.ESRFBeamlineEnum;
 import ispyb.common.util.beamlines.MAXIVBeamlineEnum;
 import ispyb.common.util.beamlines.SOLEILBeamlineEnum;
+import ispyb.common.util.beamlines.DESYBeamlineEnum;
 import ispyb.server.biosaxs.services.core.structure.Structure3Service;
 import ispyb.server.biosaxs.vos.assembly.Structure3VO;
 import ispyb.server.common.services.proposals.Proposal3Service;
@@ -331,6 +332,10 @@ public class ToolsForBLSampleWebService {
 			}
 			if (Constants.SITE_IS_SOLEIL()) {
 				SOLEILBeamlineEnum bl = SOLEILBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
+				beamlineLoc = bl.getBeamlineName();
+			}
+			if (Constants.SITE_IS_DESY()) {
+				DESYBeamlineEnum bl = DESYBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
 				beamlineLoc = bl.getBeamlineName();
 			}
 			// if (bl != null)
