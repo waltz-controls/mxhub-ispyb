@@ -206,14 +206,18 @@ public class DESYLoginModule extends UsernamePasswordLoginModule {
 		Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
 		String serverUrl = ispybProp.getProperty("userportal.webservices.url");
 		String door_token = ispybProp.getProperty("userportal.webservices.token");
+		String door_service_account = ispybProp.getProperty("smis.ws.username");
+		String door_service_password = ispybProp.getProperty("smis.ws.password");
 		// Build the endpoint url for door authorization
 		StringBuilder url = new StringBuilder(serverUrl).append("/roles/userid/").append(userid);
 
 		// Create a Get request
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(url.toString());
-		// Add the door token within the headers
+		// Add the door token and the service account within the headers
 		httpGet.addHeader("x-door-token", door_token);
+		httpGet.addHeader("x-door-service-account", door_service_account);
+		httpGet.addHeader("x-door-service-auth", door_service_password);
 
 		// Execute the call
 		CloseableHttpResponse response = httpClient.execute(httpGet);
