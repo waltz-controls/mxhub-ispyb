@@ -21,14 +21,7 @@ package ispyb.server.smis;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Arrays;
+import java.util.*;
 
 import javax.ejb.FinderException;
 import javax.naming.NamingException;
@@ -740,6 +733,8 @@ public class UpdateFromSMIS {
 				}
 
 				if (Constants.getSite().equals(SITE.DESY)) {
+					// Set the siteId
+					siteId = mainProp.getSiteId().toString();
 					if (!StringUtils.matchString(mainProp.getBllogin(), currentPerson.getLogin())) {
 						currentPerson.setLogin(mainProp.getBllogin());
 						currentPerson = person.merge(currentPerson);
