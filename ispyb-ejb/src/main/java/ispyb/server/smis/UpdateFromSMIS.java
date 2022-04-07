@@ -548,6 +548,11 @@ public class UpdateFromSMIS {
 				if (labContacts[i].getSiteId() != null) {
 					siteId = labContacts[i].getSiteId().toString();
 					currentPerson = person.findBySiteId(siteId);
+					if (Constants.SITE_IS_DESY()) {
+						if (currentPerson == null) {
+							currentPerson = person.findByLogin(labContacts[i].getBllogin());
+						}
+					}
 				} else {
 					if (Constants.SITE_IS_ESRF()) {
 						currentPerson = person.findByLogin(labContacts[i].getUserName());
