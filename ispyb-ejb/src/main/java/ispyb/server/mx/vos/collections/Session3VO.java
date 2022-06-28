@@ -148,7 +148,7 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 	private Set<EnergyScan3VO> energyScanVOs;
 	
 	@Column(name = "externalId")
-	protected Integer externalId;
+	protected String externalId;
 	
 	@Column(name = "nbReimbDewars")
 	protected Integer nbReimbDewars;
@@ -167,7 +167,7 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 			String projectCode, Date startDate, Date endDate, String beamlineName, Byte scheduled, Integer nbShifts,
 			String comments, String beamlineOperator, Byte usedFlag, String sessionTitle,
 			Float structureDeterminations, Float dewarTransport, Float databackupFrance, Float databackupEurope,
-			Integer visit_number, String operatorSiteNumber, Date timeStamp, Date lastUpdate, String protectedData, Integer externalId) {
+			Integer visit_number, String operatorSiteNumber, Date timeStamp, Date lastUpdate, String protectedData, String externalId) {
 		super();
 		this.sessionId = sessionId;
 		this.expSessionPk = expSessionPk;
@@ -497,11 +497,11 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 		return this.energyScanVOs == null ? null : new ArrayList<EnergyScan3VO>(Arrays.asList(getEnergyScanTab()));
 	}
 
-	public Integer getExternalId() {
+	public String getExternalId() {
 		return externalId;
 	}
 
-	public void setExternalId(Integer externalId) {
+	public void setExternalId(String externalId) {
 		this.externalId = externalId;
 	}
 

@@ -88,14 +88,14 @@ public class Protein3VO extends ISPyBValueObject implements Cloneable {
 	private Set<Crystal3VO> crystalVOs;
 
 	@Column(name = "externalId")
-	protected Integer externalId;
+	protected String externalId;
 
 	public Protein3VO() {
 		super();
 	}
 
 	public Protein3VO(Integer proteinId, Proposal3VO proposalVO, String name, String acronym, String safetyLevel, Double molecularMass,
-			String proteinType, String sequence, Integer personId, Date timeStamp, Byte isCreatedBySampleSheet, Integer externalId) {
+			String proteinType, String sequence, Integer personId, Date timeStamp, Byte isCreatedBySampleSheet, String externalId) {
 		super();
 		this.proteinId = proteinId;
 		this.proposalVO = proposalVO;
@@ -231,11 +231,11 @@ public class Protein3VO extends ISPyBValueObject implements Cloneable {
 		return tab;
 	}
 
-	public Integer getExternalId() {
+	public String getExternalId() {
 		return externalId;
 	}
 
-	public void setExternalId(Integer externalId) {
+	public void setExternalId(String externalId) {
 		this.externalId = externalId;
 	}
 

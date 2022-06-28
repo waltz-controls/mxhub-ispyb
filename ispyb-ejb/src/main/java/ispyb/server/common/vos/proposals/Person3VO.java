@@ -102,7 +102,7 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 	private Set<Proposal3VO> proposalVOs;
 
 	@Column(name = "externalId")
-	protected Integer externalId;
+	protected String externalId;
 
 	public Person3VO() {
 		super();
@@ -110,7 +110,7 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 
 	public Person3VO(Integer personId, Laboratory3VO laboratoryVO, String siteId, String personUUID, String familyName, String givenName,
 			String title, String emailAddress, String phoneNumber, String login, String faxNumber,
-			Set<Proposal3VO> proposalVOs, Integer externalId) {
+			Set<Proposal3VO> proposalVOs, String externalId) {
 		super();
 		this.personId = personId;
 		this.laboratoryVO = laboratoryVO;
@@ -282,11 +282,11 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 	}
 
 	
-	public Integer getExternalId() {
+	public String getExternalId() {
 		return externalId;
 	}
 
-	public void setExternalId(Integer externalId) {
+	public void setExternalId(String externalId) {
 		this.externalId = externalId;
 	}
 
