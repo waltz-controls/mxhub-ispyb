@@ -2,6 +2,7 @@ package ispyb.ws.rest.proposal;
 
 import generated.ws.smis.ProposalParticipantInfoLightVO;
 import ispyb.common.util.Constants;
+import ispyb.common.util.PropertyLoader;
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.proposals.LabContact3VO;
 import ispyb.server.common.vos.proposals.Person3VO;
@@ -14,6 +15,8 @@ import ispyb.server.mx.vos.sample.BLSample3VO;
 import ispyb.server.smis.ScientistsFromSMIS;
 import ispyb.ws.rest.mx.MXRestWebService;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -221,8 +224,40 @@ public class ShippingRestWebService extends MXRestWebService {
 					this.getContainer3Service().update(container);
 				}
 			}
-			
-			
+
+			/* Here starts the workaround for a python mailing script  */
+			Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
+			String mailscript = ispybProp.getProperty("mail.script");
+
+			String exi_status = result.getShippingStatus().replaceAll(" ", "_");
+			String proposal_id = proposal;
+			String beamtime_id = result.getFirstExp().getExpSessionPk().toString();
+			String session_start_date = result.getFirstExp().getStartDate().toString().replaceAll(" ", "_");
+			String sender_email = result.getSendingLabContactVO().getPersonVO().getEmailAddress();
+
+			String s = null;
+
+			String cmd = "python3 " + mailscript + " -p " + proposal_id + " -s " + exi_status + " -b " +  beamtime_id + " -sd " + session_start_date + " -se " + sender_email;
+			logger.info(cmd);
+			Process p = Runtime.getRuntime().exec(cmd);
+			BufferedReader stdInput = new BufferedReader(new
+					InputStreamReader(p.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new
+					InputStreamReader(p.getErrorStream()));
+
+			// read the output from the command
+			logger.info("Here is the standard output of the command:\n");
+			while ((s = stdInput.readLine()) != null) {
+				logger.info(s);
+			}
+
+			// read any errors from the attempted command
+			logger.info("Here is the standard error of the command (if any):\n");
+			while ((s = stdError.readLine()) != null) {
+				logger.info(s);
+			}
+			/* Here it finished the workaround for a python mailing script  */
 			
 			this.logFinish("setShippingStatus", id, logger);
 			HashMap<String, String> response = new HashMap<String, String>();
