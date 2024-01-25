@@ -1,0 +1,14 @@
+<jboss-deployment-structure>
+    <deployment>
+        <dependencies>
+            <module name="javaee.api"/>
+            <module name="javax.xml.bind"  export="true"/>
+            <module name="javax.xml.ws"  export="true"/>
+            <module name="javax.rmi"  export="true"/>
+            <module name="javax.ejb"  export="true"/>
+            <module name="javax.jws.api" export="true"/>
+            <module name="javax.ws.rs.api" services="import"/>
+            <!-- other module dependencies -->
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

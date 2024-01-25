@@ -23,8 +23,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- JBoss dependency versions -->
-		<version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
-		<version.wildfly>8.2.Final</version.wildfly>
+		<!--The wildfly-maven-plugin is used to provision a server using Galleon, package your application in Galleon provisioned server,
+		deploy, redeploy, undeploy or run your application. You can also deploy or undeploy artifacts, such as JDBC drivers,
+		and add or remove resources. There is also the ability to execute CLI commands-->
+		<version.wildfly.maven.plugin>4.2.0.Final</version.wildfly.maven.plugin> <!--was 1.0.2.Final-->
+		<version.wildfly>17.0.1.Final</version.wildfly> <!--was 8.2.Final-->
 		<version.jboss.spec.javaee.7.0>1.0.0.Final</version.jboss.spec.javaee.7.0>
 
 		<!-- other plugin versions -->
@@ -41,11 +44,15 @@
 	<repositories>
 		<repository>
 			<id>JBoss Repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
+			<url>https://repository.jboss.org/nexus/content/repositories/public/</url> <!--https://repository.jboss.org/nexus/content/groups/public/-->
 		</repository>
 		<repository>
 			<id>java.net</id>
 			<url>https://maven.java.net/content/repositories/public/</url>
+		</repository>
+		<repository>
+			<id>Brockmann</id>
+			<url>https://www.brockmann-consult.de/mvn/os/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -87,6 +94,31 @@
 				<version>${version.jboss.spec.javaee.7.0}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec.javax.rmi</groupId>
+				<artifactId>jboss-rmi-api_1.0_spec</artifactId>
+				<version>1.0.6.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.jws</groupId>
+				<artifactId>javax.jws-api</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.xml.ws</groupId>
+				<artifactId>jaxws-api</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>2.1.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -197,7 +229,7 @@
           <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
+                <version>3.3.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <outputDirectory>target</outputDirectory>

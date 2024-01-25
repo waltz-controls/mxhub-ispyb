@@ -4600,7 +4600,7 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Buffer_acronym` varchar(45)
 ,`Buffer_pH` varchar(45)
 ,`Buffer_composition` varchar(45)
-,`Buffer_comments` varchar(512)
+,`Buffer_comments` text
 ,`Macromolecule_macromoleculeId` int(11)
 ,`Macromolecule_proposalId` int(10) unsigned
 ,`Macromolecule_safetyLevelId` int(10)
@@ -4608,10 +4608,10 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Macromolecule_acronym` varchar(45)
 ,`Macromolecule_extintionCoefficient` varchar(45)
 ,`Macromolecule_molecularMass` varchar(45)
-,`Macromolecule_sequence` varchar(1000)
+,`Macromolecule_sequence` text
 ,`Macromolecule_contactsDescriptionFilePath` varchar(255)
 ,`Macromolecule_symmetry` varchar(45)
-,`Macromolecule_comments` varchar(1024)
+,`Macromolecule_comments` text
 ,`Macromolecule_refractiveIndex` varchar(45)
 ,`Macromolecule_solventViscosity` varchar(45)
 ,`Macromolecule_creationDate` datetime
@@ -4623,7 +4623,7 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Specimen_code` varchar(255)
 ,`Specimen_concentration` varchar(45)
 ,`Specimen_volume` varchar(45)
-,`Specimen_comments` varchar(5120)
+,`Specimen_comments` text
 ,`SamplePlatePosition_samplePlatePositionId` int(10)
 ,`SamplePlatePosition_samplePlateId` int(10)
 ,`SamplePlatePosition_rowNumber` int(11)
@@ -4648,7 +4648,7 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Experiment_sourceFilePath` varchar(256)
 ,`Experiment_dataAcquisitionFilePath` varchar(256)
 ,`Experiment_status` varchar(45)
-,`Experiment_comments` varchar(512)
+,`Experiment_comments` text
 ,`Measurement_priorityLevelId` int(10)
 ,`Measurement_exposureTemperature` varchar(45)
 ,`Measurement_viscosity` varchar(45)
@@ -4657,8 +4657,8 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Measurement_volumeToLoad` varchar(45)
 ,`Measurement_waitTime` varchar(45)
 ,`Measurement_transmission` varchar(45)
-,`Measurement_comments` varchar(512)
-,`Measurement_imageDirectory` varchar(512)
+,`Measurement_comments` text
+,`Measurement_imageDirectory` text
 ,`Run_runId` int(10)
 ,`Run_timePerFrame` varchar(45)
 ,`Run_timeStart` varchar(45)
@@ -4681,7 +4681,7 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Merge_mergeId` int(10)
 ,`Merge_measurementId` int(10)
 ,`Merge_frameListId` int(10)
-,`Merge_discardedFrameNameList` varchar(1024)
+,`Merge_discardedFrameNameList` text
 ,`Merge_averageFilePath` varchar(255)
 ,`Merge_framesCount` varchar(45)
 ,`Merge_framesMerge` varchar(45)
@@ -4712,7 +4712,7 @@ CREATE TABLE `v_saxs_datacollection` (
 ,`Subtraction_bufferOnedimensionalFiles` int(10)
 ,`Subtraction_sampleAverageFilePath` varchar(255)
 ,`Subtraction_bufferAverageFilePath` varchar(255)
-);
+) ENGINE = MyISAM;
 
 -- --------------------------------------------------------
 

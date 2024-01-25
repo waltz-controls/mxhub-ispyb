@@ -34,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import jakarta.annotation.security.PermitAll;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
@@ -42,7 +43,8 @@ public class ProposalRestWebService extends MXRestWebService{
 
 	private final static Logger logger = Logger.getLogger(ProposalRestWebService.class);
 
-	@RolesAllowed({"User", "Manager", "Industrial", "Localcontact"})
+	@PermitAll
+//	@RolesAllowed({"User", "Manager", "Industrial", "Localcontact"}) //changed to @PermitAll
 	@GET
 	@Path("{token}/proposal/list")
 	@Produces({ "application/json" })
@@ -54,7 +56,7 @@ public class ProposalRestWebService extends MXRestWebService{
 			this.logFinish(methodName, id, logger);
 			return this.sendResponse(proposals);
 		} catch (Exception e) {
-			return this.logError("getProposals", e, id, logger);
+			return Response.fromResponse(this.logError("getProposals", e, id, logger)).status(Status.INTERNAL_SERVER_ERROR).build();
 		}				
 	}
 	

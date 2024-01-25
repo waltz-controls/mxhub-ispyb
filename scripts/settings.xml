@@ -47,8 +47,8 @@ under the License.
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
   
-<!--  <localRepository>C:/java/maven/m3repo</localRepository>-->
-    <localRepository>/home/olga/.m2/repository</localRepository>
+  <localRepository>/home/olga/.m2/repository</localRepository>
+
 
   <!-- interactiveMode
    | This will determine whether maven prompts you when it needs input. If set to false,
@@ -227,11 +227,20 @@ under the License.
 			<ispyb.ws.usr>xxxxxx</ispyb.ws.usr>
 			<ispyb.ws.pwd>******</ispyb.ws.pwd>
 
-			<!--jboss.home>C:/java/appServers/wildfly-8.2.0.Final</jboss.home-->
-            <jboss.home>/home/olga/Downloads/wildfly-17.0.1.Final</jboss.home>
+			<jboss.home>/home/olga/Downloads/wildfly-17.0.1.Final</jboss.home>
+
 		</properties>
 	</profile>
-	
+      <profile>
+                <id>ispyb.site-DESY</id>
+                <properties>
+                        <smis.ws.usr>xxx</smis.ws.usr>
+                        <smis.ws.pwd>******</smis.ws.pwd>
+                        <ispyb.ws.usr>xxxxxx</ispyb.ws.usr>
+                        <ispyb.ws.pwd>******</ispyb.ws.pwd>
+                        <jboss.home>/home/olga/Downloads/wildfly-17.0.1.Final</jboss.home>
+                </properties>
+       </profile>	
   <!--
   <profile>
     <id>ldap</id>
