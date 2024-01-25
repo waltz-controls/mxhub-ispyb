@@ -34,43 +34,6 @@
 	<build>
 		<finalName>ispyb</finalName>
 		<plugins>
-			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.1.4</version> <!-- use latest version -->
-				<configuration>
-					<extraDirectories>
-						<paths>
-							<path>
-								// copies a single-file.xml
-								<from>src/main/resources/xml-files</from>
-								<into>/dest-in-container</into>
-								<includes>single-file.xml</includes>
-							</path>
-							</paths>
-					</extraDirectories>
-					<from>
-						<!-- Base image -->
-						<image>jboss/wildfly:17.0.1.Final</image> <!-- or specify your desired version -->
-					</from>
-					<to>
-						<!-- Target image -->
-						<image>HelgaMond/ispyb:1.0.0</image>
-					</to>
-					<container>
-						<appRoot>/opt/jboss/wildfly/standalone/deployments/</appRoot> <!-- WildFly deployment dir -->
-						<ports>
-							<port>8080</port> <!-- default HTTP port for WildFly -->
-						</ports>
-						<entrypoint>
-							<!-- Custom entrypoint if required, or use WildFly's default -->
-							<shell>bash</shell>
-							<option>-c</option>
-							<arg>/opt/jboss/wildfly/bin/standalone.sh -b=0.0.0.0</arg>
-						</entrypoint>
-					</container>
-				</configuration>
-			</plugin>
 			<!-- Ear plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
