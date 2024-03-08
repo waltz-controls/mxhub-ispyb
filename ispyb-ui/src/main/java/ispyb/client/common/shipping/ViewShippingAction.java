@@ -258,7 +258,7 @@ public class ViewShippingAction extends DispatchAction {
 	 * @return a Map
 	 */
 	private ArrayList<String> getRunEndDates() {
-		Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
+		Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 		if (ispybProp == null || ispybProp.size() == 0)
 			return null;
 

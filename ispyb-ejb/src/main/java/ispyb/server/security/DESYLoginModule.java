@@ -161,7 +161,7 @@ public class DESYLoginModule extends UsernamePasswordLoginModule {
 	 *
 	 */
 	private void doorAuthentication(String username, String inputPassword) throws IOException {
-		Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
+		Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 		String serverUrl = ispybProp.getProperty("userportal.webservices.url");
 		// Build the endpoint url for door authentication
 		StringBuilder url = new StringBuilder(serverUrl).append("/doorauth/auth");
@@ -203,7 +203,7 @@ public class DESYLoginModule extends UsernamePasswordLoginModule {
 	}
 
 	private void doorAuthorization(Integer userid) throws IOException {
-		Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
+		Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 		String serverUrl = ispybProp.getProperty("userportal.webservices.url");
 		String door_token = ispybProp.getProperty("userportal.webservices.token");
 		String door_service_account = ispybProp.getProperty("smis.ws.username");

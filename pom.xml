@@ -155,51 +155,6 @@
 		</profile>
 		<!-- Site profiles -->
 		<profile>
-			<id>ispyb.site-ESRF</id>
-			<activation>
-				<property>
-					<name>ispyb.site</name>
-					<value>ESRF</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.site-EMBL</id>
-			<activation>
-				<property>
-					<name>ispyb.site</name>
-					<value>EMBL</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.site-SOLEIL</id>
-			<activation>
-				<property>
-					<name>ispyb.site</name>
-					<value>SOLEIL</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.site-MAXIV</id>
-			<activation>
-				<property>
-					<name>ispyb.site</name>
-					<value>MAXIV</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.site-ALBA</id>
-			<activation>
-				<property>
-					<name>ispyb.site</name>
-					<value>ALBA</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
 			<id>ispyb.site-DESY</id>
 			<activation>
 				<property>

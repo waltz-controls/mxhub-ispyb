@@ -226,7 +226,7 @@ public class ShippingRestWebService extends MXRestWebService {
 			}
 
 			/* Here starts the workaround for a python mailing script  */
-			Properties ispybProp = PropertyLoader.loadProperties("ISPyB");
+			Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 			String mailscript = ispybProp.getProperty("mail.script");
 
 			String exi_status = result.getShippingStatus().replaceAll(" ", "_");

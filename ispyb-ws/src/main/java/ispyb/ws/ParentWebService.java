@@ -116,7 +116,7 @@ public  class ParentWebService {
 		
 	/** TODO: it does not work when retrieving using Constants class **/
 	protected String getFolderForUploads() {
-		Properties mProp3 = PropertyLoader.loadProperties("ISPyB");
+		Properties mProp3 = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 		return mProp3.getProperty("ISPyB.uploaded.root.folder");
 	}
 	

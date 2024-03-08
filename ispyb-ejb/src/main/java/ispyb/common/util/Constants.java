@@ -29,7 +29,10 @@ import java.util.Properties;
  * @author DELAGENI
  */
 public final class Constants {
-	private static Properties mProp = PropertyLoader.loadProperties("ISPyB");
+
+	public static final String ISPYB_PROPERTIES="ispyb.properties";
+
+	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 
 	public enum SITE {
 		SOLEIL, EMBL, ESRF, MAXIV, ALBA, DESY, GENERIC
@@ -1344,11 +1347,11 @@ public final class Constants {
 	 */
 	
 	public final static String getUserSmisLoginName() {
-		return PropertyLoader.loadProperties("ISPyB").getProperty("smis.ws.username");
+		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES)).getProperty("smis.ws.username");
 	}
 	
 	public final static String getUserSmisPassword() {
-		return PropertyLoader.loadProperties("ISPyB").getProperty("smis.ws.password");
+		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES)).getProperty("smis.ws.password");
 	}
 			
 	public static String getProperty(String propertyName) {
