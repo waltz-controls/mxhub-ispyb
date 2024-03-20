@@ -21,21 +21,6 @@
 	</properties>
 
 	<build>
-		<resources>
- 			<resource>
-   				<directory>src/main/resources</directory>
-   				<filtering>true</filtering>
-				<!--<includes>
-					<include>ISPyB.properties</include>
-				</includes>-->
- 			</resource>
- 			<resource>
-   				<directory>sql_scripts/mysql</directory>
-				<includes>
-					<include>update_scripts/**/*.sql</include>
-				</includes>
- 			</resource>
- 		</resources>
  		<plugins>
 			<!-- WildFly plugin to deploy war -->
 			<plugin>
