@@ -102,10 +102,6 @@ public class ToolsForAssemblyWithResultCodeWebService {
 		
 		try {
 			// Retrieve proposals from SUN set or SMIS
-			if (Constants.SITE_IS_SOLEIL()) {
-				WSUtils.UpdateProposal(proposalCode, proposalNumber);
-			}
-			
 			BiosaxsServices biosaxsWebServiceActions = new BiosaxsServices();
 			Integer experimentId = biosaxsWebServiceActions.createHPLC(proposalCode, proposalNumber, name);
 			if (experimentId == null) {
@@ -888,11 +884,6 @@ public class ToolsForAssemblyWithResultCodeWebService {
 
 		long id = this.logInit("createExperiment", new Gson().toJson(params));
 		try {
-			// Update proposal from SUN set or SMIS
-			if (Constants.SITE_IS_SOLEIL()) {
-				WSUtils.UpdateProposal(code, number);
-			}
-			
 			/**
 			 * Parsing samples in json format to ArrayList<HashMap<String, String>>
 			 **/

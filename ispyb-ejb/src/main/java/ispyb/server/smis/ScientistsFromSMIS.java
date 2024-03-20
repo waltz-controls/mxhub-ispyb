@@ -84,7 +84,7 @@ public class ScientistsFromSMIS {
 			scientists_ = ws.findScientistsForProposalByNameAndFirstName(proposalPk, name,
 					firstName);
 		 
-			if (name == null && firstName == null && !Constants.SITE_IS_SOLEIL()) {
+			if (name == null && firstName == null) {
 				scientists_ = ws.findParticipantsForProposal(proposalPk);
 			}
 
@@ -184,15 +184,7 @@ public class ScientistsFromSMIS {
 			if (ligne != null)
 				address += ligne + "\n";
 		}
-		switch (Constants.getSite()) {
-			case MAXIV:
-				laboratory.setAddress(scientist.getLabAddress1());
-				break;
-			default:
-				laboratory.setAddress(address);
-		}
-
-
+		laboratory.setAddress(address);
 		return laboratory;
 	}
 

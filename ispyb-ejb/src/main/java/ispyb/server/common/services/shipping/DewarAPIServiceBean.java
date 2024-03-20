@@ -311,7 +311,7 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 			if (location.equals("") || location.equals("SENT"))
 				dewarStatus = Constants.SHIPPING_STATUS_SENT_TO_USER;
 			else
-				dewarStatus = Constants.SHIPPING_STATUS_AT_ESRF;
+				dewarStatus = Constants.SHIPPING_STATUS_AT_FACILITY;
 			if (Constants.SITE_IS_ESRF() && location != null
 					&& Arrays.binarySearch(Constants.DEWAR_AUTOMATIC_PROCESSING_STATE, location) >= 0) {
 				dewarStatus = Constants.SHIPPING_STATUS_PROCESS;

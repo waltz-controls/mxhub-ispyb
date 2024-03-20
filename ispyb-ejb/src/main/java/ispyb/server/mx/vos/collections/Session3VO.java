@@ -609,7 +609,7 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 	
 	public  String getBeamLineOperatorEmail(){
 		String beamLineOperatorEmail = "";
-		if (Constants.SITE_IS_ESRF() || Constants.SITE_IS_MAXIV()) { // connection to ldap only for the esrf
+		if (Constants.SITE_IS_ESRF()) { // connection to ldap only for the esrf
 			
 			if (this.getBeamlineOperator() != null && !this.getBeamlineOperator().equals("")) {
 				

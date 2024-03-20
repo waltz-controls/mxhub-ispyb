@@ -66,9 +66,6 @@ public class PathUtils {
 		boolean isWindows = (System.getProperty("os.name").indexOf("Win") != -1) ? true : false;
 
 		String imageDir = getImageDirPath(dataCollectionVO);
-		if (Constants.SITE_IS_MAXIV()) {
-			imageDir = imageDir.replace("/data/visitors/","/mxn/groups/ispybstorage/visitors/");
-		}
 		String fullDNAPath = imageDir + Constants.IMG_DNA_URL_SUFIX;
 		if (isWindows) {
 			fullDNAPath = fullDNAPath.replace(Constants.DATA_FILEPATH_START, Constants.DATA_FILEPATH_WINDOWS_MAPPING);
@@ -238,27 +235,6 @@ public class PathUtils {
 						.replaceAll("/inhouse", "");
 			}
 		}
-		// MAXIV ####
-		else if (Constants.PATH_MAPPING_STYLE.equals("MAXIV")) {
-			if (filePathOut.startsWith("/data/data1/visitor")) {
-				// Visitor: "/data/visitor/mx415/id14he2/..." mapped to "/data/pyarch/id14eh2/mx415/..."
-//				String[] filePathDir = filePathOut.split("/");
-//				if (filePathDir.length > 4) {
-//					String accountName = "/" + filePathDir[3];
-//					String beamlineName = "/" + filePathDir[4];
-//					// Swap account and beamline
-//					filePathOut = filePathOut.replaceAll(accountName, "_accountName_");
-//					filePathOut = filePathOut.replaceAll(beamlineName, "_beamlineName_");
-//					filePathOut = filePathOut.replaceAll("_accountName_", beamlineName);
-//					filePathOut = filePathOut.replaceAll("_beamlineName_", accountName);
-//				}
-				filePathOut = filePathOut.replaceAll("/data/data1/", "/data/ispyb/").replaceAll("/visitor", "");;
-			} else {
-				// Inhouse and External: "/data/id14eh2/inhouse/mx415" mapped to "/data/pyarch/id14eh2/mx415/..."
-				filePathOut = filePathOut.replaceAll("/data/data1/", "/data/ispyb/").replaceAll("/external", "").replaceAll("/inhouse", "");
-			}
-		}
-
 		return filePathOut;
 	}
 	

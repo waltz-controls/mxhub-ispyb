@@ -111,27 +111,9 @@ public class DatabaseLoginModuleHelper {
 			// Next query will retrieve the password of a user (SQL '92 compliant)
 			String sql = (String)options.get(Constants.DB_USER_QUERY);
 			String password_ = null;
-			
-			if (Constants.SITE_IS_SOLEIL()) {
-				username = password;				
-				sql = "select PASSWORD, TITLE, FIRSTNAME, LASTNAME from USERS "
-						+ " where upper(USERNAME) = '" + username.toUpperCase()
-						+ "' AND STATUS = 'A'";
-			}
 
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(sql);
-			
-			if (resultSet.next()) {
-				if (Constants.SITE_IS_SOLEIL()) {
-					password_ = resultSet.getString("PASSWORD");
-					fullName.append(resultSet.getString("TITLE"));
-					fullName.append(" ");
-					fullName.append(resultSet.getString("FIRSTNAME"));
-					fullName.append(" ");
-					fullName.append(resultSet.getString("LASTNAME"));
-				}
-			}
 			
 			if (StringUtils.isEmpty(password_)) {
 				LOG.info("invalid credential ");
@@ -237,23 +219,10 @@ public class DatabaseLoginModuleHelper {
 				throw new LoginException("Invalid username");
 			
 			String sql = (String)options.get(Constants.DB_ROLE_QUERY);
-		
-			if (Constants.SITE_IS_SOLEIL()) {
-				username = password;				
-				sql = "select distinct(RT.name) as ROLE_NAME "
-						+ "from ROLE_TYPES RT, ROLES R, USERS U "
-						+ "where RT.ROLETID=R.TYPEID and R.USERID=U.USERID and U.USERNAME='"
-						+ username + "'";
-			}
 
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(sql);
 			List<String> roles = new ArrayList<String>();
-			while (resultSet.next()) {
-				if (Constants.SITE_IS_SOLEIL()) {	
-					roles.add(resultSet.getString("ROLE_NAME"));
-				}
-			}
 			roles.add("User");
 			return roles.toArray(new String[roles.size()]);
 		} catch (SQLException sqle) {

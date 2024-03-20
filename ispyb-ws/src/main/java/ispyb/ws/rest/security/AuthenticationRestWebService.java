@@ -83,15 +83,6 @@ public class AuthenticationRestWebService extends RestWebService {
 						siteId = LdapConnection.findByUniqueIdentifier(login).getSiteNumber();
 						logger.info(String.format("Login: %s siteId: %s", login, siteId));
 						break;
-					case "SOLEIL":
-						roles = SOLEILLLoginModule.authenticate(login, password);
-						break;
-					case "MAXIV":
-						roles = MAXIVLoginModule.authenticate(login, password);
-						break;
-					case "ALBA":
-						roles = ALBALoginModule.authenticate(login, password);
-						break;
 					case "DESY":
 						roles = DESYLoginModule.authenticate(login, password);
 						break;

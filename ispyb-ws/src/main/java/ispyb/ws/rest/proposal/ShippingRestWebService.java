@@ -521,30 +521,6 @@ public class ShippingRestWebService extends MXRestWebService {
 				}
 			}
 
-			if (Constants.SITE_IS_MAXIV()) {
-				try {
-					String proposalCode = proposal.substring(0, 2);
-					String proposalNumber = proposal.substring(proposal.length() - 8);
-					List<Shipping3VO> results = this.getShipping3Service().findFiltered(null, name, proposalCode, proposalNumber, null, null, null, null, false);
-					if (results != null && !results.isEmpty()) {
-						if ((shippingId != null) && (!"".equals(shippingId))) {
-							for (int i=0;i<results.size();i++) {
-								Shipping3VO ship = results.get(i);
-								if (!shippingId.equals(ship.getShippingId().toString()) && ship.getShippingName().equals(name)) {
-									this.logFinish("saveShipping", id, logger);
-									return this.sendError("There is another shipment with the same name for this proposal");
-								}
-							}
-						} else {
-							this.logFinish("saveShipping", id, logger);
-							return this.sendError("There is another shipment with the same name for this proposal");
-						}
-					}
-				} catch (Exception e) {
-					return this.logError("saveShipping", e, id, logger);
-				}
-			}
-
 			shipping3VO.setShippingName(name);
 			shipping3VO.setShippingStatus(Constants.SHIPPING_STATUS_OPENED);
 			shipping3VO.setComments(comments);

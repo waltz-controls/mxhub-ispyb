@@ -186,14 +186,6 @@ public class UpdateFromSMIS {
 				SMISWebService ws = SMISWebServiceGenerator.getWs();
 				pk = ws.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
 				break;
-			case SOLEIL:
-				SMISWebService wsSOLEIL = SMISWebServiceGenerator.getWs();
-				pk = wsSOLEIL.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
-				break;
-			case ALBA:
-				SMISWebService wsALBA = SMISWebServiceGenerator.getWs();
-				pk = wsALBA.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
-				break;
 			case DESY:
 				SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
 				pk = wsDESY.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
@@ -202,11 +194,6 @@ public class UpdateFromSMIS {
 				SMISWebService wsEMBL = SMISWebServiceGenerator.getWs();
 				pk = wsEMBL.getProposalPK("SAXS", 225L);
 				System.out.println("GREAT!!! " + pk.toString());
-				break;
-			case MAXIV:
-				/*SMISWebService wsMAXIV = SMISWebServiceGenerator.getWs();
-				pk = wsMAXIV.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));*/
-				pk = Long.parseLong(myProposal.getNumber());
 				break;
 			default:
 				break;
@@ -307,11 +294,7 @@ public class UpdateFromSMIS {
 			case EMBL:
 				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPk(pk);
 				break;
-			case MAXIV:
-				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPkAndDays(pk, nbDays);
-				break;
             default:
-			case SOLEIL:
 				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPkAndDays(pk, nbDays);
 				break;
 			}
@@ -333,8 +316,6 @@ public class UpdateFromSMIS {
 	public static void updateThisProposalFromLists(List<ExpSessionInfoLightVO> smisSessions_, List<ProposalParticipantInfoLightVO> mainProposers_,
 			List<SampleSheetInfoLightVO> smisSamples_, List<ProposalParticipantInfoLightVO> labContacts_, Long userPortalPk	) throws Exception {
 
-		// userPortalPk is needed only for SOLEIL to display messages, it can be null or set to 0 if upload by json files
-		
 		ProposalParticipantInfoLightVO[] mainProposers = null;
 		if (mainProposers_ != null) {
 			mainProposers = new ProposalParticipantInfoLightVO[mainProposers_.size()];
@@ -395,124 +376,27 @@ public class UpdateFromSMIS {
 		// -----------------------------------------------------------------------------------
 		ArrayList<ProposalParticipantInfoLightVO> mxProposers = new ArrayList<ProposalParticipantInfoLightVO>();
 		ArrayList<ProposalParticipantInfoLightVO> bxProposers = new ArrayList<ProposalParticipantInfoLightVO>();
-		
-		if (Constants.SITE_IS_SOLEIL()) {
-			if (mainProposers != null && mainProposers.length > 0) {
-				for (ProposalParticipantInfoLightVO proposer : mainProposers) {
-					if (proposer.getCategoryCode().equalsIgnoreCase("mx")) {
-						mxProposers.add(proposer);
-						LOG.debug(" mx proposers for propos_no = " + userPortalPk + " | size = " + mxProposers.size());
-					} else if (proposer.getCategoryCode().equalsIgnoreCase("bx")) {
-						bxProposers.add(proposer);
-						LOG.debug(" bx proposers for propos_no = " + userPortalPk + " | size = " + bxProposers.size());
-					}
-				}
-			}
-		}
-		
-		if (!Constants.SITE_IS_SOLEIL()) {
-			loadProposers(mainProposers);
-		} else if (Constants.SITE_IS_SOLEIL()) {
-			if (mxProposers != null && !mxProposers.isEmpty()) {
-				LOG.debug(" search for mx sessions for propos_no = " + userPortalPk + " | size = " + mxProposers.size());
-				mainProposers = new ProposalParticipantInfoLightVO[mxProposers.size()];
-				mainProposers = mxProposers.toArray(mainProposers);
-				loadProposers(mainProposers);
-			}
-			if (bxProposers != null && !bxProposers.isEmpty()) {
-				LOG.debug(" search for bx sessions for propos_no = " + userPortalPk);
-				mainProposers = new ProposalParticipantInfoLightVO[bxProposers.size()];
-				mainProposers = bxProposers.toArray(mainProposers);
-				loadProposers(mainProposers);
-			}
-		}
+
+		loadProposers(mainProposers);
+
 
 		// -----------------------------------------------------------------------------------
 		// the proposal is created : load samples and sessions
 		// -----------------------------------------------------------------------------------
 		ArrayList<ExpSessionInfoLightVO> mxSessions = new ArrayList<ExpSessionInfoLightVO>();
 		ArrayList<ExpSessionInfoLightVO> bxSessions = new ArrayList<ExpSessionInfoLightVO>();
-		if (Constants.SITE_IS_SOLEIL()) {
-			if (smisSessions != null && smisSessions.length > 0) {
-				for (ExpSessionInfoLightVO session : smisSessions) {
-					if (session.getCategCode().equalsIgnoreCase("mx")) {
-						mxSessions.add(session);
-					} else if (session.getCategCode().equalsIgnoreCase("bx")) {
-						bxSessions.add(session);
-					}
-				}
-			}
-		}
-		
-		if (!Constants.SITE_IS_SOLEIL()) {
-			loadSessions(smisSessions);
-		} else if (Constants.SITE_IS_SOLEIL()) {
-			if (mxSessions != null && !mxSessions.isEmpty()) {
-				LOG.debug(" search for mx sessions for propos_no = " + userPortalPk);
-				smisSessions = new ExpSessionInfoLightVO[mxSessions.size()];
-				smisSessions = mxSessions.toArray(smisSessions);
-				loadSessions(smisSessions);
-			}
-			if (bxSessions != null && !bxSessions.isEmpty()) {
-				LOG.debug(" search for bx sessions for propos_no = " + userPortalPk);
-				smisSessions = new ExpSessionInfoLightVO[bxSessions.size()];
-				smisSessions = bxSessions.toArray(smisSessions);
-				loadSessions(smisSessions);
-			}
-		}
+
+		loadSessions(smisSessions);
 		
 		ArrayList<SampleSheetInfoLightVO> mxSamples = new ArrayList<SampleSheetInfoLightVO>();
 		ArrayList<SampleSheetInfoLightVO> bxSamples = new ArrayList<SampleSheetInfoLightVO>();
-		if (Constants.SITE_IS_SOLEIL()) {
-			if (smisSamples != null && smisSamples.length > 0) {
-				for (SampleSheetInfoLightVO sample : smisSamples) {
-					if (sample.getCategoryCode().equalsIgnoreCase("mx")) {
-						mxSamples.add(sample);
-					} else if (sample.getCategoryCode().equalsIgnoreCase("bx")) {
-						bxSamples.add(sample);
-					}
-				}
-			}
-		}
-		
-		if (!Constants.SITE_IS_SOLEIL()) {
-			loadSamples(smisSamples);
-		} else if (Constants.SITE_IS_SOLEIL()) {
-			if (mxSamples != null && !mxSamples.isEmpty()) {
-				LOG.debug(" search for mx samples for propos_no = " + userPortalPk);
-				smisSamples = new SampleSheetInfoLightVO[mxSamples.size()];
-				smisSamples = mxSamples.toArray(smisSamples);
-				loadSamples(smisSamples);
-			}
-			if (bxSamples != null && !bxSamples.isEmpty()) {
-				LOG.debug(" search for bx samples for propos_no = " + userPortalPk);
-				smisSamples = new SampleSheetInfoLightVO[bxSamples.size()];
-				smisSamples = bxSamples.toArray(smisSamples);
-				loadSamples(smisSamples);
-			}
-		}
+
+		loadSamples(smisSamples);
 
 		// -----------------------------------------------------------------------------------
 		// the proposal, samples and sessions are created: load labcontacts (list of all people attached to the proposal: proposers and users)
 		// -----------------------------------------------------------------------------------
-		if (Constants.SITE_IS_MAXIV()) {
-			loadParticipants(labContacts);
-			loadParticipants(mainProposers);
-			// Adding the mainProposers
 
-			//Array<ProposalParticipantInfoLightVO> both = array(labContacts).append(array(mainProposers));
-			//labContacts = both.array();
-
-
-			List<ProposalParticipantInfoLightVO> listFromArray = Arrays.asList(labContacts);
-			List<ProposalParticipantInfoLightVO> tempList = new ArrayList<ProposalParticipantInfoLightVO>(listFromArray);
-			for (int i = 0; i < mainProposers.length; i++) {
-				tempList.add(mainProposers[i]);
-			}
-			ProposalParticipantInfoLightVO[] tempArray = new ProposalParticipantInfoLightVO[tempList.size()];
-			labContacts = tempList.toArray(tempArray);
-
-		}
 		if (labContacts != null && labContacts.length > 0) {
 
 			LOG.info("Loading labcontacts ... ");
@@ -747,25 +631,6 @@ public class UpdateFromSMIS {
 					}
 				}
 
-				if (Constants.getSite().equals(SITE.ALBA)) {
-					// Create a new person record for the experiment if existing login doesn't match
-					if (!StringUtils.matchString(mainProp.getBllogin(), currentPerson.getLogin())) {
-						Person3VO newPerson = new Person3VO();
-						newPerson.setEmailAddress(mainProp.getScientistEmail());
-						newPerson.setGivenName(mainProp.getScientistFirstName());
-						newPerson.setFamilyName(mainProp.getScientistName());
-						newPerson.setLogin(mainProp.getBllogin());
-						newPerson.setSiteId(mainProp.getSiteId() != null ? mainProp.getSiteId().toString() : null);
-						newPerson.setLaboratoryVO(currentPerson.getLaboratoryVO());
-
-						newPerson = person.merge(newPerson);
-						proposalVO.setPersonVO(newPerson);
-						proposal.update(proposalVO);
-
-						LOG.debug("Created new person record with id " + newPerson.getPersonId());
-					}
-				}
-
 				// fill the siteId if it was null before
 				if (StringUtils.matchString(currentFamilyName, familyName)
 						&& StringUtils.matchString(currentGivenName, givenName) && (siteId != null) && (currentSiteId==null) ) {
@@ -937,11 +802,6 @@ public class UpdateFromSMIS {
 	          
 	          personEnt = person.merge(personEnt);
 
-	            // reload all the proposal info to avoid lazyloading error in proposalVO.getParticipants(). Only for MAX IV
-				if (Constants.SITE_IS_MAXIV()) {
-			  		proposalVO = proposal.findWithParticipantsByPk(proposalVO.getProposalId());
-			  }
-			  
 	          Set<Person3VO> currentParticipants = proposalVO.getParticipants();
 	          
 	          boolean personExists = false;
@@ -1100,27 +960,16 @@ public class UpdateFromSMIS {
 															// number because we
 															// always start
 															// with 0
-		if (Constants.SITE_IS_MAXIV()){
-			visit_number = Integer.valueOf(sessionVO.getName());
-		}
 		Integer nbShifts = sessionVO.getShifts();
 		Integer startShift = sessionVO.getStartShift(); // startShift equals 1,
 														// 2 or 3 and stands for
 														// 8:30am,
 														// 4:30pm or 00:30am
-		startShift = Constants.SITE_IS_SOLEIL() ? 0 : startShift;
         Integer daysToAdd = 0;
-		if (Constants.SITE_IS_MAXIV()){
-            daysToAdd = nbShifts / 6 + 1;
-            if ((startShift == 1 && nbShifts % 6 == 5) || (startShift == 2 && nbShifts % 6 == 4) ||
-                    (startShift == 3 && nbShifts % 6 == 3) || (startShift == 4 && nbShifts % 6 == 2) ||
-                    (startShift == 5 && nbShifts % 6 == 1))
-                daysToAdd++;
-        } else {
-            daysToAdd = nbShifts / 3 + 1;
-            if ((startShift == 1 && nbShifts % 3 == 2) || (startShift == 2 && nbShifts % 3 != 0))
-                daysToAdd++;
-        }
+        daysToAdd = nbShifts / 3 + 1;
+        if ((startShift == 1 && nbShifts % 3 == 2) || (startShift == 2 && nbShifts % 3 != 0))
+			daysToAdd++;
+
 		// only new sessions are retrieved
 		String beamlineName = sessionVO.getBeamlineName();
 		Calendar endDateCal = Calendar.getInstance();
@@ -1132,15 +981,9 @@ public class UpdateFromSMIS {
 		List<Session3VO> sessFromDBs = null;
 		LOG.debug("look for session already in DB for proposalId = " + proposalId + " | startDate = " + startDate
 				+ " | endDate = " + endDate + " | beamlineName = " + beamlineName + " | nbShifts = " + nbShifts);
-		
-		if (Constants.SITE_IS_SOLEIL()) {
-			sessFromDBs = session.findByStartDateAndBeamLineNameAndNbShifts(proposalId, startDate, endDate,
-					beamlineName, nbShifts);			
-		}
 
 		// if the session from DB is null we add a new one only if not cancelled
-		if ( (sessFromDB == null && !sessionVO.isCancelled() )
-				|| (Constants.SITE_IS_SOLEIL() && sessFromDBs != null && sessFromDBs.size() == 0)) {
+		if (sessFromDB == null && !sessionVO.isCancelled()) {
 
 			Session3VO sesv = new Session3VO();
 			BeamLineSetup3VO setupv = new BeamLineSetup3VO();
@@ -1159,10 +1002,6 @@ public class UpdateFromSMIS {
 			sesv.setExpSessionPk(sessionVO.getPk());
 			sesv.setOperatorSiteNumber(siteNumber);
 
-			if (Constants.SITE_IS_SOLEIL() || Constants.SITE_IS_MAXIV()) {
-				sesv.setVisit_number(visit_number);
-			}
-			
 			if (Constants.SITE_IS_ESRF()) {
 				sesv.setNbReimbDewars(sessionVO.getReimbursedDewars());
 			}
@@ -1182,8 +1021,7 @@ public class UpdateFromSMIS {
 			}
 		} // update existing session
 		else {
-			Boolean isSoleil = Constants.SITE_IS_SOLEIL() && sessFromDBs != null && sessFromDBs.size() > 0;
-			Session3VO ispybSession = isSoleil ? sessFromDBs.get(0) : sessFromDB;
+			Session3VO ispybSession = sessFromDB;
 			// update the coming session if needed -
 			Date yesterday = IspybDateUtils.rollDateByDay(new Date(), -1);
 			if (ispybSession != null && 
@@ -1238,15 +1076,6 @@ public class UpdateFromSMIS {
 					changeTxt += ", scheduled " + ispybSession.getScheduled() + " => " + sessionVO.isCancelled();
 					ispybSession.setScheduled(new Byte("1"));
 					changeSession = true;
-				}
-				if (isSoleil) {
-					if (sessionVO.getStartShift() != null && ispybSession.getVisit_number() != null
-							&& !sessionVO.getStartShift().equals(ispybSession.getVisit_number())) {
-						changeTxt += ", visit_number " + ispybSession.getVisit_number() + " => "
-								+ sessionVO.getStartShift();
-						ispybSession.setVisit_number(new Integer(sessionVO.getStartShift()));
-						changeSession = true;
-					}
 				}
 				if (changeSession) {
 					changeTxt += " (with sessionId = " + ispybSession.getSessionId() + ")";
@@ -1396,12 +1225,7 @@ public class UpdateFromSMIS {
 				propv.setType(Constants.PROPOSAL_OTHER);
 			}
 			break;
-			
-		case MAXIV:
-			propv.setType(Constants.PROPOSAL_MX);
-			
-			break;
-			
+
 		default:
 			if (mainProp.getProposalType() != null && mainProp.getProposalGroup() != null) {
 				if (mainProp.getProposalType().intValue() == Constants.PROPOSAL_ROLLING_TYPE

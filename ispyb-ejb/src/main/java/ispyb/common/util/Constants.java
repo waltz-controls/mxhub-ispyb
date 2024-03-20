@@ -35,7 +35,7 @@ public final class Constants {
 	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 
 	public enum SITE {
-		SOLEIL, EMBL, ESRF, MAXIV, ALBA, DESY, LOCAL
+		EMBL, ESRF, DESY, LOCAL
 	}
 
 	/*
@@ -93,13 +93,7 @@ public final class Constants {
 
 	public static final String SITE_DLS = "DLS";
 
-	public static final String SITE_SOLEIL = "SOLEIL";
-
 	public static final String SITE_EMBL = "EMBL";
-
-	public static final String SITE_MAXIV = "MAXIV";
-
-	public static final String SITE_ALBA = "ALBA";
 
 	public static final String SITE_DESY = "DESY";
 
@@ -117,26 +111,13 @@ public final class Constants {
 		return getProperty(SITE_PROPERTY).equals(SITE_EMBL);
 	}
 
-	public static final boolean SITE_IS_SOLEIL() {
-		return getProperty(SITE_PROPERTY).equals(SITE_SOLEIL); // && DATABASE_IS_ORACLE(); //TODO
-	}
-
 	public static final boolean SITE_IS_LOCAL() {
 		return getProperty(SITE_PROPERTY).equals(SITE_LOCAL);
 	}
 
 	public static final SITE getSite() {
-		if (SITE_IS_SOLEIL()) {
-			return SITE.SOLEIL;
-		}
 		if (SITE_IS_EMBL()) {
 			return SITE.EMBL;
-		}
-		if (SITE_IS_MAXIV()) {
-			return SITE.MAXIV;
-		}
-		if (SITE_IS_ALBA()) {
-			return SITE.ALBA;
 		}
 		if (SITE_IS_DESY()) {
 			return SITE.DESY;
@@ -145,14 +126,6 @@ public final class Constants {
             return SITE.ESRF;
         }
 		return SITE.LOCAL;
-	}
-
-	public static final boolean SITE_IS_MAXIV() {
-		return getProperty(SITE_PROPERTY).equals(SITE_MAXIV);
-	}
-
-	public static final boolean SITE_IS_ALBA() {
-		return getProperty(SITE_PROPERTY).equals(SITE_ALBA);
 	}
 
 	public static final boolean SITE_IS_DESY() {
@@ -247,13 +220,13 @@ public final class Constants {
 	
 	public static final String LDAP_Employee_Identifier = getProperty("ldap.attribute");
 
-	public static final String LDAP_base = SITE_IS_MAXIV() || SITE_IS_ALBA() ? getProperty("ldap.base") : "";
+	public static final String LDAP_base = "";
 	
-	public static final String LDAP_prefix = SITE_IS_MAXIV() || SITE_IS_ALBA() ? getProperty("ldap.principalDNPrefix") : "";
+	public static final String LDAP_prefix = "";
 	
-	public static final String LDAP_username = SITE_IS_MAXIV() ? getProperty("ldap.username") : "";
+	public static final String LDAP_username = "";
 	
-	public static final String LDAP_credential = SITE_IS_MAXIV() ? getProperty("ldap.credential") : "";
+	public static final String LDAP_credential = "";
 
 	/*
 	 * login prefix
@@ -279,12 +252,10 @@ public final class Constants {
 	public static final String MAIL_FROM = mProp.getProperty("mail.from");
 	public static final String MAIL_CC = mProp.getProperty("mail.cc");
 	public static final String MAIL_TO = (SITE_IS_ESRF()) ? getProperty("mail.cc") : (SITE_IS_DLS()) ? getProperty("mail.cc")
-			: (SITE_IS_MAXIV()) ? getProperty("mail.cc") : (SITE_IS_SOLEIL()) ? getProperty("mail.cc")
-			: (SITE_IS_EMBL()) ? getProperty("mail.cc"): "";
+			: (SITE_IS_DESY()) ? getProperty("mail.cc") : (SITE_IS_EMBL()) ? getProperty("mail.cc"): "";
 
 	public static final String MAIL_TO_SITE = (SITE_IS_ESRF()) ? getProperty("mail.to") : (SITE_IS_DLS()) ? getProperty("mail.to")
-			: (SITE_IS_MAXIV()) ? getProperty("mail.to") : (SITE_IS_SOLEIL()) ? getProperty("mail.to") 
-			: (SITE_IS_EMBL()) ? getProperty("mail.to") : "";
+			: (SITE_IS_DESY()) ? getProperty("mail.to") : (SITE_IS_EMBL()) ? getProperty("mail.to") : "";
 			
 	public static final boolean IS_INDUSTRY_MAILING_IN_PROD() {
 				return getProperty("mail.report.industry").equals(DEPLOY_PROD);
@@ -412,15 +383,15 @@ public final class Constants {
 
 	public static final String SHIPPING_STATUS_CLOSED = "closed";
 
-	public static final String SHIPPING_STATUS_SENT_TO_ESRF = "sent to " + getProperty("ISPyB.site");
+	public static final String SHIPPING_STATUS_SENT_TO_FACILITY = "sent to " + getProperty("ISPyB.site");
 
-	public static final String SHIPPING_STATUS_AT_ESRF = "at " + getProperty("ISPyB.site");
+	public static final String SHIPPING_STATUS_AT_FACILITY = "at " + getProperty("ISPyB.site");
 
 	public static final String SHIPPING_STATUS_SENT_TO_USER = "sent to User";
 
 	public static final String SHIPPING_STATUS_READY_TO_GO = "ready to go";
 
-	public static final String DEWAR_STATUS_AT_ESRF = "at " + getProperty("ISPyB.site");
+	public static final String DEWAR_STATUS_AT_FACILITY = "at " + getProperty("ISPyB.site");
 
 	public static final String DEWAR_STATUS_PROCESS = "processing";
 
@@ -872,12 +843,6 @@ public final class Constants {
 	
 	public static final String[] BEAMLINE_LOCATION_DLS = { "i02", "i03", "i04", "i04-1", "i24" };
 
-	public static final String[] BEAMLINE_LOCATION_MAXIV = { "BioMAX", "MX" };
-
-	public static final String[] BEAMLINE_LOCATION_SOLEIL = { "SWING", "PROXIMA1", "PROXIMA2" };
-
-	public static final String[] BEAMLINE_LOCATION_ALBA = { "XALOC" };
-
 	public static final String[] BEAMLINE_LOCATION_DESY = { "P11" };
 
 	public static final String[] BEAMLINE_LOCATION_DEFAULT = { "Not", "yet", "defined", "for", "this", "site" };
@@ -888,10 +853,6 @@ public final class Constants {
 			return "P12";
 		case ESRF:
 			return "BM29";
-		case SOLEIL:
-			return "SWING";
-		case ALBA:
-			return "XALOC";
 		default:
 			return "UNKNOWN";
 		}
@@ -901,11 +862,9 @@ public final class Constants {
 
 	public static final int LOCATIONS_IN_SC = Integer.parseInt(getProperty("samplechanger.locations", "5"));
 
-	public static final String[] CONTAINER_TYPE_MAXIV = { "Unipuck", "Other" };
-
 	public static final String[] CONTAINER_TYPE_DEFAULT = { "Spinepuck", "Unipuck", "Cane", "Other" };
 
-	public static final String[] CONTAINER_TYPE = (SITE_IS_MAXIV()) ? CONTAINER_TYPE_MAXIV : CONTAINER_TYPE_DEFAULT;
+	public static final String[] CONTAINER_TYPE = CONTAINER_TYPE_DEFAULT;
 
 	public static final String[] CONTAINER_CAPACITY_ESRF = { "10", "16", "6", "0" };
 
@@ -913,19 +872,10 @@ public final class Constants {
 
 	public static final String[] CONTAINER_CAPACITY_EMBL = { "10", "16", "6", "0" };
 
-	public static final String[] CONTAINER_CAPACITY_MAXIV = { "16", "16", "6", "0" };
-
-	public static final String[] CONTAINER_CAPACITY_SOLEIL = { "10", "16", "6", "0" };
-
-	public static final String[] CONTAINER_CAPACITY_ALBA = { "10", "6", "0" };
-
 	public static final String[] CONTAINER_CAPACITY_DESY = { "16", "16", "6", "0" };
 
 	public static final String[] CONTAINER_CAPACITY = (SITE_IS_ESRF()) ? CONTAINER_CAPACITY_ESRF
-			: (SITE_IS_DLS()) ? CONTAINER_CAPACITY_DLS : (SITE_IS_MAXIV()) ? CONTAINER_CAPACITY_MAXIV
-					: (SITE_IS_SOLEIL()) ? CONTAINER_CAPACITY_SOLEIL
-			: (SITE_IS_DESY()) ? CONTAINER_CAPACITY_DESY
-			: (SITE_IS_ALBA()) ? CONTAINER_CAPACITY_ALBA : CONTAINER_CAPACITY_ESRF;
+			: (SITE_IS_DLS()) ? CONTAINER_CAPACITY_DLS : (SITE_IS_DESY()) ? CONTAINER_CAPACITY_DESY : CONTAINER_CAPACITY_ESRF;
 
 	public static final String[] LIST_EXPERIMENT_KIND_MAXIV = { "Default", "OSC", "SAD", "MAD", "Fixed", "Ligand binding",
 			"Refinement", "MAD - Inverse Beam", "SAD - Inverse Beam" };
@@ -934,8 +884,6 @@ public final class Constants {
 //		"MAD", "Fixed", "Ligand binding", "Refinement", "MAD - Inverse Beam", "SAD - Inverse Beam" };
 
 	public static final String[] LIST_EXPERIMENT_KIND_ESRF = { "Default", "MXPressE", "MXPressO", "MXPressF", "MXPressI", "MXPressE_SAD", "MXScore", "MXPressM", "MXPressP", "MXPressP_SAD" };
-
-	public static final String[] LIST_EXPERIMENT_KIND_ALBA = { "Default", "MXPressE", "MXPressO", "MXPressI", "MXPressE_SAD", "MXScore", "MXPressM", "MXPressA" };
 
 	public static final String[] LIST_EXPERIMENT_KIND = (SITE_IS_ESRF()) ? LIST_EXPERIMENT_KIND_ESRF : LIST_EXPERIMENT_KIND_MAXIV;
 
@@ -1335,11 +1283,11 @@ public final class Constants {
 	public static final String DEFAULT_TEST_PROPOSAL_PK = Constants.getProperty("userportal.test.proposal.pk");
 
 	public static String getDummyFamilyName() {
-		return (SITE_IS_MAXIV()) ? getProperty("ISPyB.dummy.family.name.lab.contact") : "";
+		return "";
 	}
 
 	public static String getDummyGivenName() {
-		return (SITE_IS_MAXIV()) ? getProperty("ISPyB.dummy.given.name.lab.contact") : "";
+		return "";
 	}
 
 	/*

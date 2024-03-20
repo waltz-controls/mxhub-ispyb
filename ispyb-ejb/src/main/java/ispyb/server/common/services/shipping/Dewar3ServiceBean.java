@@ -103,48 +103,12 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 		this.entityManager.persist(vo);
 		
 		// generate and add the bar code to the vo
-		if (Constants.SITE_IS_ESRF()) {
-			String barCode = "ESRF";
-			if (vo.getDewarId() < 1000000)
-				barCode = barCode + "0";
-			barCode = barCode + vo.getDewarId().toString();
-			vo.setBarCode(barCode);
-			this.update(vo);
-		}
-		//IK TODO
-		else if (Constants.SITE_IS_EMBL()) {
-			String barCode = "EMBL";
-			if (vo.getDewarId() < 1000000)
-				barCode = barCode + "0";
-			barCode = barCode + vo.getDewarId().toString();
-			vo.setBarCode(barCode);
-			this.update(vo);
-		}
-		else if (Constants.SITE_IS_MAXIV()) {
-			String barCode = "MAXIV";
-			if (vo.getDewarId() < 1000000)
-				barCode = barCode + "0";
-			barCode = barCode + vo.getDewarId().toString();
-			vo.setBarCode(barCode);
-			this.update(vo);
-		}
-		else if (Constants.SITE_IS_SOLEIL()) {
-			String barCode = Constants.SITE_NAME;
-			if (vo.getDewarId() < 1000000)
-				barCode = barCode + "0";
-			barCode = barCode + vo.getDewarId().toString();
-			vo.setBarCode(barCode);
-			this.update(vo);
-		}
-		else  {
-			String barCode = Constants.SITE_NAME;
-			if (vo.getDewarId() < 1000000)
-				barCode = barCode + "0";
-			barCode = barCode + vo.getDewarId().toString();
-			vo.setBarCode(barCode);
-			this.update(vo);
-		}
-
+		String barCode = Constants.SITE_NAME;
+		if (vo.getDewarId() < 1000000)
+			barCode = barCode + "0";
+		barCode = barCode + vo.getDewarId().toString();
+		vo.setBarCode(barCode);
+		this.update(vo);
 		return vo;
 	}
 

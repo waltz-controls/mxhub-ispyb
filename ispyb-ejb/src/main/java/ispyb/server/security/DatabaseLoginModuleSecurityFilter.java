@@ -152,11 +152,6 @@ public class DatabaseLoginModuleSecurityFilter extends SimpleSecurityRealmBase {
 	   	
 	    boolean valid = false;
 	    
-    	// retrieve, decode & decrypt password received
-	    if (Constants.SITE_IS_SOLEIL()) {
-	    	password = getDecryptPass(password);
-	    }
-	    
     	debug_ = "true".equalsIgnoreCase((String) getDebug());
 	    
     	try {

@@ -272,18 +272,6 @@ public class DewarRestWebService extends RestWebService {
 						
 					}
 				}
-				if (Constants.SITE_IS_MAXIV()) {
-					ArrayList<String> p = StringUtils.GetProposalNumberAndCode(proposal);
-					String proposalCode = p.get(0);
-					String proposalNumber = p.get(2);
-					ProposalWS3VO proposalws3vo = getProposal3Service().findForWSByCodeAndNumber(proposalCode, proposalNumber);
-					Integer proposalId = proposalws3vo.getProposalId();
-					List<Dewar3VO> dewar3vos = getDewar3Service().findFiltered(proposalId, shippingId, null,
-					code, null, null, null, null, null, null, false, false);
-					if (dewar3vos != null && dewar3vos.size() > 0){
-						return this.sendError("You cannot have 2 dewars with the same name in the same shipment at MAXIV");
-					}
-				}
 				dewar3vo = getDewar3Service().create(dewar3vo);
 			} else {
 				dewar3vo = getDewar3Service().findByPk(dewarId, false, false);

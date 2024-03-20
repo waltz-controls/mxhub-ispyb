@@ -391,7 +391,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 		String userName = loginName;
 		if (site != null){
-			if (site.equals(Constants.SITE_ESRF) || site.equals(Constants.SITE_MAXIV)) {
+			if (site.equals(Constants.SITE_ESRF)) {
 				/**
 				 * Contains a number then we assume is a proposal and for ESRF if the login name is "IFX xxx" then the username should be
 				 * "fx xxx"

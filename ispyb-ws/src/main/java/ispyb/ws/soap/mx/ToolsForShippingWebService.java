@@ -144,11 +144,6 @@ public class ToolsForShippingWebService {
 			LOG.debug("findProposalByCodeAndNumber");
 			ProposalWS3VO proposalValue = null;
 
-			// Update proposal from SUN set or SMIS
-			if (Constants.SITE_IS_SOLEIL()) {
-				WSUtils.UpdateProposal(code, String.valueOf(number));
-			}
-			
 			Ejb3ServiceLocator ejb3ServiceLocator = Ejb3ServiceLocator.getInstance();
 			Proposal3Service proposalService = (Proposal3Service) ejb3ServiceLocator
 					.getLocalService(Proposal3Service.class);
@@ -171,11 +166,6 @@ public class ToolsForShippingWebService {
 			LOG.debug("findProposal");
 			ProposalWS3VO proposalValue = null;
 
-			// Update proposal from SUN set or SMIS
-			if (Constants.SITE_IS_SOLEIL()) {
-				WSUtils.UpdateProposal(code, number);
-			}
-			
 			Ejb3ServiceLocator ejb3ServiceLocator = Ejb3ServiceLocator.getInstance();
 			Proposal3Service proposalService = (Proposal3Service) ejb3ServiceLocator
 					.getLocalService(Proposal3Service.class);
@@ -340,7 +330,7 @@ public class ToolsForShippingWebService {
 					.getLocalService(Proposal3Service.class);
 			
 			List<String> groups = null;
-			if(Constants.SITE_IS_MAXIV() || Constants.SITE_IS_DESY()) {
+			if(Constants.SITE_IS_DESY()) {
 				List<Proposal3VO> props = proposalService.findByLoginName(login);
 				if(props.size() >= 1){
 					Proposal3VO prop = props.get(0);

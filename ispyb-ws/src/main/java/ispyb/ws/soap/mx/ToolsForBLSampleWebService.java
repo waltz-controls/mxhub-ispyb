@@ -326,14 +326,6 @@ public class ToolsForBLSampleWebService {
 				EMBLBeamlineEnum bl = EMBLBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
 				beamlineLoc = bl.getBeamlineName();
 			}
-			if (Constants.SITE_IS_MAXIV()) {
-				MAXIVBeamlineEnum bl = MAXIVBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
-				beamlineLoc = bl.getBeamlineName();
-			}
-			if (Constants.SITE_IS_SOLEIL()) {
-				SOLEILBeamlineEnum bl = SOLEILBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
-				beamlineLoc = bl.getBeamlineName();
-			}
 			if (Constants.SITE_IS_DESY()) {
 				DESYBeamlineEnum bl = DESYBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
 				beamlineLoc = bl.getBeamlineName();
@@ -390,10 +382,6 @@ public class ToolsForBLSampleWebService {
 			ESRFBeamlineEnum bl = ESRFBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
 			if (bl != null)
 				beamlineLoc = bl.getBeamlineName();
-			if (Constants.SITE_IS_SOLEIL()) {
-				SOLEILBeamlineEnum sbl = SOLEILBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
-				beamlineLoc = sbl != null ? sbl.getBeamlineName() : beamlineLocation;
-			}
 			sampleInfos = blSampleService.findForWSSampleInfoLight(proposalId, null, beamlineLoc, status);
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;

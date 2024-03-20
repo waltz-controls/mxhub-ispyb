@@ -193,7 +193,7 @@ public class ToolsForCollectionWebService {
 
 			SessionWS3VO[] ret = sessionService.findForWSByProposalCodeAndNumber(StringUtils.getProposalCode(code), number,
 					beamLineName);
-			if (Constants.SITE_IS_ESRF() || Constants.SITE_IS_SOLEIL()) {
+			if (Constants.SITE_IS_ESRF()) {
 				if (ret == null || ret.length <1){
 					//no sessions found, try to update DB				
 					LOG.debug("findSessionsByProposalAndBeamLine : no sessions found, try to update from SMIS ") ;
@@ -349,12 +349,6 @@ public class ToolsForCollectionWebService {
 					// force startDate, endDate and nbShifts=3
 					Calendar startDateCal = Calendar.getInstance();
 					Timestamp startDate = new Timestamp(startDateCal.getTimeInMillis());
-					if (Constants.SITE_IS_MAXIV()) {
-						startDateCal.set(Calendar.HOUR_OF_DAY, 8);
-						startDateCal.set(Calendar.MINUTE, 0);
-						startDateCal.set(Calendar.SECOND, 0);
-						startDate = new Timestamp(startDateCal.getTimeInMillis());
-					}
 					session.setStartDate(startDate);
 					nbShifts = 3;
 					session.setNbShifts(nbShifts);
@@ -364,12 +358,6 @@ public class ToolsForCollectionWebService {
 					endDateCal.setTime(startDate);
 					endDateCal.add(Calendar.DATE, daysToAdd);
 					Timestamp endDate = new Timestamp(endDateCal.getTimeInMillis());
-					if (Constants.SITE_IS_MAXIV()) {
-						endDateCal.set(Calendar.HOUR_OF_DAY, 7);
-						endDateCal.set(Calendar.MINUTE, 59);
-						endDateCal.set(Calendar.SECOND, 59);
-						endDate = new Timestamp(endDateCal.getTimeInMillis());
-					}
 					session.setEndDate(endDate);	
 				}
 
@@ -690,8 +678,8 @@ public class ToolsForCollectionWebService {
 				
 				LOG.debug("create DataCollectionGroup : " + dataCollectionGroupId);
 				// Issue 1728: email notification for ID30
-				if ((Constants.SITE_IS_ESRF() && ESRFBeamlineEnum.isBeamlineEmailNotification(dataCollectionGroup.getSessionVO()
-						.getBeamlineName())) || Constants.SITE_IS_SOLEIL()) {
+				if (Constants.SITE_IS_ESRF() && ESRFBeamlineEnum.isBeamlineEmailNotification(dataCollectionGroup.getSessionVO()
+						.getBeamlineName())) {
 					
 					Session3VO ses = sessionService.findByPk(vo.getSessionId(), true /*withDataCollectionGroup*/, true/*withEnergyScan*/, true /*withXFESpectrum*/);
 					
