@@ -136,11 +136,11 @@
 			</activation>
 		</profile>
 		<profile>
-			<id>ispyb.site-GENERIC</id>
+			<id>ispyb.site-LOCAL</id>
 			<activation>
 				<property>
 					<name>ispyb.site</name>
-					<value>GENERIC</value>
+					<value>LOCAL</value>
 				</property>
 			</activation>
 		</profile>

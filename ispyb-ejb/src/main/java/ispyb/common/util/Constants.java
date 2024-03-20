@@ -35,7 +35,7 @@ public final class Constants {
 	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 
 	public enum SITE {
-		SOLEIL, EMBL, ESRF, MAXIV, ALBA, DESY, GENERIC
+		SOLEIL, EMBL, ESRF, MAXIV, ALBA, DESY, LOCAL
 	}
 
 	/*
@@ -103,7 +103,7 @@ public final class Constants {
 
 	public static final String SITE_DESY = "DESY";
 
-	public static final String SITE_GENERIC = "GENERIC";
+	public static final String SITE_LOCAL = "LOCAL";
 
 	public static final boolean SITE_IS_ESRF() {
 		return getProperty(SITE_PROPERTY).equals(SITE_ESRF);
@@ -121,8 +121,8 @@ public final class Constants {
 		return getProperty(SITE_PROPERTY).equals(SITE_SOLEIL); // && DATABASE_IS_ORACLE(); //TODO
 	}
 
-	public static final boolean SITE_IS_GENERIC() {
-		return getProperty(SITE_PROPERTY).equals(SITE_GENERIC);
+	public static final boolean SITE_IS_LOCAL() {
+		return getProperty(SITE_PROPERTY).equals(SITE_LOCAL);
 	}
 
 	public static final SITE getSite() {
@@ -144,7 +144,7 @@ public final class Constants {
         if (SITE_IS_ESRF()) {
             return SITE.ESRF;
         }
-		return SITE.GENERIC;
+		return SITE.LOCAL;
 	}
 
 	public static final boolean SITE_IS_MAXIV() {

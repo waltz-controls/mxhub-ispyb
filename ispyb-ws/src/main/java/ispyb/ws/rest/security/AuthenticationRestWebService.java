@@ -95,7 +95,7 @@ public class AuthenticationRestWebService extends RestWebService {
 					case "DESY":
 						roles = DESYLoginModule.authenticate(login, password);
 						break;
-					case "GENERIC":
+					case "LOCAL":
 						roles = PropertyLoginModule.authenticate(login, password);
 						break;
 					default:

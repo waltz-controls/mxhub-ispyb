@@ -245,63 +245,7 @@
 	
 	  <!--  profiles to separate environment properties -->
   <profiles>
-    <profile>
-  		<id>ispyb.env-production</id>
-  		<activation>
-			<property>
-				<name>ispyb.env</name>
-				<value>production</value>
-			</property>
-      	</activation>
-  		
-  		<properties>
-  			<js.minimized>true</js.minimized>
-  			<js.alternative.path.enabled>false</js.alternative.path.enabled>
-  			<js.alternative.path> </js.alternative.path>
-  			
-  			<mail.report.industry>prod</mail.report.industry>
-  			
-  		</properties>
-  	</profile>
-
-  	<profile>
-  		<id>ispyb.env-test</id>
-		<activation>
-			<property>
-				<name>ispyb.env</name>
-				<value>test</value>
-			</property>
-		</activation>
-  		<properties>
-  			<js.minimized>false</js.minimized>
-  			<js.alternative.path>http://172.26.4.24:8082</js.alternative.path>
-  			<js.alternative.path.enabled>true</js.alternative.path.enabled>
-  			<data.path>W:</data.path>
-  			
-  			<mail.report.industry>test</mail.report.industry>
-  		</properties>
-  	</profile>
-
-     <profile>
-  		<id>ispyb.env-development</id>
-		<activation>
-			<property>
-				<name>ispyb.env</name>
-				<value>development</value>
-			</property>
-		</activation>
-  		<properties>
-  			<js.minimized>false</js.minimized>
-  			<js.alternative.path>http://172.26.4.24:8082</js.alternative.path>
-  			<js.alternative.path.enabled>true</js.alternative.path.enabled>
-  			<data.path>/work/ademaria/data/pyarch/</data.path>
-  			
-  			<mail.report.industry>test</mail.report.industry>
-  		</properties>
-  	</profile>
-
-  <!--  profiles to separate runtime environments -->
-	  <!--LOCAL-->
+<!--LOCAL-->
 	  <profile>
 		  <id>ispyb.site-LOCAL</id>
 		  <activation>
@@ -506,67 +450,6 @@
 			  <shipment.upload.populatedTemplate>ispyb-template6.2_shipment.xls</shipment.upload.populatedTemplate>
 		  </properties>
 	  </profile>
-	  <!--GENERIC-->
-  	<profile>
-  		<id>ispyb.site-GENERIC</id>
-		<activation>
-			<property>
-				<name>ispyb.site</name>
-				<value>GENERIC</value>
-			</property>
-		</activation>
-  		
-  		<properties>
-  			<ispyb.dbDialect>MYSQL</ispyb.dbDialect>
-  			<ispyb.dbJndiName.direct>java:jboss/ispyb_db_direct</ispyb.dbJndiName.direct>
-  			<ispyb.authentication.method>SIMPLE</ispyb.authentication.method>
-  			<ispyb.authorisation.proposals.source>database</ispyb.authorisation.proposals.source>
-  			  			
-  			<ispyb.root.folder>${java.io.tmpdir}/${user.name}/ispyb/</ispyb.root.folder>
-  			<ispyb.uploaded.root.folder>${ispyb.root.folder}upload/</ispyb.uploaded.root.folder>
-  			
-  			<ispyb.server.name.prod>localhost</ispyb.server.name.prod>
-  			<ispyb.server.name.prod.alias>localhost</ispyb.server.name.prod.alias>
-  			<ispyb.server.name.prod.ext>127.0.0.1</ispyb.server.name.prod.ext>
-  			<ispyb.server.name.test>localhost</ispyb.server.name.test>
-  			
-  			<shipping.container.capacity>16</shipping.container.capacity>
-			<samplechanger.container.capacity>16</samplechanger.container.capacity>
-			<samplechanger.locations>5</samplechanger.locations>
-				
-  			<ispyb.dataprocessing.denzo>true</ispyb.dataprocessing.denzo>
-  			<ispyb.path.mappingstyle>GENERIC</ispyb.path.mappingstyle>
-  			<ispyb.bcm>mxcube</ispyb.bcm>
-  			
-  			<mail.smtp.host>localhost</mail.smtp.host>
-  			<mail.admin>${user.name}@localhost</mail.admin>
-  			<mail.dev>${user.name}@localhost</mail.dev>
-  			<mail.ispyb>${user.name}@localhost</mail.ispyb>
-  			<mail.stores>${user.name}@localhost</mail.stores>
-  			
-  			<mail.report.industry.from>${user.name}@localhost</mail.report.industry.from>
-			<mail.report.industry.cc>${user.name}@localhost</mail.report.industry.cc>
-			<mail.report.industry.bcc></mail.report.industry.bcc>
-			
-			
-			<dictionary.site>GENERIC</dictionary.site>
-			<dictionary.bcm>mxCuBE</dictionary.bcm>
-			
-			<ispyb.authorisation.active>false</ispyb.authorisation.active>
-			
-			<ispyb.userportal.link>JSON</ispyb.userportal.link>
-			<ispyb.upload.folder.json>${ispyb.uploaded.root.folder}json/</ispyb.upload.folder.json>
-
-            <ispyb.shipping.reimburseddewars>false</ispyb.shipping.reimburseddewars>
-
-			<shipment.upload.template>ispyb-template6.2_shipment.xlt</shipment.upload.template>
-			<shipment.upload.populatedTemplate>ispyb-template6.2_shipment.xls</shipment.upload.populatedTemplate>
-
-		</properties>
-  	</profile> 
-  	
   </profiles>
-	
-
 </project>
 
