@@ -1,7 +1,6 @@
 #!/bin/bash
 
 site=DESY
-environment=development
 maven_settings_file=/home/ispybdev/scripts/settings.xml
 ispyb_java_project_path=/home/ispybdev/projects/ISPyB
 
@@ -16,7 +15,7 @@ git fetch origin
 git pull
 
 # Build the ISPyB Java project
-mvn -s ${maven_settings_file} -Dispyb.site=${site} -Dispyb.env=${environment} clean install
+mvn -s ${maven_settings_file} -Dispyb.site=${site} clean install
 
 echo "Finish build for ISPyB Java ${site} ${environment} environment."
 echo "Deployable ear file available at:"

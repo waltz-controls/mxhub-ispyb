@@ -125,34 +125,6 @@
 
 
 	<profiles>
-		<!-- Environment profiles -->
-		<profile>
-			<id>ispyb.env-production</id>
-			<activation>
-				<property>
-					<name>ispyb.env</name>
-					<value>production</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.env-development</id>
-			<activation>
-				<property>
-					<name>ispyb.env</name>
-					<value>development</value>
-				</property>
-			</activation>
-		</profile>
-		<profile>
-			<id>ispyb.env-test</id>
-			<activation>
-				<property>
-					<name>ispyb.env</name>
-					<value>test</value>
-				</property>
-			</activation>
-		</profile>
 		<!-- Site profiles -->
 		<profile>
 			<id>ispyb.site-DESY</id>
@@ -195,7 +167,6 @@
       </build>
     </profile>
   </profiles>
-
 	<build>
 		<plugins>
 			<plugin>
