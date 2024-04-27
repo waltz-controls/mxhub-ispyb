@@ -1,3 +1,0 @@
-var SITE_CONF = {
-	
-};

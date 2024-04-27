@@ -1,7 +1,0 @@
-   <!-- Roles Form -->
-        <form-bean name="rolesChooseForm" 
-            type="org.apache.struts.validator.DynaValidatorForm"
-            dynamic="true">
-            <form-property name="value" type="java.lang.Integer" />
-        </form-bean>
-        

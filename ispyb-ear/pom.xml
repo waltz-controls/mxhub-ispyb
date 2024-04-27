@@ -16,12 +16,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		  
-		<dependency>
-			<groupId>ispyb</groupId>
-			<artifactId>ispyb-ui</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
+
   		<dependency>
 			<groupId>ispyb</groupId>
 			<artifactId>ispyb-ws</artifactId>
@@ -66,13 +61,6 @@
 							<artifactId>ispyb-ws</artifactId>
 							<contextRoot>/ispyb/ispyb-ws</contextRoot>
 						</webModule>
-						 
-						<webModule>
-							<groupId>ispyb</groupId>
-							<artifactId>ispyb-ui</artifactId>
-							<contextRoot>/ispyb</contextRoot>
-						</webModule>
-						
 					</modules>
 					<fileNameMapping>no-version</fileNameMapping>
 				</configuration>

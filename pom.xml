@@ -9,10 +9,7 @@
 	<modules>
 		<module>ispyb-ejb</module>
 		<module>ispyb-ws</module>
-		<module>ispyb-ui</module>
 		<module>ispyb-ear</module>
-		<module>ispyb-bcr</module>
-		<module>ispyb-bcr-ear</module>
 	</modules>
 
 	<properties>
