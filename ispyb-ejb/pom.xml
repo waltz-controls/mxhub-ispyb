@@ -140,37 +140,30 @@
 		<dependency>
 			<groupId>io.jhdf</groupId> <!--jhdf-->
 			<artifactId>jhdf</artifactId>
-			<version>0.6.10</version> <!--1.0-->
 		</dependency>
 		<dependency>
 			<groupId>ncsa.hdf</groupId> <!--jhdf5-->
 			<artifactId>jhdf5</artifactId>
-			<version>2.7</version> <!--1.0-->
 		</dependency>
 		<dependency>
 			<groupId>ncsa.hdf</groupId> <!--jhdf5obj-->
 			<artifactId>jhdf5obj</artifactId>
-			<version>2.7</version> <!--1.0-->
 		</dependency>
 		<dependency>
 			<groupId>ncsa.hdf</groupId> <!--jhdfobj-->
 			<artifactId>jhdfobj</artifactId>
-			<version>2.7</version> <!--1.0-->
 		</dependency>
 		<dependency>
 			<groupId>org.hdfgroup</groupId>
 			<artifactId>hdf-java</artifactId>
-			<version>2.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>securityaes</groupId>
 			<artifactId>securityaes</artifactId>
-			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>securityfilter</groupId>
 			<artifactId>securityfilter</artifactId>
-			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -213,7 +206,6 @@
 		<dependency>
 			<groupId>ispyb</groupId>
 			<artifactId>ispyb-userportal-gen</artifactId>
-			<version>1.8</version>
 		</dependency>
 		
 		<dependency>
@@ -242,5 +234,12 @@
 	</dependency>
 		
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>lib</id>
+			<url>file://${basedir}/../dependencies/lib</url>
+		</repository>
+	</repositories>
 </project>
 
