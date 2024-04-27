@@ -124,9 +124,6 @@ public  class ParentWebService {
 	protected String getTargetFolder(int proposalId) throws Exception {
 		Proposal3VO proposal = this.getProposal3Service().findProposalById(proposalId);
 		String proposalName = proposal.getCode().toLowerCase() + proposal.getNumber();
-		if (Constants.SITE_IS_EMBL()) {
-			proposalName = proposal.getNumber();
-		}
 		return  this.getFolderForUploads() +  proposalName;
 	}
 	

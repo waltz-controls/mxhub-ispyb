@@ -387,23 +387,9 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	}
 	
 	@Override
-	public List<Proposal3VO> findProposalByLoginName(String loginName, String site) {
+	public List<Proposal3VO> findProposalByLoginName(String loginName) {
 
 		String userName = loginName;
-		if (site != null){
-			if (site.equals(Constants.SITE_ESRF)) {
-				/**
-				 * Contains a number then we assume is a proposal and for ESRF if the login name is "IFX xxx" then the username should be
-				 * "fx xxx"
-				 */
-				if (loginName.matches("(.*)[0-9](.*)")) {
-					ArrayList<String> authentitionInfo;
-					authentitionInfo = StringUtils.GetProposalNumberAndCode(loginName);
-					userName = authentitionInfo.get(0) + authentitionInfo.get(2);
-				}
-			}
-		}
-
 		List<Proposal3VO> proposals = new ArrayList<Proposal3VO>();
 		/**
 		 * If user is a proposal it is linked by proposalCode and proposalNumber in the proposal table
@@ -430,8 +416,8 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	}
 
 	@Override
-	public List<String> findProposalNamesByLoginName(String loginName, String site) {
-		List<Proposal3VO> proposals = this.findProposalByLoginName(loginName, site);
+	public List<String> findProposalNamesByLoginName(String loginName) {
+		List<Proposal3VO> proposals = this.findProposalByLoginName(loginName);
 		return this.getProposalAccounts(proposals);
 	}
 
@@ -475,10 +461,6 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	 * It looks for proposal based on the login name It looks for proposal in: - Proposal table concatenating proposalCode and
 	 * proposalNumber - Person table y the column login Then both systems, by proposal and by user are allowed
 	 */
-	public List<Proposal3VO> findProposalByLoginName(String loginName) {
-		return this.findProposalByLoginName(loginName, null);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Proposal3VO> findAllProposals() {

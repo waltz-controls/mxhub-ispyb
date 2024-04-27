@@ -577,12 +577,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 					if (Constants.IS_INDUSTRY_MAILING_IN_PROD()) {
 						to = mpEmail;
 						cc = Constants.getProperty("mail.report.cc");
-						// ESRF ####
-						if (Constants.SITE_IS_ESRF()) {
-							bcc = Constants.getProperty("mail.report.bcc");
-							if (proposal.endsWith("12"))
-								cc = cc + "," + Constants.getProperty("mail.report.cc.fx12");
-						}
 						body = Constants.getProperty("mail.report.body");
 					}
 

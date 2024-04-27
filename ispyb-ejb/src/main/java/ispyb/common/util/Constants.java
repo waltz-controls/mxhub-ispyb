@@ -35,7 +35,7 @@ public final class Constants {
 	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 
 	public enum SITE {
-		EMBL, ESRF, DESY, LOCAL
+		DESY, LOCAL
 	}
 
 	/*
@@ -59,7 +59,6 @@ public final class Constants {
 	
 	public static final String ROLE_WS = "WebService";
 
-	// DLS #####
 	public static final String FULLNAME = "fullname";
 
 	public static final String MY_VISITS = "My visits";
@@ -89,42 +88,18 @@ public final class Constants {
 
 	public static final String SITE_PROPERTY = "ISPyB.site";
 
-	public static final String SITE_ESRF = "ESRF";
-
-	public static final String SITE_DLS = "DLS";
-
-	public static final String SITE_EMBL = "EMBL";
-
 	public static final String SITE_DESY = "DESY";
 
 	public static final String SITE_LOCAL = "LOCAL";
-
-	public static final boolean SITE_IS_ESRF() {
-		return getProperty(SITE_PROPERTY).equals(SITE_ESRF);
-	}
-
-	public static final boolean SITE_IS_DLS() {
-		return getProperty(SITE_PROPERTY).equals(SITE_DLS);
-	}
-
-	public static final boolean SITE_IS_EMBL() {
-		return getProperty(SITE_PROPERTY).equals(SITE_EMBL);
-	}
 
 	public static final boolean SITE_IS_LOCAL() {
 		return getProperty(SITE_PROPERTY).equals(SITE_LOCAL);
 	}
 
 	public static final SITE getSite() {
-		if (SITE_IS_EMBL()) {
-			return SITE.EMBL;
-		}
 		if (SITE_IS_DESY()) {
 			return SITE.DESY;
 		}
-        if (SITE_IS_ESRF()) {
-            return SITE.ESRF;
-        }
 		return SITE.LOCAL;
 	}
 
@@ -251,11 +226,8 @@ public final class Constants {
 	public static final String MAIL_HOST = mProp.getProperty("mail.smtp.host");
 	public static final String MAIL_FROM = mProp.getProperty("mail.from");
 	public static final String MAIL_CC = mProp.getProperty("mail.cc");
-	public static final String MAIL_TO = (SITE_IS_ESRF()) ? getProperty("mail.cc") : (SITE_IS_DLS()) ? getProperty("mail.cc")
-			: (SITE_IS_DESY()) ? getProperty("mail.cc") : (SITE_IS_EMBL()) ? getProperty("mail.cc"): "";
-
-	public static final String MAIL_TO_SITE = (SITE_IS_ESRF()) ? getProperty("mail.to") : (SITE_IS_DLS()) ? getProperty("mail.to")
-			: (SITE_IS_DESY()) ? getProperty("mail.to") : (SITE_IS_EMBL()) ? getProperty("mail.to") : "";
+	public static final String MAIL_TO = (SITE_IS_DESY()) ? getProperty("mail.cc") : "";
+	public static final String MAIL_TO_SITE = (SITE_IS_DESY()) ? getProperty("mail.to") : "";
 			
 	public static final boolean IS_INDUSTRY_MAILING_IN_PROD() {
 				return getProperty("mail.report.industry").equals(DEPLOY_PROD);
@@ -546,7 +518,7 @@ public final class Constants {
 
 	// EDNA
 
-	public static final String EDNA_FILES_SUFIX = SITE_IS_DLS() ? "summary_html/" : "edna_html/";
+	public static final String EDNA_FILES_SUFIX = "edna_html/";
 
 	public static final String EDNA_FILES_STRATEGY_SUFIX = "strategy_1/";
 
@@ -567,18 +539,12 @@ public final class Constants {
 
 	public static final String SITE_AUTHENTICATION_METHOD = getProperty("ISPyB.authentication.method");
 
-	public static final String SITE_AUTHENTICATION_METHOD_LDAP = "LDAP";
-
 	public static final String SITE_AUTHENTICATION_METHOD_CAS = "CAS";
 
 	public static final boolean SITE_AUTHENTICATION_IS_CAS() {
 		return getProperty("ISPyB.authentication.method").equals(SITE_AUTHENTICATION_METHOD_CAS);
 	}
 
-	public static final boolean SITE_AUTHENTICATION_IS_LDAP() {
-		return getProperty("ISPyB.authentication.method").equals(SITE_AUTHENTICATION_METHOD_LDAP);
-	}
-	
 	public static final String SITE_USERPORTAL_LINK_TYPE = getProperty("userportal.link.type");
 	
 	public static final String SITE_USERPORTAL_LINK_JSON = "JSON";
@@ -848,14 +814,7 @@ public final class Constants {
 	public static final String[] BEAMLINE_LOCATION_DEFAULT = { "Not", "yet", "defined", "for", "this", "site" };
 
 	public static String getSAXSBeamline() {
-		switch (Constants.getSite()) {
-		case EMBL:
-			return "P12";
-		case ESRF:
-			return "BM29";
-		default:
-			return "UNKNOWN";
-		}
+		return "UNKNOWN";
 	}
 
 	public static final String[] BEAMLINE_LOCATION = BEAMLINE_LOCATION_DEFAULT;
@@ -866,26 +825,14 @@ public final class Constants {
 
 	public static final String[] CONTAINER_TYPE = CONTAINER_TYPE_DEFAULT;
 
-	public static final String[] CONTAINER_CAPACITY_ESRF = { "10", "16", "6", "0" };
-
-	public static final String[] CONTAINER_CAPACITY_DLS = { "16", "6", "0" };
-
-	public static final String[] CONTAINER_CAPACITY_EMBL = { "10", "16", "6", "0" };
-
 	public static final String[] CONTAINER_CAPACITY_DESY = { "16", "16", "6", "0" };
 
-	public static final String[] CONTAINER_CAPACITY = (SITE_IS_ESRF()) ? CONTAINER_CAPACITY_ESRF
-			: (SITE_IS_DLS()) ? CONTAINER_CAPACITY_DLS : (SITE_IS_DESY()) ? CONTAINER_CAPACITY_DESY : CONTAINER_CAPACITY_ESRF;
+	public static final String[] CONTAINER_CAPACITY = CONTAINER_CAPACITY_DESY;
 
-	public static final String[] LIST_EXPERIMENT_KIND_MAXIV = { "Default", "OSC", "SAD", "MAD", "Fixed", "Ligand binding",
-			"Refinement", "MAD - Inverse Beam", "SAD - Inverse Beam" };
-
-//	public static final String[] LIST_EXPERIMENT_KIND_ESRF = { "Default", "MXPressE", "MXPressO", "MXPressE_SAD", "MXScore", "MXPressM","OSC", "SAD",
+//	public static final String[] LIST_EXPERIMENT_KIND_ESRF = { "Default", "MXPressE", "MXPressO", "MXPressE_SAD", "MXPressP_SAD", "MXScore", "MXPressM", "MXPressF", "MXPressI", "MXPressP", "MXScore", "OSC", "SAD",
 //		"MAD", "Fixed", "Ligand binding", "Refinement", "MAD - Inverse Beam", "SAD - Inverse Beam" };
-
-	public static final String[] LIST_EXPERIMENT_KIND_ESRF = { "Default", "MXPressE", "MXPressO", "MXPressF", "MXPressI", "MXPressE_SAD", "MXScore", "MXPressM", "MXPressP", "MXPressP_SAD" };
-
-	public static final String[] LIST_EXPERIMENT_KIND = (SITE_IS_ESRF()) ? LIST_EXPERIMENT_KIND_ESRF : LIST_EXPERIMENT_KIND_MAXIV;
+	public static final String[] LIST_EXPERIMENT_KIND = { "Default", "OSC", "SAD", "MAD", "Fixed", "Ligand binding",
+			"Refinement", "MAD - Inverse Beam", "SAD - Inverse Beam" };
 
 	public static final String[] DATA_COLLECTION_TYPE = { "Peak", "Inflection", "High Energy Remote", "Low Energy Remote" };
 
@@ -1120,8 +1067,6 @@ public final class Constants {
 	public static final String VIEW_ALL_SESSIONS_VISITS = "View all " + SESSIONS_VISITS;
 
 	public static final String SESSION_VISIT_COMMENTS = SESSION_VISIT + " Comments";
-
-	public static final String ESRF_DLS = getProperty("dictionary.site");
 
 	public static final String SITE_NAME = getProperty("ISPyB.site");
 

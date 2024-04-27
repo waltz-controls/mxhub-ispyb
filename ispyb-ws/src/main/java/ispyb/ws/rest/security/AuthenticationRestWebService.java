@@ -2,7 +2,6 @@ package ispyb.ws.rest.security;
 
 import ispyb.server.common.util.LoggerFormatter;
 import ispyb.server.common.vos.login.Login3VO;
-import ispyb.server.security.LdapConnection;
 import ispyb.ws.rest.RestWebService;
 import ispyb.ws.rest.security.login.*;
 
@@ -75,14 +74,6 @@ public class AuthenticationRestWebService extends RestWebService {
 			if (!password.isEmpty()){
 				if (site != null){
 					switch (site) {
-					case "EMBL":
-						roles = EMBLLoginModule.authenticate(login, password);
-						break;
-					case "ESRF":
-						roles = ESRFLoginModule.authenticate(login, password);
-						siteId = LdapConnection.findByUniqueIdentifier(login).getSiteNumber();
-						logger.info(String.format("Login: %s siteId: %s", login, siteId));
-						break;
 					case "DESY":
 						roles = DESYLoginModule.authenticate(login, password);
 						break;
@@ -112,7 +103,7 @@ public class AuthenticationRestWebService extends RestWebService {
 				login3vo.setRoles(roles.toString());
 				login3vo.setSiteId(siteId);
 				/** Retrieving the proposals attached to a User **/
-				List<String> proposalsAuthorized =  this.getProposal3Service().findProposalNamesByLoginName(login, site);
+				List<String> proposalsAuthorized =  this.getProposal3Service().findProposalNamesByLoginName(login);
 				login3vo.setAuthorized(proposalsAuthorized.toString());
 							
 				/** Calculating expiration time **/

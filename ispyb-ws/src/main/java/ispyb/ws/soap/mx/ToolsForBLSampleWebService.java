@@ -318,14 +318,7 @@ public class ToolsForBLSampleWebService {
 			SampleInfo[] sampleInfos = null;
 			String status = Constants.PROCESSING_STATUS;
 			String beamlineLoc = beamlineLocation;
-			if (Constants.SITE_IS_ESRF()) {
-				ESRFBeamlineEnum bl = ESRFBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
-				beamlineLoc = bl.getBeamlineName();
-			}
-			if (Constants.SITE_IS_EMBL()) {
-				EMBLBeamlineEnum bl = EMBLBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
-				beamlineLoc = bl.getBeamlineName();
-			}
+
 			if (Constants.SITE_IS_DESY()) {
 				DESYBeamlineEnum bl = DESYBeamlineEnum.retrieveBeamlineWithName(beamlineLocation);
 				beamlineLoc = bl.getBeamlineName();

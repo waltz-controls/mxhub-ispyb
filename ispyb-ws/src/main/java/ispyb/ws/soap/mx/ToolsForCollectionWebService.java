@@ -193,15 +193,6 @@ public class ToolsForCollectionWebService {
 
 			SessionWS3VO[] ret = sessionService.findForWSByProposalCodeAndNumber(StringUtils.getProposalCode(code), number,
 					beamLineName);
-			if (Constants.SITE_IS_ESRF()) {
-				if (ret == null || ret.length <1){
-					//no sessions found, try to update DB				
-					LOG.debug("findSessionsByProposalAndBeamLine : no sessions found, try to update from SMIS ") ;
-					UpdateFromSMIS.updateProposalFromSMIS(code, number);
-					ret = sessionService.findForWSByProposalCodeAndNumber(StringUtils.getProposalCode(code), number,
-						beamLineName);
-				}
-			}
 
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
@@ -677,79 +668,6 @@ public class ToolsForCollectionWebService {
 				dataCollectionGroupId = dataCollectionGroupValue.getDataCollectionGroupId();
 				
 				LOG.debug("create DataCollectionGroup : " + dataCollectionGroupId);
-				// Issue 1728: email notification for ID30
-				if (Constants.SITE_IS_ESRF() && ESRFBeamlineEnum.isBeamlineEmailNotification(dataCollectionGroup.getSessionVO()
-						.getBeamlineName())) {
-					
-					Session3VO ses = sessionService.findByPk(vo.getSessionId(), true /*withDataCollectionGroup*/, true/*withEnergyScan*/, true /*withXFESpectrum*/);
-					
-					if (ses.getDataCollectionGroupsList() == null || 
-							ses.getDataCollectionGroupsList().size() == 1) {
-						
-						Proposal3VO proposal = dataCollectionGroup.getSessionVO().getProposalVO();
-						String beamline = dataCollectionGroup.getSessionVO().getBeamlineName();
-						SimpleDateFormat dateStandard = new SimpleDateFormat(Constants.DATE_FORMAT);
-						String experimentDateFormated = dateStandard.format(dataCollectionGroup.getSessionVO().getStartDate());
-						Shipping3VO shipping = null;
-						Dewar3VO dewar = null;
-						if (dataCollectionGroup.getBlSampleVO() != null
-								&& dataCollectionGroup.getBlSampleVO().getContainerVO() != null
-								&& dataCollectionGroup.getBlSampleVO().getContainerVO().getDewarVO() != null) {
-							dewar = dataCollectionGroup.getBlSampleVO().getContainerVO().getDewarVO();
-						} else {
-							Dewar3Service dewarService = (Dewar3Service) ejb3ServiceLocator.getLocalService(Dewar3Service.class);
-							List<Dewar3VO> listDewar = dewarService.findByExperiment(
-									dataCollectionGroup.getSessionVO().getSessionId(), Constants.DEWAR_STATUS_PROCESS);
-							if (listDewar != null && listDewar.size() > 0) {
-								dewar = listDewar.get(0);
-							}
-						}
-						if (dewar != null) {
-							shipping = dewar.getShippingVO();
-						}
-						String sendingLabContact = "";
-						if (shipping != null && shipping.getSendingLabContactVO() != null) {
-							sendingLabContact = shipping.getSendingLabContactVO().getCardName();
-						}
-						String returnLabContact = "";
-						if (shipping != null && shipping.getReturnLabContactVO() != null) {
-							returnLabContact = shipping.getReturnLabContactVO().getCardName();
-						}
-
-						SimpleDateFormat dateTimeStandard = new SimpleDateFormat(Constants.DATE_TIME_FORMAT);
-						String collectTime = dateTimeStandard.format(dataCollectionGroup.getStartTime());
-
-						// mail
-						String from = Constants.getProperty("mail.from");
-						String to = "";
-						if (shipping != null) {
-							Person3Service person3Service = (Person3Service) ejb3ServiceLocator.getLocalService(Person3Service.class);
-							LabContact3Service labContact3Service = (LabContact3Service) ejb3ServiceLocator
-									.getLocalService(LabContact3Service.class);
-							LabContact3VO labContactS = labContact3Service.findByPk(shipping.getSendingLabContactId());
-							if (labContactS != null)
-								to = person3Service.findByPk(labContactS.getPersonVOId()).getEmailAddress();
-							LabContact3VO labContactR = labContact3Service.findByPk(shipping.getReturnLabContactId());
-							if (labContactS != null && labContactR != null
-									&& !labContactS.getLabContactId().equals(labContactR.getLabContactId()))
-								to += ", " + person3Service.findByPk(labContactR.getPersonVOId()).getEmailAddress();
-						}
-						LOG.debug("test Create first collection on " + beamline + " : sendMail to " + to);
-						// to = Constants.getProperty("mail.notification.collect.cc");
-						String cc = Constants.getProperty("mail.notification.collect.cc");
-						String subject = proposal == null ? "" : (proposal.getCode() + proposal.getNumber() + ": ");
-						subject += "Collect started on " + beamline + "";
-						String body = "Shipment name: " + (shipping == null ? "" : shipping.getShippingName()) + "\n"
-								+ "Sending LabContact: " + sendingLabContact + "\n" + "Return LabContact: " + returnLabContact + "\n"
-								+ "Proposal number: " + (proposal == null ? "" : (proposal.getCode() + proposal.getNumber())) + "\n"
-								+ "Exp. date: " + experimentDateFormated + " & Beamline:" + beamline + "\n"
-								+ "---------------------------------------------------\n" + "Collect started at " + collectTime + "\n";
-
-						if (to != "")
-							SendMailUtils.sendMail(from, to, cc, subject, body);
-						LOG.debug("Create first collection on " + beamline + " : sendMail to " + to);
-					}
-				}
 			} else {
 				dataCollectionGroupValue = dataCollectionGroupService.update(dataCollectionGroup);
 				LOG.debug("update DataCollectionGroup : " + dataCollectionGroupId);
@@ -1535,7 +1453,7 @@ public class ToolsForCollectionWebService {
 					localContact = sessionVO.getBeamlineOperator();
 				String localContactEmail = "";
 				if (sessionVO != null)
-					localContactEmail = sessionVO.getBeamLineOperatorEmail();
+					localContactEmail = "";
 				BLSampleWS3VO blSampleVO = null;
 				BLSample3VO sampleFromDB = null;
 				if (vo.getDataCollectionGroupVO() != null && vo.getDataCollectionGroupVO().getBlSampleVO() != null) {

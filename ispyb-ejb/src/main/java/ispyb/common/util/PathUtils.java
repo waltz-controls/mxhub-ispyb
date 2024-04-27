@@ -98,20 +98,16 @@ public class PathUtils {
 
 	public static String getFullEDNAPath(DataCollection3VO dataCollectionVO) throws Exception {
 		String fullEDNAPath = null;
-		if (!Constants.SITE_IS_DLS()) {
-			fullEDNAPath = getFullDNAPath(dataCollectionVO) + Constants.EDNA_FILES_SUFIX;
-		} else {
-			String imgPrefix = dataCollectionVO.getImagePrefix();
-			Integer dataCollectionNumber = dataCollectionVO.getDataCollectionNumber();
-			String imgDir = dataCollectionVO.getImageDirectory();
-			int i = imgDir.indexOf('/', 19); // get the index of '/' after /dls/i0x/data/yyyy/proposal-visitNumber
-			String processedDir = imgDir.substring(0, i + 1) + "processed/";
-			if (i + 1 < imgDir.length())
-				processedDir += imgDir.substring(i + 1);
 
-			fullEDNAPath = processedDir + imgPrefix + "_" + dataCollectionNumber.toString() + "_/edna/";
-		}
+		String imgPrefix = dataCollectionVO.getImagePrefix();
+		Integer dataCollectionNumber = dataCollectionVO.getDataCollectionNumber();
+		String imgDir = dataCollectionVO.getImageDirectory();
+		int i = imgDir.indexOf('/', 19); // get the index of '/' after /dls/i0x/data/yyyy/proposal-visitNumber
+		String processedDir = imgDir.substring(0, i + 1) + "processed/";
+		if (i + 1 < imgDir.length())
+			processedDir += imgDir.substring(i + 1);
 
+		fullEDNAPath = processedDir + imgPrefix + "_" + dataCollectionNumber.toString() + "_/edna/";
 		return fullEDNAPath;
 	}
 

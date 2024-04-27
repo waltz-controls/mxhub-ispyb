@@ -128,11 +128,9 @@ public interface Proposal3Service {
 	@WebMethod
 	public List<Proposal3VO> findFiltered(final String code, final String number, final String title) throws Exception;
 
-	public List<Proposal3VO> findProposalByLoginName(String loginName, String site);
-
 	public List<Proposal3VO> findProposalByLoginName(String loginName);
 	
-	public List<String> findProposalNamesByLoginName(String loginName, String site);
+	public List<String> findProposalNamesByLoginName(String loginName);
 	
 	public Proposal3VO findProposalById(int proposalId);
 	

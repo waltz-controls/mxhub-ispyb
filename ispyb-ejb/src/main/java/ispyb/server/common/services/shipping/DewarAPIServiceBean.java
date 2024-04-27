@@ -78,9 +78,6 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 
 		try {
 			Dewar3Service _dewarFacade = (Dewar3Service) ejb3ServiceLocator.getLocalService(Dewar3Service.class);
-
-			if (Constants.DEWAR_BARCODE_STYLE.equals("DLS"))
-				dewarBarCode = dewarBarCode.toLowerCase();
 			List<Dewar3VO> dewars = _dewarFacade.findByBarCode(dewarBarCode);
 			Dewar3VO myDewar = dewars.get(0);
 		} catch (Exception e) {
@@ -191,8 +188,6 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 
 			// Get shipping Id
 			try {
-				if (Constants.DEWAR_BARCODE_STYLE.equals("DLS"))
-					dewarBarCode = dewarBarCode.toLowerCase();
 				List<Dewar3VO> dewars = dewarService.findByBarCode(dewarBarCode);
 				Dewar3VO myDewar = dewars.get(0);
 				dewarId = myDewar.getDewarId();
@@ -312,10 +307,6 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 				dewarStatus = Constants.SHIPPING_STATUS_SENT_TO_USER;
 			else
 				dewarStatus = Constants.SHIPPING_STATUS_AT_FACILITY;
-			if (Constants.SITE_IS_ESRF() && location != null
-					&& Arrays.binarySearch(Constants.DEWAR_AUTOMATIC_PROCESSING_STATE, location) >= 0) {
-				dewarStatus = Constants.SHIPPING_STATUS_PROCESS;
-			}
 			// Init facades
 			Dewar3Service dewarService = (Dewar3Service) ejb3ServiceLocator.getLocalService(Dewar3Service.class);
 			Container3Service containerService = (Container3Service) ejb3ServiceLocator.getLocalService(Container3Service.class);
@@ -325,8 +316,6 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 			// Get dewar and shipping Id
 			int dewarId;
 			int shippingId;
-			if (Constants.DEWAR_BARCODE_STYLE.equals("DLS"))
-				dewarBarCode = dewarBarCode.toLowerCase();
 			List<Dewar3VO> dewars = dewarService.findByBarCode(dewarBarCode);
 			Dewar3VO dewar = null;
 			if (dewars.size() == 1) {

@@ -26,7 +26,6 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityResult;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -36,14 +35,12 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.OrderBy;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.common.vos.proposals.Proposal3VO;
-import ispyb.server.security.LdapConnection;
 
 /**
  * Session3 value object mapping table Session
@@ -604,45 +601,5 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 				+ ", " + "lastUpdate=" + this.lastUpdate + ", " + "protectedData=" + this.protectedData;
 
 		return s;
-	}
-	
-	
-	public  String getBeamLineOperatorEmail(){
-		String beamLineOperatorEmail = "";
-		if (Constants.SITE_IS_ESRF()) { // connection to ldap only for the esrf
-			
-			if (this.getBeamlineOperator() != null && !this.getBeamlineOperator().equals("")) {
-				
-				String lastName = this.getBeamlineOperator();				
-				String firstNameLetter = "*";
-				if (this.getBeamlineOperator()
-						.substring(this.getBeamlineOperator().length() - 2, this.getBeamlineOperator().length() - 1).equals(" ")) {
-					// Get first letter of firstName + *
-					firstNameLetter = this.getBeamlineOperator().substring(this.getBeamlineOperator().length() - 1, this.getBeamlineOperator().length()) + "*";
-					// Get lastName without first letter of firstName in case there was a firstname letter
-					lastName = this.getBeamlineOperator().substring(0, this.getBeamlineOperator().length() - 2);
-					if (lastName.endsWith(" "))
-						lastName = lastName.substring(0, lastName.length() - 1);
-				}
-				
-				lastName = lastName.replace(' ', '*');
-				if(lastName.toLowerCase().startsWith("mc")){
-					lastName = "mc*"+lastName.substring(2);
-				}
-				// Get local contact email
-				String email = null;
-				if (Constants.SITE_IS_ESRF()) {
-					email = LdapConnection.getLocalContactEmail(lastName, firstNameLetter);
-					if (email != null && !email.equals(""))
-						beamLineOperatorEmail = email;
-					LOG.debug("LocalContact email: " + lastName + "/" + firstNameLetter + " = " + beamLineOperatorEmail);
-				} else {
-					LOG.debug("LocalContact " + lastName + "/" + firstNameLetter);
-				}
-			} else {
-				LOG.debug("Local contact is empty.");
-			}
-		}
-		return beamLineOperatorEmail;
 	}
 }

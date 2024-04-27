@@ -93,13 +93,8 @@ public class AuthorisationServiceBean implements AuthorisationService, Authorisa
 		if (user.equalsIgnoreCase("anonymous"))
 			return;
 		
-		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user, Constants.SITE_ESRF);
-		
-		if (Constants.SITE_IS_EMBL())
-		{
-			proposals = proposalService.findProposalByLoginName(user, Constants.SITE_EMBL);
-		}
-		
+		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user);
+
 		for (Iterator<Proposal3VO> iterator = proposals.iterator(); iterator.hasNext();) {
 			Proposal3VO proposal3vo = (Proposal3VO) iterator.next();
 			if ( vo.getProposalVOId().equals(proposal3vo.getProposalId()))
@@ -132,7 +127,7 @@ public class AuthorisationServiceBean implements AuthorisationService, Authorisa
 		if (user.equalsIgnoreCase("anonymous"))
 			return;
 		
-		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user, Constants.SITE_ESRF);
+		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user);
 		
 		for (Iterator<Proposal3VO> iterator = proposals.iterator(); iterator.hasNext();) {
 			Proposal3VO proposal3vo = (Proposal3VO) iterator.next();
@@ -166,7 +161,7 @@ public class AuthorisationServiceBean implements AuthorisationService, Authorisa
 		if (user.equalsIgnoreCase("anonymous"))
 			return;
 		
-		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user, Constants.SITE_ESRF);
+		List<Proposal3VO> proposals = proposalService.findProposalByLoginName(user);
 		
 		for (Iterator<Proposal3VO> iterator = proposals.iterator(); iterator.hasNext();) {
 			Proposal3VO proposal3vo = (Proposal3VO) iterator.next();

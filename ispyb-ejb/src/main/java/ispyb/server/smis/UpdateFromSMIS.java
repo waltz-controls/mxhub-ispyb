@@ -154,18 +154,7 @@ public class UpdateFromSMIS {
 
 			for (Iterator<Long> iterator = newProposalPks.iterator(); iterator.hasNext();) {
 				Long pk = (Long) iterator.next();
-
-				if (Constants.SITE_IS_ESRF()) {
-					// in case of ESRF we do not want old proposals
-					if (pk.longValue() > 20000) {
-						updateThisProposalFromSMISPk(pk);
-						nbFoundESRF = nbFoundESRF + 1;
-					} else {
-						LOG.debug("proposal with pk = "+ pk.toString() + " is an old one, not updated ");
-					}
-				} else
-					updateThisProposalFromSMISPk(pk);
-
+				updateThisProposalFromSMISPk(pk);
 			}
 		}
 		LOG.info("Update of ISPyB is finished, nbFound for ESRF = " + nbFoundESRF);
@@ -182,18 +171,9 @@ public class UpdateFromSMIS {
 		if (Constants.SITE_USERPORTAL_LINK_IS_SMIS()) {
 		
 			switch (Constants.getSite()) {
-			case ESRF:
-				SMISWebService ws = SMISWebServiceGenerator.getWs();
-				pk = ws.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
-				break;
 			case DESY:
 				SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
 				pk = wsDESY.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
-				break;
-			case EMBL:
-				SMISWebService wsEMBL = SMISWebServiceGenerator.getWs();
-				pk = wsEMBL.getProposalPK("SAXS", 225L);
-				System.out.println("GREAT!!! " + pk.toString());
 				break;
 			default:
 				break;
@@ -285,20 +265,8 @@ public class UpdateFromSMIS {
 			// Get the service
 			SMISWebService sws = SMISWebServiceGenerator.getWs();
 			LOG.info("Update of ISPyB from User Portal using soap WS, proposal in user portal pk = " + pk);
-			
-			switch (Constants.getSite()) {
-			case ESRF:
-				// only sessions WITH local contacts are retrieved
-				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPkAndDays(pk, nbDays);
-				break;
-			case EMBL:
-				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPk(pk);
-				break;
-            default:
-				smisSessions_ = sws.findRecentSessionsInfoLightForProposalPkAndDays(pk, nbDays);
-				break;
-			}
 
+			smisSessions_ = sws.findRecentSessionsInfoLightForProposalPkAndDays(pk, nbDays);
 			mainProposers_ = sws.findMainProposersForProposal(pk);
 			smisSamples_ = sws.findSamplesheetInfoLightForProposalPk(pk, true /* only with OpMode(checked by Safety) */);
 			labContacts_ = sws.findParticipantsForProposal(pk);
@@ -438,11 +406,7 @@ public class UpdateFromSMIS {
 						}
 					}
 				} else {
-					if (Constants.SITE_IS_ESRF()) {
-						currentPerson = person.findByLogin(labContacts[i].getUserName());
-					} else {
-						currentPerson = person.findByLogin(labContacts[i].getBllogin());
-					}
+					currentPerson = person.findByLogin(labContacts[i].getBllogin());
 				}
 									
 				if (currentPerson != null) {
@@ -580,47 +544,6 @@ public class UpdateFromSMIS {
 				String email = mainProp.getScientistEmail();
 				String username = mainProp.getUserName();
 				
-				if (Constants.SITE_IS_ESRF() ) {					
-					siteId = (mainProp.getSiteId() != null) ? mainProp.getSiteId().toString() : null;					
-					
-					//TODO clean this method later when the username will be mandatory and filled for everybody
-					
-					// fill the main proposer info and update it in the proposal if main proposer has changed
-					if (!StringUtils.matchString(familyName, currentFamilyName)) {
-						Person3VO newPerson = new Person3VO();
-						
-						if (person.findByLogin(username) != null) {												
-							newPerson = person.findByLogin(username);
-						} else if (person.findByFamilyAndGivenName(familyName, givenName) != null && !person.findByFamilyAndGivenName(familyName, givenName).isEmpty()) {												
-							newPerson = person.findByFamilyAndGivenName(familyName, givenName).get(0);
-						}
-						newPerson.setFamilyName(familyName);
-						newPerson.setGivenName(givenName);
-						newPerson.setSiteId(siteId);
-						newPerson.setEmailAddress(email);
-						newPerson.setLogin(username);
-						newPerson = person.merge(newPerson);
-						proposalVO.setPersonVO(newPerson);
-						proposal.update(proposalVO);
-						LOG.debug("Update proposal main proposer person with name: " + familyName);
-						
-					
-					// fill the login if it was null before or if it has changed
-					} else if (currentLogin == null || (username != null && !StringUtils.matchString(currentLogin, username))) {
-						currentPerson.setLogin(username);
-						currentPerson = person.merge(currentPerson);
-						LOG.debug("Update person with username: " + username);	
-					}
-				}
-
-				if (Constants.getSite().equals(SITE.EMBL)) {
-					if (!StringUtils.matchString(mainProp.getBllogin(), currentPerson.getLogin())) {
-						currentPerson.setLogin(mainProp.getBllogin());
-						currentPerson = person.merge(currentPerson);
-						LOG.debug("Update person with bllogin");
-					}
-				}
-
 				if (Constants.getSite().equals(SITE.DESY)) {
 					// Set the siteId
 					siteId = mainProp.getSiteId().toString();
@@ -736,8 +659,7 @@ public class UpdateFromSMIS {
 						 * If there is not any macromolecule with that acronym
 						 * and proposalId it will be created
 						 **/
-						if (isSampleSheetApproved(sampleSheetInfoLightVO) && saxsProposal3Service.findMacromoleculesBy(sampleSheetInfoLightVO.getAcronym(), proposalId)
-								.size() == 0) {
+						if (saxsProposal3Service.findMacromoleculesBy(sampleSheetInfoLightVO.getAcronym(), proposalId).size() == 0) {
 							saxsProposal3Service.merge(new Macromolecule3VO(proposalId, sampleSheetInfoLightVO
 									.getAcronym(), sampleSheetInfoLightVO.getAcronym(), sampleSheetInfoLightVO
 									.getDescription()));
@@ -751,15 +673,8 @@ public class UpdateFromSMIS {
 			}
 
 			for (int j = 0; j < smisSamples.length; j++) {
-
 				SampleSheetInfoLightVO value = smisSamples[j];
-				if (isSampleSheetApproved(value)){
-					retrieveSampleSheet(proplv, value);
-				} else {
-					LOG.debug(" sample: "+  value.getAcronym() +  " not retrieved because not validated by Safety");
-				}
-				
-
+				retrieveSampleSheet(proplv, value);
 			}
 		} else {
 			LOG.debug(" no samples found for propos_no = " + proposalNumber);
@@ -893,20 +808,7 @@ public class UpdateFromSMIS {
 			}
 		}
 	}
-	
-	private static boolean isSampleSheetApproved(SampleSheetInfoLightVO value){
-		if (Constants.SITE_IS_ESRF()) {
-			if (value.getOpmodePk() != null && value.getOpmodePk().longValue() < 4) {
-				LOG.debug("Samplesheet safety OK for:" + value.getAcronym());
-				return true;
-			} else {
-				LOG.debug("Samplesheet safety NOT OK for:" + value.getAcronym());
-				return false;	
-			}
-		}
-		return true;
-	}
-	
+
 	private static String getSafetyLevelFromUserPortal(SampleSheetInfoLightVO value){
 		
 		Long userPortalSafety = value.getOpmodePk();
@@ -1002,9 +904,6 @@ public class UpdateFromSMIS {
 			sesv.setExpSessionPk(sessionVO.getPk());
 			sesv.setOperatorSiteNumber(siteNumber);
 
-			if (Constants.SITE_IS_ESRF()) {
-				sesv.setNbReimbDewars(sessionVO.getReimbursedDewars());
-			}
 			session.create(sesv);
 			LOG.debug("inserted a new session inside ISPyB db: " + sessionVO.getStartDate().getTime() + " start shift="
 					+ startShift + " nb shifts=" + nbShifts + " end date=" + ((Date) endDate).toString());
@@ -1100,10 +999,7 @@ public class UpdateFromSMIS {
 		String title = mainProp.getScientistTitle();
 		String faxNumber = mainProp.getScientistFax();
 		String siteId = null;
-		if (Constants.SITE_IS_ESRF() && mainProp.getSiteId()!= null) {
-				siteId = mainProp.getSiteId().toString();
-		}
-		String login = (Constants.SITE_IS_ESRF() ) ? mainProp.getUserName() : mainProp.getBllogin();
+		String login = mainProp.getBllogin();
 
 		// labo
 		Integer labId;
@@ -1192,62 +1088,25 @@ public class UpdateFromSMIS {
 		propv.setPersonVO(persv);
 
 		// Proposal Type: MX, BX, MB (both: MX with sessions on BM29), OT (others for testing other techniques)
-		switch (Constants.getSite()) {
-		case EMBL:
-			if ((mainProp.getCategoryCode() != null) && ((mainProp.getCategoryCode().toUpperCase().equals("SAXS")))) {
+		if (mainProp.getProposalType() != null && mainProp.getProposalGroup() != null) {
+			if (mainProp.getProposalType().intValue() == Constants.PROPOSAL_ROLLING_TYPE
+					&& mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_BIOSAXS_EXPGROUP) {
+				LOG.debug("proposal is BioSaxs");
 				propv.setType(Constants.PROPOSAL_BIOSAXS);
+			} else if (mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_INDUSTRIAL_EXPGROUP) {
+				// industrial can be MX or BX
+				LOG.debug("proposal is MB because it is indutrial ");
+				propv.setType(Constants.PROPOSAL_MX_BX);
 			} else {
+				// Default is MX
+				LOG.debug("proposal is MX (by default)");
 				propv.setType(Constants.PROPOSAL_MX);
 			}
-			break;
-
-		case ESRF:
-			if (isMXorBX(mainProp) ) {	
-				// Default is MX
-				String propType = Constants.PROPOSAL_MX;
-				
-				if (mainProp.getProposalType() != null && mainProp.getProposalGroup() != null) {
-					if (mainProp.getProposalType().intValue() == Constants.PROPOSAL_ROLLING_TYPE
-							&& mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_BIOSAXS_EXPGROUP) {
-						propType = Constants.PROPOSAL_BIOSAXS;
-						
-					} else if (mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_INDUSTRIAL_EXPGROUP) {
-						// industrial can be MX or BX
-						propType =  Constants.PROPOSAL_MX_BX;						
-					} 
-				}
-				LOG.debug("proposal is of type : "+ propType);
-				propv.setType(propType);
-
-			} else {
-				// other technique than BioSaxs or MX
-				LOG.debug("proposal is another technique");
-				propv.setType(Constants.PROPOSAL_OTHER);
-			}
-			break;
-
-		default:
-			if (mainProp.getProposalType() != null && mainProp.getProposalGroup() != null) {
-				if (mainProp.getProposalType().intValue() == Constants.PROPOSAL_ROLLING_TYPE
-						&& mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_BIOSAXS_EXPGROUP) {
-					LOG.debug("proposal is BioSaxs");
-					propv.setType(Constants.PROPOSAL_BIOSAXS);
-				} else if (mainProp.getProposalGroup().intValue() == Constants.PROPOSAL_INDUSTRIAL_EXPGROUP) {
-					// industrial can be MX or BX
-					LOG.debug("proposal is MB because it is indutrial ");
-					propv.setType(Constants.PROPOSAL_MX_BX);
-				} else {
-					// Default is MX
-					LOG.debug("proposal is MX (by default)");
-					propv.setType(Constants.PROPOSAL_MX);
-				}
-			} else {
-				// Default is MX BX
-				LOG.debug("proposal can be MX or BX (because of null values)");
-				propv.setType(Constants.PROPOSAL_MX_BX);
-			}
-			break;
-		}		
+		} else {
+			// Default is MX BX
+			LOG.debug("proposal can be MX or BX (because of null values)");
+			propv.setType(Constants.PROPOSAL_MX_BX);
+		}
 		return propv;
 	}
 

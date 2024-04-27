@@ -896,15 +896,6 @@ public class Robot3ServiceBean implements Robot3Service, Robot3ServiceLocal {
 		samplePlate_3.setPlatetype3VO(type_3);
 		platePositionToSamplePlate3VO.put("3", samplePlate_3);
 
-		/** At EMBL Layout is vertical instead of horizontal **/
-		if (Constants.SITE_IS_EMBL()){
-			samplePlate_1.setSlotPositionRow("1");
-			samplePlate_1.setSlotPositionColumn("1");
-			samplePlate_2.setSlotPositionRow("2");
-			samplePlate_2.setSlotPositionColumn("1");
-			samplePlate_3.setSlotPositionRow("3");
-			samplePlate_3.setSlotPositionColumn("1");
-		}
 		return platePositionToSamplePlate3VO;
 	}
 
