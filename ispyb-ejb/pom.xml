@@ -181,6 +181,7 @@
 			<groupId>ispyb</groupId>
 			<artifactId>ispyb-userportal-gen</artifactId>
 			<version>1.8</version>
+			<systemPath>${basedir}/lib/ispyb-userportal-gen-1.8.jar</systemPath>
 		</dependency>
 		
 		<dependency>
