@@ -127,6 +127,7 @@
 							<artifactId>securityaes</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
 							<file>${basedir}/../dependencies/securityaes.jar</file>
 						</configuration>
 					</execution>
