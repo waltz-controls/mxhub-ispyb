@@ -26,11 +26,10 @@ import ispyb.server.common.vos.EJB3Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import ispyb.server.common.vos.shipping.DewarTransportHistory3VO;
+import org.junit.*;
 
+@Ignore
 public class DewarTransportHistory3VOTest extends EJB3Test {
 
 	

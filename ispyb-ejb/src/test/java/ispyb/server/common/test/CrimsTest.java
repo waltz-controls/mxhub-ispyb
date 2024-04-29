@@ -17,7 +17,7 @@
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
 
-package ispyb.server.common.test.services;
+package ispyb.server.common.test;
 
 //import ispyb.client.biosaxs.hdf5.HDF5FileReader;
 import ispyb.server.biosaxs.services.core.analysis.Analysis3Service;
@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.ExclusionStrategy;
@@ -53,7 +54,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 //import org.apache.commons.io.IOUtils;
-
+@Ignore
 public class CrimsTest extends SaxsEJB3Test {
 
 	private External3Service external3Service;

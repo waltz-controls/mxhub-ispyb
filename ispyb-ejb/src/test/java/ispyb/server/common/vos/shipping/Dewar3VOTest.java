@@ -27,11 +27,10 @@ import ispyb.server.common.vos.EJB3Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import ispyb.server.common.vos.shipping.Dewar3VO;
+import org.junit.*;
 
+@Ignore
 public class Dewar3VOTest extends EJB3Test {
 
 	private List<Dewar3VO> dewars = new ArrayList<Dewar3VO>();

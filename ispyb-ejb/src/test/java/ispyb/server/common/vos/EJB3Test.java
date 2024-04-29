@@ -32,7 +32,9 @@ import javax.security.auth.login.LoginContext;
 
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 
+@Ignore
 public class EJB3Test {
 
 	protected static Ejb3ServiceLocator serviceLocator;

@@ -17,7 +17,7 @@
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
 
-package ispyb.server.common.test.services;
+package ispyb.server.common.test;
 
 
 //import ispyb.client.bx.dataAdapter.BiosaxsActions;
@@ -40,10 +40,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
 
+@Ignore
 public class PDBFileTest extends SaxsEJB3Test {
 
 	

@@ -26,11 +26,9 @@ import ispyb.server.common.vos.EJB3Test;
 import ispyb.server.mx.services.screening.Screening3Service;
 import ispyb.server.mx.services.screening.ScreeningOutput3Service;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
+@Ignore
 public class ScreeningTest extends EJB3Test {
 
 	

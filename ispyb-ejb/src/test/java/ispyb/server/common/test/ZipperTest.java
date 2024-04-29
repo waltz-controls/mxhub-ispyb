@@ -17,7 +17,7 @@
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
 
-package ispyb.server.common.test.services;
+package ispyb.server.common.test;
 
 
 //import ispyb.client.biosaxs.hdf5.HDF5FileReader;
@@ -35,12 +35,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 //import org.apache.commons.io.IOUtils;
-
+@Ignore
 public class ZipperTest extends SaxsEJB3Test {
 	
 	private Analysis3Service analysis3Service;

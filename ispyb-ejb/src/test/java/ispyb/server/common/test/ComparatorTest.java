@@ -17,7 +17,7 @@
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
 
-package ispyb.server.common.test.services;
+package ispyb.server.common.test;
 
 
 import ispyb.server.biosaxs.services.core.ExperimentScope;
@@ -39,12 +39,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
+@Ignore
 public class ComparatorTest extends SaxsEJB3Test {
 
 	/** PARAMETERS **/

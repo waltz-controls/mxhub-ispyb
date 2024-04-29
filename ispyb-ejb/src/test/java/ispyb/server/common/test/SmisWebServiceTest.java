@@ -1,4 +1,4 @@
-package ispyb.server.common.test.services;
+package ispyb.server.common.test;
 
 import generated.ws.smis.ExpSessionInfoLightVO;
 import generated.ws.smis.ProposalParticipantInfoLightVO;

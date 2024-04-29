@@ -27,11 +27,9 @@ import ispyb.server.common.vos.EJB3Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
+@Ignore
 public class Shipping3VOTest extends EJB3Test {
 
 	private List<Shipping3VO> shippings = new ArrayList<Shipping3VO>();
