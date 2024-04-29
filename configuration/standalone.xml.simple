@@ -433,6 +433,7 @@
         <subsystem xmlns="urn:jboss:domain:sar:1.0"/>
         <subsystem xmlns="urn:jboss:domain:security:1.2">
             <security-domains>
+            <!-- There should be a LdapLoginModule.java implemented in folder ispyb.server.security if you use LDAP -->
                 <security-domain name="ispybLDAP" cache-type="default">
                     <authentication>
                         <login-module code="ispyb.server.security.LdapLoginModule" flag="required">
