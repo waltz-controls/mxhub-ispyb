@@ -58,8 +58,6 @@ import ispyb.server.common.vos.proposals.ProposalWS3VO;
 import ispyb.server.common.vos.shipping.Shipping3VO;
 import ispyb.server.mx.vos.collections.Session3VO;
 import ispyb.server.mx.vos.collections.SessionWS3VO;
-import ispyb.server.security.LdapSearchModule;
-import ispyb.ws.soap.common.WSUtils;
 
 /**
  * Web services for Shipment / proposal
@@ -344,24 +342,6 @@ public class ToolsForShippingWebService {
 					//ProposalWS3VO wsProposal = proposalService.findForWSByCodeAndNumber("MX", prop.getNumber());
 					
 					proposalValues.add(wsProposal);
-				}
-			} else{
-				//get proposal groups from LDAP
-				LOG.debug("findProposalByLoginAndBeamline: get proposal groups from LDAP for the user " +login +"...");
-				LdapSearchModule ldapModule = new LdapSearchModule();
-				groups = ldapModule.getUserGroups(login);
-
-				//Get the proposals of the user for a specific beamline
-				LOG.debug("findProposalByLoginAndBeamline: get the proposals for the " +beamline +" beamline...");
-				for (String groupName : groups) {
-					ArrayList<String> proposalNumberAndCode = StringUtils.GetProposalNumberAndCode(groupName);
-					if (proposalNumberAndCode != null && !proposalNumberAndCode.isEmpty()){
-						LOG.debug("findProposalByLoginAndBeamline: find the proposal in the DB with code = " +StringUtils.getProposalCode(proposalNumberAndCode.get(0)) +" and number = " +proposalNumberAndCode.get(2));
-						ProposalWS3VO prop= proposalService.findForWSByCodeAndNumber(StringUtils.getProposalCode(proposalNumberAndCode.get(0)), proposalNumberAndCode.get(2)+"");
-						proposalValues.add(prop);
-					} else {
-						LOG.debug("findProposalByLoginAndBeamline: no match found between group and proposal number/code");
-					}
 				}
 			}
 			

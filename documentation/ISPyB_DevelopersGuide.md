@@ -141,7 +141,7 @@ Change the drivers definition if needed:
 <driver name="mysql-connector-java-5.1.21.jar" module="com.mysql"/>
 ```
 
-Add a security domain:
+Add a security domain (There should be a LdapLoginModule.java implemented in folder ispyb.server.security if you use LDAP):
 
 ```xml
 <security-domain name="ispyb" cache-type="default">

@@ -18,20 +18,6 @@
  ******************************************************************************************************************************/
 
 
-/**
- * LdapLoginModule
- *  
- * Created on Nov 20, 2004
- *
- * Ricardo LEAL
- * ESRF - European Synchrotron Radiation Facility
- * B.P. 220
- * 38043 Grenoble Cedex - France
- * Phone: 00 33 (0)4 38 88 19 59
- * Fax: 00 33 (0)4 76 88 25 42
- * ricardo.leal@esrf.fr
- * 
- */
 package ispyb.server.security;
 
 import ispyb.common.util.Constants;
