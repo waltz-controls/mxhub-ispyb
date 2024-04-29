@@ -19,20 +19,6 @@
 				<version>2.5.2</version>
 				<executions>
 					<execution>
-						<id>install-struts-layout</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>struts-layout</groupId>
-							<artifactId>struts-layout</artifactId>
-							<version>1.2</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/Struts-Layout-1.2.jar</file>
-						</configuration>
-					</execution>
-					<execution>
 						<id>install-ispyb-userportal-gen</id>
 						<phase>initialize</phase>
 						<goals>
@@ -43,77 +29,8 @@
 							<artifactId>ispyb-userportal-gen</artifactId>
 							<version>1.8</version>
 							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
 							<file>${basedir}/../dependencies/ispyb-userportal-gen-1.8.jar</file>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install-jhdf</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>jhdf</groupId>
-							<artifactId>jhdf</artifactId>
-							<version>1.0</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/jhdf.jar</file>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install-jhdf5</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>jhdf5</groupId>
-							<artifactId>jhdf5</artifactId>
-							<version>1.0</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/jhdf5.jar</file>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install-jhdf5obj</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>jhdf5obj</groupId>
-							<artifactId>jhdf5obj</artifactId>
-							<version>1.0</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/jhdf5obj.jar</file>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install-jhdfobj</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>jhdfobj</groupId>
-							<artifactId>jhdfobj</artifactId>
-							<version>1.0</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/jhdfobj.jar</file>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install-ojdbc6</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>ojdbc6</groupId>
-							<artifactId>ojdbc6</artifactId>
-							<version>1.0</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/../dependencies/ojdbc6.jar</file>
 						</configuration>
 					</execution>
 					<execution>
@@ -142,6 +59,7 @@
 							<artifactId>securityfilter</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
 							<file>${basedir}/../dependencies/securityfilter.jar</file>
 						</configuration>
 					</execution>
