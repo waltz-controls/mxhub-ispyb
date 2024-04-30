@@ -26,7 +26,7 @@ import ispyb.server.mx.vos.sample.SampleInfo;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface BLSample3Service {

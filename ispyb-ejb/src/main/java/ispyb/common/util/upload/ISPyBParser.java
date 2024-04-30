@@ -35,7 +35,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -68,7 +68,7 @@ public class ISPyBParser extends XLSParser {
 	/**
 	 * Creates a new instance of eHTPXXLSParser and initialises the JAXB Object Factory
 	 * 
-	 * @throws javax.xml.bind.JAXBException
+	 * @throws jakarta.xml.bind.JAXBException
 	 *             If there is a problem binding to the JAXB process
 	 */
 

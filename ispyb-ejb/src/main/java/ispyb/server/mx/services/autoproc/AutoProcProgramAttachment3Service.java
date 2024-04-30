@@ -23,7 +23,7 @@ import java.util.List;
 
 import ispyb.server.mx.vos.autoproc.AutoProcProgramAttachment3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface AutoProcProgramAttachment3Service {

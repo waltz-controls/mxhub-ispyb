@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.proposals;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface LabContact3ServiceLocal extends LabContact3Service {

@@ -25,7 +25,7 @@ import ispyb.server.biosaxs.vos.datacollection.SaxsDataCollection3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

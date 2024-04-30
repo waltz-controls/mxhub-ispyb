@@ -21,9 +21,9 @@ package ispyb.server.common.util.ejb;
 
 import java.rmi.RemoteException;
 
-import javax.ejb.CreateException;
-import javax.ejb.RemoveException;
-import javax.ejb.SessionContext;
+import jakarta.ejb.CreateException;
+import jakarta.ejb.RemoveException;
+import jakarta.ejb.SessionContext;
 import javax.naming.NamingException;
 
 import java.nio.file.AccessDeniedException;

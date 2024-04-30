@@ -19,7 +19,7 @@
 
 package ispyb.server.common.exceptions;
 
-import javax.ejb.FinderException;
+import jakarta.ejb.FinderException;
 
 /**
  * Signals an access to resources that are forbidden for the authenticated user.

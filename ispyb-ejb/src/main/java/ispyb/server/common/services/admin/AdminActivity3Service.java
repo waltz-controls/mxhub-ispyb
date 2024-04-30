@@ -23,7 +23,7 @@ import ispyb.server.common.vos.admin.AdminActivity3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface AdminActivity3Service {

@@ -24,18 +24,15 @@ import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.rmi.RMISecurityManager;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
+import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
 
 public class SaxsEJB3Test {
@@ -58,8 +55,19 @@ public class SaxsEJB3Test {
 		System.out.println("Setting environment up. Fix path is required " + jbossPath);
 		
 		System.setProperty("java.security.auth.login.config", jbossPath);
-        UsernamePasswordHandler handler = null;
-        handler = new UsernamePasswordHandler("mx9999", "");
+		CallbackHandler
+				handler = new CallbackHandler(){
+			@Override
+			public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+				getCallback(callbacks, NameCallback.class).setName("mx9999");
+				getCallback(callbacks, PasswordCallback.class).setPassword("xxx".toCharArray());
+			}
+
+			private <T> T getCallback(Callback[] callbacks, Class<T> clazz) {
+				return Arrays.stream(callbacks).filter(callback -> callback.getClass().isAssignableFrom(clazz)).map(callback -> (T) callback).findAny().get();
+			}
+
+		};
         LoginContext lc = new LoginContext("testEJB", handler);
         lc.login();
         System.setProperty("java.security.policy", jbossPolicy);

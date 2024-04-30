@@ -27,7 +27,7 @@ import ispyb.server.biosaxs.vos.dataAcquisition.plate.Sampleplate3VO;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Robot3Service {

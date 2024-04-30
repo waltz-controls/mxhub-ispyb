@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.stats;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Stats3ServiceLocal extends Stats3Service {

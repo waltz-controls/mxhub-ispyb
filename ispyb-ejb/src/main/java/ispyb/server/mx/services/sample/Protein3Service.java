@@ -24,7 +24,7 @@ import ispyb.server.mx.vos.sample.Protein3VO;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Protein3Service {

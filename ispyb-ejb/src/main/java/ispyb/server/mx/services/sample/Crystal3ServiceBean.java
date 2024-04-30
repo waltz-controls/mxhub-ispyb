@@ -24,10 +24,10 @@ import ispyb.server.mx.vos.sample.Crystal3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +36,7 @@ import ispyb.server.mx.vos.sample.Crystal3VO;
 import java.math.BigInteger;
 import java.util.List;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;

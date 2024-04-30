@@ -54,8 +54,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
+import jakarta.ejb.CreateException;
+import jakarta.ejb.FinderException;
 import javax.naming.NamingException;
 
 public class DBTools {
@@ -276,7 +276,7 @@ public class DBTools {
 //
 //			if (!targetCrystal.getSampleVOs().isEmpty())
 //				crystalHasSample = targetCrystal.getSampleVOs().size();
-		} catch (javax.ejb.ObjectNotFoundException notFound) {
+		} catch (jakarta.ejb.ObjectNotFoundException notFound) {
 
 		}
 		return crystalHasSample;
@@ -302,7 +302,7 @@ public class DBTools {
 				isCreatedBySampleSheet = 0;
 			else if (targetProtein.getIsCreatedBySampleSheet() == 1)
 				isCreatedBySampleSheet = 1;
-		} catch (javax.ejb.ObjectNotFoundException notFound) {
+		} catch (jakarta.ejb.ObjectNotFoundException notFound) {
 
 		}
 		return isCreatedBySampleSheet;

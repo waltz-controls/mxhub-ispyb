@@ -21,8 +21,8 @@ package ispyb.server.common.services.proposals;
 
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.jws.WebMethod;
+import jakarta.ejb.Remote;
+import jakarta.jws.WebMethod;
 
 import ispyb.server.common.vos.proposals.ProposalHasPerson3VO;
 

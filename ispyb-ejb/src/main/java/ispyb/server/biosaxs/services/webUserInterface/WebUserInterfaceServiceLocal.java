@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.webUserInterface;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface WebUserInterfaceServiceLocal extends WebUserInterfaceService {

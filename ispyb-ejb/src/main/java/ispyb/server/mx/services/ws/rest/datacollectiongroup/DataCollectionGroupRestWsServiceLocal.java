@@ -21,7 +21,7 @@ package ispyb.server.mx.services.ws.rest.datacollectiongroup;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface DataCollectionGroupRestWsServiceLocal extends DataCollectionGroupRestWsService {

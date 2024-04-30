@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.robot;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Robot3ServiceLocal extends Robot3Service {

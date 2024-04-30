@@ -19,7 +19,7 @@
 
 package ispyb.server.em.services.collections;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface  EM3ServiceLocal  extends EM3Service{

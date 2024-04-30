@@ -23,19 +23,16 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 
 import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ejb3.annotation.TransactionTimeout;
-import org.jboss.ws.api.annotation.WebContext;
 
 import ispyb.common.util.Constants;
 import ispyb.server.common.services.admin.AdminVar3Service;
@@ -56,8 +53,8 @@ import ispyb.ws.ParentWebService;
 @Stateless
 @RolesAllowed({ "User", "WebService" })
 // allow special access roles
-@SecurityDomain("ispyb")
-@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
+//@SecurityDomain("ispyb")
+//@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
 
 public class UpdateFromSMISWebService extends ParentWebService{
 	private final static Logger logger = Logger.getLogger(UpdateFromSMISWebService.class);
@@ -78,7 +75,7 @@ public class UpdateFromSMISWebService extends ParentWebService{
 	 * @throws Exception
 	 */
 	@WebMethod
-	@TransactionTimeout(5000)
+//	@TransactionTimeout(5000)
 	public void updateFromSMIS() throws Exception {
 		String methodName = "updateFromSMIS";
 		long id = this.logInit(methodName, logger);
@@ -111,7 +108,7 @@ public class UpdateFromSMISWebService extends ParentWebService{
 	 * @throws Exception
 	 */
 	@WebMethod
-	@TransactionTimeout(1000)
+//	@TransactionTimeout(1000)
 	public void updateProposalFromSMIS(@WebParam(name = "code") String code, 
 			@WebParam(name = "number") String number) throws Exception {
 			

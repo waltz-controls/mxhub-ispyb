@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.samplePlate;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Sampleplate3ServiceLocal extends Sampleplate3Service {

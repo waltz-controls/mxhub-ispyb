@@ -21,7 +21,7 @@ package ispyb.server.mx.services.collections.workflowStep;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface WorkflowStep3ServiceLocal extends WorkflowStep3Service {

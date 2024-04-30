@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.autoproc;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface  AutoProcScalingStatistics3ServiceLocal  extends AutoProcScalingStatistics3Service{

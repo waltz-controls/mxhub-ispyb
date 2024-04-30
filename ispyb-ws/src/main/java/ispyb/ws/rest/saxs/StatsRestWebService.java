@@ -9,7 +9,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Properties;
 
-import javax.annotation.security.PermitAll;
+import jakarta.annotation.security.PermitAll;
 import javax.naming.NamingException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

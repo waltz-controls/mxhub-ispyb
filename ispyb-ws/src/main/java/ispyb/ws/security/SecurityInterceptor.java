@@ -10,13 +10,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.ext.Provider;
+
+import jakarta.ws.rs.container.ContainerRequestFilter;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.core.Headers;
 import org.jboss.resteasy.core.ResourceMethodInvoker;
@@ -27,7 +28,7 @@ import org.jboss.resteasy.core.ServerResponse;
  * 
  * */
 @Provider
-public class SecurityInterceptor implements javax.ws.rs.container.ContainerRequestFilter {
+public class SecurityInterceptor implements ContainerRequestFilter {
 	private final static Logger logger = Logger.getLogger(SecurityInterceptor.class);
 	
 	private static final ServerResponse ACCESS_DENIED = new ServerResponse("Access denied for this resource", 401,new Headers<Object>());

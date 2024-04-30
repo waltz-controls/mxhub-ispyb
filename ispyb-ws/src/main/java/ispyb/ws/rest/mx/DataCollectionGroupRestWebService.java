@@ -5,7 +5,7 @@ import ispyb.ws.soap.em.ToolsForEMDataCollection;
 
 import java.io.File;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;

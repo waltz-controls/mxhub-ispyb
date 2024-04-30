@@ -21,7 +21,7 @@ package ispyb.server.common.services.login;
 
 import ispyb.server.common.vos.login.Login3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Login3Service {

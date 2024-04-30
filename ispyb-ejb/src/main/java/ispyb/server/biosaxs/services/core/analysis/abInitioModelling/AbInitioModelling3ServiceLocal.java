@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.analysis.abInitioModelling;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface AbInitioModelling3ServiceLocal extends AbInitioModelling3Service {

@@ -23,7 +23,7 @@ import ispyb.server.mx.vos.sample.Crystal3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Crystal3Service {

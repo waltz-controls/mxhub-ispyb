@@ -22,7 +22,7 @@ package ispyb.server.biosaxs.services.core.specimen;
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;

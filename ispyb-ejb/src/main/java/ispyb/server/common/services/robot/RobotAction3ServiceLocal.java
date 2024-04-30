@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.robot;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface RobotAction3ServiceLocal extends RobotAction3Service {

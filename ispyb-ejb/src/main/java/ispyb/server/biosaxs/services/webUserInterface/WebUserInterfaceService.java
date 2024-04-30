@@ -27,7 +27,7 @@ import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
 import ispyb.server.biosaxs.vos.utils.comparator.SaxsDataCollectionComparator;
 import ispyb.server.biosaxs.vos.utils.comparator.SpecimenComparator;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

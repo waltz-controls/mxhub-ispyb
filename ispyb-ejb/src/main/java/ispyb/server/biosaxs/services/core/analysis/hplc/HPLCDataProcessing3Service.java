@@ -22,7 +22,7 @@ package ispyb.server.biosaxs.services.core.analysis.hplc;
 import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.biosaxs.vos.datacollection.SaxsDataCollection3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

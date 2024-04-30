@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;

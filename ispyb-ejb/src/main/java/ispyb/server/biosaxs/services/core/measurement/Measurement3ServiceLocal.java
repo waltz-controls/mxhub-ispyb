@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.measurement;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Measurement3ServiceLocal extends Measurement3Service {

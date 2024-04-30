@@ -23,7 +23,7 @@ import ispyb.server.mx.vos.autoproc.SpaceGroup3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface SpaceGroup3Service {

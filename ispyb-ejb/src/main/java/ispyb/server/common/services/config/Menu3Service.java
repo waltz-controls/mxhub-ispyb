@@ -23,7 +23,7 @@ import java.util.List;
 
 import ispyb.server.common.vos.config.Menu3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Menu3Service {

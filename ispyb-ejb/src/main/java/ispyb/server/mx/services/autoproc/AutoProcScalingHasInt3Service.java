@@ -23,7 +23,7 @@ import java.util.List;
 
 import ispyb.server.mx.vos.autoproc.AutoProcScalingHasInt3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface AutoProcScalingHasInt3Service {

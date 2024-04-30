@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.proposals;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Proposal3ServiceLocal extends Proposal3Service {

@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.experiment;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Experiment3ServiceLocal extends Experiment3Service {

@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.config;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Menu3ServiceLocal extends Menu3Service {

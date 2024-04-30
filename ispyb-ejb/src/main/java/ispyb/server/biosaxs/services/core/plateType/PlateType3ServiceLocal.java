@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.plateType;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface PlateType3ServiceLocal extends  PlateType3Service {

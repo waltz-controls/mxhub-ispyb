@@ -24,7 +24,7 @@ import ispyb.server.common.vos.login.Login3VO;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 

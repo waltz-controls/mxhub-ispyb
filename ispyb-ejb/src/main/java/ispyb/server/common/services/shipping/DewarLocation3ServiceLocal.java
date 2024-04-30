@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.shipping;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface DewarLocation3ServiceLocal extends DewarLocation3Service {

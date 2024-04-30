@@ -24,7 +24,6 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 /**
  * <p>
@@ -142,9 +141,8 @@ public class Ejb3ServiceLocator {
 
 	public Object getRemoteService(Class serviceClass, Properties props) throws NamingException {
 		String serviceJndiName = EJB3_CONTEXT + serviceClass.getSimpleName() + EJB3_COMMON_SUFFIX + EJB3_REMOTE_SUFFIX;
-		Object ref = getObjectRef(serviceJndiName, props);
-		Object realized = PortableRemoteObject.narrow(ref, serviceClass);
-		return realized;
+		Context context = new InitialContext(props);
+		return serviceClass.cast(context.lookup(serviceJndiName));
 	}
 
 	/* PRIVATE METHODS */

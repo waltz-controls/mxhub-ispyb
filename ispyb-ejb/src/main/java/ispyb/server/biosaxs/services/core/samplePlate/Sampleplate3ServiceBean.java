@@ -25,7 +25,7 @@ import ispyb.server.biosaxs.vos.dataAcquisition.plate.Sampleplateposition3VO;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;

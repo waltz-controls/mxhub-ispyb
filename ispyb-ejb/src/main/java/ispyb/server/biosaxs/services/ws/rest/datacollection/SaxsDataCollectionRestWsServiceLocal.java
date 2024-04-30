@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.ws.rest.datacollection;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface SaxsDataCollectionRestWsServiceLocal extends SaxsDataCollectionRestWsService {

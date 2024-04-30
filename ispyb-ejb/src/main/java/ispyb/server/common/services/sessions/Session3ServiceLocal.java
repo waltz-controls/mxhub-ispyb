@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.sessions;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Session3ServiceLocal extends Session3Service {

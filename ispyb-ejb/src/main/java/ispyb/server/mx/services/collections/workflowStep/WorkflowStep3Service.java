@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.collections.workflowStep;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.mx.vos.collections.WorkflowStep3VO;
 

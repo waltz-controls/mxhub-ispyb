@@ -2,7 +2,7 @@ package ispyb.ws.rest.mx;
 
 import ispyb.server.mx.vos.collections.Image3VO;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;

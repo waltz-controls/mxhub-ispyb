@@ -30,11 +30,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -53,7 +53,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.jboss.ejb3.annotation.TransactionTimeout;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.beamlines.ESRFBeamlineEnum;
@@ -68,7 +67,7 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
  * </p>
  */
 @Stateless
-@TransactionTimeout(3600)
+//@TransactionTimeout(3600)
 public class Session3ServiceBean implements Session3Service, Session3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Session3ServiceBean.class);

@@ -18,7 +18,7 @@
  ******************************************************************************************************************************/
 package ispyb.server.common.services;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface AuthorisationServiceLocal extends AuthorisationService {

@@ -32,16 +32,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ws.api.annotation.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 	
@@ -50,8 +48,8 @@ import org.slf4j.LoggerFactory;
 @SOAPBinding(style = Style.DOCUMENT, use = SOAPBinding.Use.LITERAL, parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)
 @Stateless
 @RolesAllowed({ "WebService", "User", "Industrial" })
-@SecurityDomain("ispyb")
-@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
+//@SecurityDomain("ispyb")
+//@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
 public class ToolsForEMDataCollection{
 
 	protected Logger log = LoggerFactory.getLogger(ToolsForEMDataCollection.class);

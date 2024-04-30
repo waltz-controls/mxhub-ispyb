@@ -23,7 +23,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import javax.ejb.FinderException;
+import jakarta.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import generated.ws.smis.ExpSessionInfoLightVO;
 import generated.ws.smis.InnerScientistVO;
 import generated.ws.smis.ProposalParticipantInfoLightVO;
-import generated.ws.smis.SMISWebService;
 import generated.ws.smis.SampleSheetInfoLightVO;
 import ispyb.common.util.Constants;
 import ispyb.common.util.Constants.SITE;

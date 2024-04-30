@@ -24,7 +24,7 @@ import java.util.List;
 import ispyb.server.mx.vos.autoproc.AutoProcProgram3VO;
 import ispyb.server.mx.vos.collections.DataCollection3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface AutoProcProgram3Service {

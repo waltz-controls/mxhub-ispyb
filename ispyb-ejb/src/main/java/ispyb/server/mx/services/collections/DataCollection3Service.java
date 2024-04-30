@@ -26,7 +26,7 @@ import ispyb.server.mx.vos.collections.XDSInfo;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface DataCollection3Service {

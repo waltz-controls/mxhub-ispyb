@@ -2,7 +2,7 @@ package ispyb.ws.rest.schema;
 
 import ispyb.ws.rest.RestWebService;
 
-import javax.annotation.security.PermitAll;
+import jakarta.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

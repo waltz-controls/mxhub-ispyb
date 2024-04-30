@@ -25,7 +25,7 @@ import ispyb.server.common.vos.proposals.PersonWS3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Person3Service {

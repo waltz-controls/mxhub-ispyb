@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.shipping.external;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface External3ServiceLocal extends External3Service {

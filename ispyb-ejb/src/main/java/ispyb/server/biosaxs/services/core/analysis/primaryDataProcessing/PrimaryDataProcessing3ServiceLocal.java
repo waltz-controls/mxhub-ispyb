@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.analysis.primaryDataProcessing;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface PrimaryDataProcessing3ServiceLocal extends PrimaryDataProcessing3Service {

@@ -13,7 +13,7 @@ import ispyb.server.mx.vos.collections.DataCollection3VO;
 import ispyb.ws.rest.RestWebService;
 import ispyb.ws.soap.em.ToolsForEMDataCollection;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

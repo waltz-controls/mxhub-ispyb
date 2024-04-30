@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.jboss.util.collection.ReverseListIterator;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;

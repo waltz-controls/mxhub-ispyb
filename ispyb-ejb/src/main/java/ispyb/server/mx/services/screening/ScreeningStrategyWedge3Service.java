@@ -23,7 +23,7 @@ import ispyb.server.mx.vos.screening.ScreeningStrategyWedge3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface ScreeningStrategyWedge3Service {

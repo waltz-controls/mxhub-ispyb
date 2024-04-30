@@ -21,7 +21,7 @@ package ispyb.server.mx.services.autoproc;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;

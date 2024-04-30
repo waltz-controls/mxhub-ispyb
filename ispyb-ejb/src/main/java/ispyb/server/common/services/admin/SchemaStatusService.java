@@ -2,7 +2,7 @@ package ispyb.server.common.services.admin;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.common.vos.admin.SchemaStatusVO;
 
