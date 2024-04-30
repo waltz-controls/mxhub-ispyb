@@ -17,7 +17,6 @@
 
 package ispyb.ws.rest;
 
-import ispyb.ws.rest.compression.GZIPInterceptor;
 import ispyb.ws.rest.mx.AutoprocintegrationRestWebService;
 import ispyb.ws.rest.mx.CrystalRestWebService;
 import ispyb.ws.rest.mx.EnergyScanRestWebService;
