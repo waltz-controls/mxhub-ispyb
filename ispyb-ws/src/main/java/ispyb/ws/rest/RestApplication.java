@@ -106,12 +106,4 @@ public class RestApplication extends Application {
 //        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 //        return resources;
 //    }
-
-
-    @Override
-    public Set<Object> getSingletons() {
-        return new HashSet<Object>(){{
-            add(new GZIPInterceptor());
-        }};
-    }
 }
