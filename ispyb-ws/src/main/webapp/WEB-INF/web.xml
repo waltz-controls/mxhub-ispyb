@@ -13,7 +13,7 @@
 <!-- 	</context-param> -->
 	<security-constraint>
 		<web-resource-collection>
-			<web-resource-name>WebServices</web-resource-name>
+			<web-resource-name>ispybWS</web-resource-name>
 			<url-pattern>/ispybWS/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
