@@ -17,6 +17,7 @@
 
 package ispyb.ws.rest;
 
+import ispyb.ws.rest.compression.GZIPInterceptor;
 import ispyb.ws.rest.mx.AutoprocintegrationRestWebService;
 import ispyb.ws.rest.mx.CrystalRestWebService;
 import ispyb.ws.rest.mx.EnergyScanRestWebService;
@@ -105,4 +106,12 @@ public class RestApplication extends Application {
 //        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 //        return resources;
 //    }
+
+
+    @Override
+    public Set<Object> getSingletons() {
+        return new HashSet<Object>(){{
+            add(new GZIPInterceptor());
+        }};
+    }
 }

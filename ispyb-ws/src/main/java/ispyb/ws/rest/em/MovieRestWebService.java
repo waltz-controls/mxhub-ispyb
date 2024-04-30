@@ -21,11 +21,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.apache.cxf.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class MovieRestWebService extends RestWebService {
 
 	protected Logger log = LoggerFactory.getLogger(ToolsForEMDataCollection.class);
@@ -39,7 +40,6 @@ public class MovieRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/{dataCollectionId}/dose")
 	@Produces("text/plain")
 	public Response getDoseByDataCollectionId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -57,7 +57,6 @@ public class MovieRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/{dataCollectionId}/movie")
 	@Produces({ "application/json" })
 	public Response getMoviesByDataCollectionId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -70,7 +69,6 @@ public class MovieRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/{dataCollectionId}/movie/all")
 	@Produces({ "application/json" })
 	public Response getMoviesDataByDataCollectionId(@PathParam("token") String token, @PathParam("proposal") String proposal,

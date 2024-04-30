@@ -19,11 +19,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.apache.cxf.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class StatsWebService extends MXRestWebService {
 
 	protected Logger log = LoggerFactory.getLogger(MovieRestWebService.class);
@@ -54,7 +55,6 @@ public class StatsWebService extends MXRestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/session/{sessionIdList}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionBySessionId(@PathParam("token") String token, @PathParam("proposal") String proposal,

@@ -17,9 +17,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.apache.log4j.Logger;
 import org.apache.poi.util.StringUtil;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import file.FileUploadForm;
 import ispyb.server.biosaxs.vos.assembly.Macromolecule3VO;
@@ -224,8 +224,13 @@ public class CrystalRestWebService extends MXRestWebService {
 			@PathParam("token") String token,
 			@PathParam("proposal") String proposal,
 			@PathParam("crystalid") Integer crystalId,
-			@MultipartForm FileUploadForm form) throws IllegalStateException, IOException{
-				
+			MultipartBody multipartBody) throws IllegalStateException, IOException{
+
+		FileUploadForm form = new FileUploadForm();
+		form.setInputStream(multipartBody.getAttachment("file").getDataHandler().getInputStream());
+		form.setType(multipartBody.getAttachment("type").getDataHandler().getContent().toString());
+		form.setGroupName(multipartBody.getAttachment("groupName").getDataHandler().getContent().toString());
+
 		try {
 			if (form.getInputStream() != null){
 				String filePath = null;

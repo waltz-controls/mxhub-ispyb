@@ -18,10 +18,12 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.ext.Provider;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.model.OperationResourceInfo;
+import org.apache.cxf.message.Message;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.core.Headers;
-import org.jboss.resteasy.core.ResourceMethodInvoker;
-import org.jboss.resteasy.core.ServerResponse;
 
 /**
  * This SecurityInterceptor verify the access permissions for a user based on user name and method annotations
@@ -30,11 +32,12 @@ import org.jboss.resteasy.core.ServerResponse;
 @Provider
 public class SecurityInterceptor implements ContainerRequestFilter {
 	private final static Logger logger = Logger.getLogger(SecurityInterceptor.class);
-	
-	private static final ServerResponse ACCESS_DENIED = new ServerResponse("Access denied for this resource", 401,new Headers<Object>());
-	private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse("Nobody can access this resource", 403,new Headers<Object>());
 
-	
+	private static final Response ACCESS_DENIED = Response.status(Response.Status.UNAUTHORIZED).entity("Access denied for this resource").build();
+	private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN).entity("Nobody can access this resource").build();
+
+	@Context
+	private MessageContext messageContext;
 //	private Response getUnauthorizedResponse(){
 //		return Response.status(401) 
 //				.header("Access-Control-Allow-Origin", "*").build();
@@ -42,8 +45,9 @@ public class SecurityInterceptor implements ContainerRequestFilter {
 	
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-		ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
-		Method method = methodInvoker.getMethod();
+		Message message = (Message) messageContext.get(Message.class);
+		OperationResourceInfo operationInfo = message.getExchange().get(OperationResourceInfo.class);
+		Method method = operationInfo.getMethodToInvoke();
 
 		/** Allowing cross-domain **/
 		ArrayList<String> header = new ArrayList<String>();

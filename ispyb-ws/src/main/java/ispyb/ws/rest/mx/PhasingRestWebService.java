@@ -22,10 +22,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.compress.archivers.zip.ZipMethod;
+import org.apache.cxf.annotations.GZIP;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.GZIP;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class PhasingRestWebService extends MXRestWebService {
 
 	private final static Logger logger = Logger.getLogger(PhasingRestWebService.class);

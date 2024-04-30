@@ -14,11 +14,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.apache.cxf.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class DataCollectionGroupRestWebService extends MXRestWebService {
 
 
@@ -47,7 +48,6 @@ public class DataCollectionGroupRestWebService extends MXRestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollectiongroup/{dataCollectionGroupId}/xtal/thumbnail")
 	@Produces("image/png")
 	public Response getXtalThumbnailByDataCollectionGroupId(@PathParam("token") String token, @PathParam("proposal") String proposal,

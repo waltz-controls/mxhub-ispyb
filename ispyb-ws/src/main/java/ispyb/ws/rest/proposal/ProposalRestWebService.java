@@ -35,8 +35,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import jakarta.annotation.security.PermitAll;
+import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 @Path("/")
 public class ProposalRestWebService extends MXRestWebService{
@@ -286,8 +286,13 @@ public class ProposalRestWebService extends MXRestWebService{
 	public Response saveStructure(
 			@PathParam("token") String token,
 			@PathParam("proposal") String proposal,
-			@MultipartForm FileUploadForm form) throws IllegalStateException, IOException{
-				
+			MultipartBody multipartBody) throws IllegalStateException, IOException{
+
+
+		FileUploadForm form = new FileUploadForm();
+		form.setInputStream(multipartBody.getAttachment("file").getDataHandler().getInputStream());
+		form.setType(multipartBody.getAttachment("type").getDataHandler().getContent().toString());
+		form.setGroupName(multipartBody.getAttachment("groupName").getDataHandler().getContent().toString());
 		try {
 			logger.info("saveStructure for proposal " + proposal);
 			if (form.getInputStream() != null){

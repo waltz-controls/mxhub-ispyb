@@ -23,10 +23,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.annotations.GZIP;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.GZIP;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class SessionRestWebService extends RestWebService {
 	private final static Logger logger = Logger.getLogger(SessionRestWebService.class);
 
@@ -79,7 +80,6 @@ public class SessionRestWebService extends RestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/list")
 	@Produces({ "application/json" })
 	public Response getSessionByProposalId(@PathParam("token") String token, @PathParam("proposal") String proposal) throws Exception {
@@ -96,7 +96,6 @@ public class SessionRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/sessionId/{sessionId}/list")
 	@Produces({ "application/json" })
 	public Response getSessionById(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -124,7 +123,6 @@ public class SessionRestWebService extends RestWebService {
 	 */
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/date/{startdate}/{enddate}/list")
 	@Produces({ "application/json" })
 	public Response getSessionByDate(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -148,7 +146,6 @@ public class SessionRestWebService extends RestWebService {
 
 	@RolesAllowed({ "Manager", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/session/date/{startdate}/{enddate}/list")
 	@Produces({ "application/json" })
 	public Response getSessionsByDate(
@@ -176,7 +173,6 @@ public class SessionRestWebService extends RestWebService {
 		
 	@RolesAllowed({ "Manager", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/session/beamlineoperator/{beamlineOperator}/list")
 	@Produces({ "application/json" })
 	public Response getSessionsByBeamlineOperator(

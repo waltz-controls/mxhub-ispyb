@@ -16,11 +16,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.apache.cxf.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class MotionCorrectionRestWebService extends RestWebService {
 
 	protected Logger log = LoggerFactory.getLogger(ToolsForEMDataCollection.class);
@@ -34,7 +35,6 @@ public class MotionCorrectionRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/{dataCollectionId}/movie/{movieId}/motioncorrection/thumbnail")
 	@Produces("image/png")
 	public Response getMotionCorrectionThumbnailByMovieId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -57,7 +57,6 @@ public class MotionCorrectionRestWebService extends RestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/em/datacollection/{dataCollectionId}/movie/{movieId}/motioncorrection/drift")
 	@Produces("image/png")
 	public Response getMotionCorrectionDriftByMovieId(@PathParam("token") String token, @PathParam("proposal") String proposal,
