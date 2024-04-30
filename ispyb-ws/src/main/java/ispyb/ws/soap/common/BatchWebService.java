@@ -62,9 +62,6 @@ public class BatchWebService {
 
 	private final Integer CONFIDENTIALITY_WINDOW_PK = 11;
 
-	@Resource
-	private UserTransaction userTransaction;
-
 	@WebMethod(operationName = "echo")
 	@WebResult(name = "echo")
 	public String echo() {
@@ -178,8 +175,6 @@ public class BatchWebService {
 	public void protectSession(Integer sessionId) throws Exception {
 
 		try {
-			userTransaction.setTransactionTimeout(60); // Set timeout to 300 seconds
-			userTransaction.begin();
 			if (sessionId != null) {
 				Session3Service sessionService = (Session3Service) ejb3ServiceLocator
 						.getLocalService(Session3Service.class);
@@ -191,8 +186,6 @@ public class BatchWebService {
 			//
 			LOG.error("WS ERROR: getDataToBeProtected " + sessionId);
 			e.printStackTrace();
-		} finally {
-			userTransaction.commit();
 		}
 	}
 }
