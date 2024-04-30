@@ -28,7 +28,7 @@
 
 	<login-config>
 		<auth-method>BASIC</auth-method>
-		<realm-name>ispybRealm</realm-name>
+		<realm-name>ispyb</realm-name>
 	</login-config>
 
 	<security-role>
