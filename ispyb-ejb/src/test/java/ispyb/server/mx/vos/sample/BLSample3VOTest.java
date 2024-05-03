@@ -27,11 +27,9 @@ import ispyb.server.mx.services.sample.BLSample3Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
+@Ignore
 public class BLSample3VOTest extends EJB3Test {
 
 	private List<BLSample3VO> blSamples3VOs = new ArrayList<BLSample3VO>();

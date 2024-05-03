@@ -7,7 +7,6 @@ import ispyb.server.biosaxs.services.utils.BiosaxsZipper;
 import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.biosaxs.vos.utils.comparator.SaxsDataCollectionComparator;
 import ispyb.server.common.services.proposals.Proposal3Service;
-import ispyb.server.common.test.services.ZipperTest;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 import ispyb.server.common.vos.proposals.Proposal3VO;
 

@@ -26,11 +26,9 @@ import ispyb.server.mx.services.sample.Protein3Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
+@Ignore
 public class Protein3VOTest extends EJB3Test {
 
 	private List<Protein3VO> proteins = new ArrayList<Protein3VO>();

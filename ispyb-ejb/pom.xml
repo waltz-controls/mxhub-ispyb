@@ -39,7 +39,13 @@
         </plugins>
     </build>
     <dependencies>
-        <!-- Import the CDI API, we use provided scope as the API is included in
+        <dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Import the CDI API, we use provided scope as the API is included in
             JBoss WildFly -->
         <dependency>
             <groupId>javax.enterprise</groupId>

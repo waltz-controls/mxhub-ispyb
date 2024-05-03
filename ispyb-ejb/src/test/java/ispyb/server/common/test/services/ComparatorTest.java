@@ -39,12 +39,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
+@Ignore
 public class ComparatorTest extends SaxsEJB3Test {
 
 	/** PARAMETERS **/

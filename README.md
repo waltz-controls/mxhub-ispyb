@@ -17,7 +17,7 @@
    the local Maven repository so that Maven can find them:
 
    ```
-   cd dependencies && mvn initialize
+   cd dependencies && mvn install
    ```
 
 3. Build ISPyB using Maven:
