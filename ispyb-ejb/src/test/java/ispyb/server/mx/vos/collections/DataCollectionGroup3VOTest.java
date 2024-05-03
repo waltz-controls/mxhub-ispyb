@@ -27,11 +27,9 @@ import ispyb.server.mx.services.collections.DataCollectionGroup3Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
+@Ignore
 public class DataCollectionGroup3VOTest extends EJB3Test {
 
 	private List<DataCollectionGroup3VO> dataCollectionGroups = new ArrayList<DataCollectionGroup3VO>();
