@@ -17,7 +17,7 @@
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
 
-package ispyb.server.common.test;
+package ispyb.server.common.vos;
 
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 
@@ -32,45 +32,45 @@ import javax.security.auth.login.LoginContext;
 
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 
-public class Ejb3GenericRemoteTest {
+@Ignore
+public class EJB3Test {
+
+	protected static Ejb3ServiceLocator serviceLocator;
 
 	protected static Properties properties;
-	protected static Ejb3ServiceLocator serviceLocator;
-	
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Properties ispybProperties = new Properties();
 		ispybProperties.load(new FileReader(new File("build.properties")));
-		String jbossPath =  ispybProperties.getProperty("jboss.home") + "/server/default/conf/testJAAS.config";
-		String jbossPolicy =  ispybProperties.getProperty("jboss.home") + "/server/default/conf/standaloneClient.policy";
-		
+		String jbossPath = ispybProperties.getProperty("jboss.home") + "/server/default/conf/testJAAS.config";
+		String jbossPolicy = ispybProperties.getProperty("jboss.home") + "/server/default/conf/standaloneClient.policy";
+
 		System.out.println("Setting environment up. Fix path is required " + jbossPath);
 		System.setProperty("java.security.auth.login.config", jbossPath);
-        UsernamePasswordHandler handler = null;
-        String username = "mx415";
-        String password = "pimx415";
-        handler = new UsernamePasswordHandler(username, password);
-        LoginContext lc = new LoginContext("testEJB", handler);
-        lc.login();
-        System.setProperty("java.security.policy", jbossPolicy);
-        System.setSecurityManager(new RMISecurityManager());
-        properties = new Properties();
+		UsernamePasswordHandler handler = null;
+		String username = "mx415";
+		String password = "pimx415";
+		handler = new UsernamePasswordHandler(username, password);
+		LoginContext lc = new LoginContext("testEJB", handler);
+		lc.login();
+		System.setProperty("java.security.policy", jbossPolicy);
+		System.setSecurityManager(new RMISecurityManager());
+		properties = new Properties();
 		properties.put("java.naming.factory.initial", "org.jnp.interfaces.NamingContextFactory");
-        properties.put("java.naming.factory.url.pkgs", "=org.jboss.naming:org.jnp.interfaces");
-        properties.put("java.naming.provider.url", "localhost:1099");
-        serviceLocator = Ejb3ServiceLocator.getInstance(); 
+		properties.put("java.naming.factory.url.pkgs", "=org.jboss.naming:org.jnp.interfaces");
+		properties.put("java.naming.provider.url", "localhost:1099");
+		serviceLocator = Ejb3ServiceLocator.getInstance();
+
 	}
 
-	
-	protected java.sql.Date getDate(int day, int month, int year) throws ParseException{
+	protected java.sql.Date getDate(int day, int month, int year) throws ParseException {
 		String date = year + "/" + month + "/" + day;
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 		java.util.Date utilDate = formatter.parse(date);
 		return new java.sql.Date(utilDate.getTime());
 	}
-	
 
 }
-

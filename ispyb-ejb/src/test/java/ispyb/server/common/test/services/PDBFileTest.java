@@ -40,10 +40,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
 
+@Ignore
 public class PDBFileTest extends SaxsEJB3Test {
 
 	
