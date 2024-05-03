@@ -45,8 +45,8 @@ import java.util.Set;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * The goal of this class is to merge all the logic coming from BiosaxsDataAdapter

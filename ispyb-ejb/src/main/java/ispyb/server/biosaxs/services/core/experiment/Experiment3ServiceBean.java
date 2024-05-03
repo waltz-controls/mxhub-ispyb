@@ -31,10 +31,10 @@ import java.util.Set;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SQLQuery;

@@ -35,11 +35,15 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -49,10 +53,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.beamlines.ESRFBeamlineEnum;
@@ -321,37 +321,65 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findFiltered(Integer nbMax, String beamline, Date date1, Date date2, Date dateEnd,
 			boolean usedFlag, String operatorSiteNumber) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> criteriaQuery = criteriaBuilder.createQuery(Session3VO.class);
 
-		if (beamline != null)
-			crit.add(Restrictions.like("beamlineName", beamline));
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = criteriaQuery.from(Session3VO.class);
 
-		if (date1 != null)
-			crit.add(Restrictions.ge("startDate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("startDate", date2));
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
 
-		if (dateEnd != null)
-			crit.add(Restrictions.ge("endDate", dateEnd));
-
-		// usedFlag =1 or endDate > yesterday
-		if (usedFlag)
-			crit.add(Restrictions.sqlRestriction("(usedFlag = 1 OR endDate >= " + Constants.MYSQL_ORACLE_YESTERDAY + " )"));
-
-		if (nbMax != null)
-			crit.setMaxResults(nbMax);
-
-
-		if (operatorSiteNumber != null) {
-			crit.add(Restrictions.eq("operatorSiteNumber", operatorSiteNumber));
+// Add conditions based on method parameters
+		if (beamline != null) {
+			predicates.add(criteriaBuilder.like(root.get("beamlineName"), "%" + beamline + "%"));
 		}
 
-		crit.addOrder(Order.desc("startDate"));
+		if (date1 != null) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), date1));
+		}
+		if (date2 != null) {
+			predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), date2));
+		}
 
-		return crit.list();
+		if (dateEnd != null) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), dateEnd));
+		}
+
+		if (usedFlag) {
+			// Assuming usedFlag is a boolean that if true applies a special filter
+			Predicate usedFlagPredicate = criteriaBuilder.equal(root.get("usedFlag"), 1);
+			Predicate endDatePredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), new Date()); // Adjust the date as per your application logic
+			predicates.add(criteriaBuilder.or(usedFlagPredicate, endDatePredicate));
+		}
+
+		if (operatorSiteNumber != null) {
+			predicates.add(criteriaBuilder.equal(root.get("operatorSiteNumber"), operatorSiteNumber));
+		}
+
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
+
+// Order the results
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("startDate")));
+
+// Prepare the query to be executed
+		List<Session3VO> result;
+		if (nbMax != null) {
+			result = entityManager.createQuery(criteriaQuery)
+					.setMaxResults(nbMax)
+					.getResultList();
+		} else {
+			result = entityManager.createQuery(criteriaQuery).getResultList();
+		}
+
+		return result;
 	}
 
 	/**
@@ -507,21 +535,29 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 * @return
 	 */
 	public Session3VO findByExpSessionPk(final Long expSessionPk) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		
-		if (expSessionPk != null)
-			crit.add(Restrictions.eq("expSessionPk", expSessionPk));
-		
-		crit.addOrder(Order.desc("startDate"));
-		
-		List<Session3VO> foundEntities = crit.list();
-			if (foundEntities == null || foundEntities.size() == 0) {
-					return null;
-			} else {
-					return foundEntities.get(0);
-			}
+		// Get the EntityManager and CriteriaBuilder
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> criteriaQuery = criteriaBuilder.createQuery(Session3VO.class);
+
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = criteriaQuery.from(Session3VO.class);
+
+// Condition to filter by expSessionPk if not null
+		if (expSessionPk != null) {
+			Predicate expSessionPkPredicate = criteriaBuilder.equal(root.get("expSessionPk"), expSessionPk);
+			criteriaQuery.where(expSessionPkPredicate);
+		}
+
+// Order the results by startDate in descending order
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("startDate")));
+
+// Execute the query and retrieve the list
+		List<Session3VO> foundEntities = entityManager.createQuery(criteriaQuery).getResultList();
+
+// Return the first element if list is not empty, otherwise return null
+		return foundEntities.isEmpty() ? null : foundEntities.get(0);
 		
 	}
 
@@ -672,51 +708,48 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	//******************************     PRIVATE METHODS  ********************************************************
 
 	private List<Session3VO> findSessionToBeProtected(Integer delay, Integer window) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Get the EntityManager and CriteriaBuilder
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		Integer delayToTrigger = 26;
-		Integer windowForTrigger = 24;
-		if (delay != null)
-			delayToTrigger = delay;
-		if (window != null)
-			windowForTrigger = window;
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
 
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = cq.from(Session3VO.class);
+
+// List to hold all conditions (Predicates)
+		List<Predicate> predicates = new ArrayList<>();
+
+// Calculate date ranges based on delay and window
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger);
-
+		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger); // Adjusted by delay
 		Date date2 = cal.getTime();
-		cal.add(Calendar.HOUR_OF_DAY, -windowForTrigger);
+		cal.add(Calendar.HOUR_OF_DAY, -windowForTrigger); // Adjusted by window
 		Date date1 = cal.getTime();
 
-		if (date1 != null)
-			crit.add(Restrictions.ge("lastUpdate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("lastUpdate", date2));
-		
+// Add date range conditions
+		predicates.add(cb.greaterThanOrEqualTo(root.get("lastUpdate"), date1));
+		predicates.add(cb.lessThanOrEqualTo(root.get("lastUpdate"), date2));
+
+// Add beamline name condition, protected beamlines
 		String[] beamlinesToProtect = ESRFBeamlineEnum.getBeamlineNamesToBeProtected();
-		
-		if (LOG.isDebugEnabled()) {
-			String beamlines = "";
-			for (String beamline: beamlinesToProtect) { 
-				beamlines = beamlines + " " + beamline;
-			};
-			LOG.debug("beamlinesToProtect: " + beamlines);
-		}
-		
-		
-		crit.add(Restrictions.in("beamlineName", beamlinesToProtect));
+		predicates.add(root.get("beamlineName").in((Object[]) beamlinesToProtect));
 
-		// account not to protect: opid*, opd*, mxihr*
-		Criteria subCrit = crit.createCriteria("proposalVO");
+// Add subquery to filter out specific proposal codes
+		Join<Session3VO, ProposalVO> proposalJoin = root.join("proposalVO");
+		String[] accountNotToProtect = new String[] {"opid*", "opd*", "mxihr*"}; // example pattern codes
+		predicates.add(cb.not(proposalJoin.get("code").in((Object[]) accountNotToProtect)));
 
-		subCrit.add(Restrictions.not(Restrictions.in("code", account_not_to_protect)));
+// Set where clause with combined predicates
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
-		crit.addOrder(Order.asc("lastUpdate"));
+// Order by lastUpdate ascending
+		cq.orderBy(cb.asc(root.get("lastUpdate")));
 
-		return crit.list();
+// Execute the query
+		List<Session3VO> results = entityManager.createQuery(cq).getResultList();
+		return results;
 	}
 	
 	private List<Session3VO> findSessionNotProtectedToBeProtected(Date date1, Date date2) {

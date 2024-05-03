@@ -25,14 +25,12 @@ import ispyb.server.common.vos.login.Login3VO;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 
 @Stateless
@@ -52,10 +50,24 @@ public class Login3ServiceBean implements Login3Service, Login3ServiceLocal {
 
 	@Override
 	public Login3VO findByToken(String token) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Login3VO.class);
-		criteria.add(Restrictions.eq("token", token));
-		List<Login3VO> loginList = criteria.list();
+		// Obtain the entity manager and criteria builder
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a criteria query for the Login3VO class
+		CriteriaQuery<Login3VO> criteriaQuery = criteriaBuilder.createQuery(Login3VO.class);
+
+// Define the root of the query (from where we start)
+		Root<Login3VO> root = criteriaQuery.from(Login3VO.class);
+
+// Specify the selection (typically, you might retrieve more complex structures)
+		criteriaQuery.select(root);
+
+// Add a where clause to the query
+		criteriaQuery.where(criteriaBuilder.equal(root.get("token"), token));
+
+// Execute the query
+		List<Login3VO> loginList = entityManager.createQuery(criteriaQuery).getResultList();
+
 		if (loginList.size() == 1){
 			return loginList.get(0);
 		}
@@ -65,11 +77,26 @@ public class Login3ServiceBean implements Login3Service, Login3ServiceLocal {
 	
 	@Override
 	public Login3VO findBylastByLogin(String login) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Login3VO.class);
-		criteria.add(Restrictions.eq("login", login));
-		criteria.addOrder(Order.desc("loginId"));
-		List<Login3VO> loginList = criteria.list();
+		// Obtain the entity manager and criteria builder
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a criteria query for the Login3VO class
+		CriteriaQuery<Login3VO> criteriaQuery = criteriaBuilder.createQuery(Login3VO.class);
+
+// Define the root of the query (from where we start)
+		Root<Login3VO> root = criteriaQuery.from(Login3VO.class);
+
+// Create the conditions (where clauses)
+		Predicate loginCondition = criteriaBuilder.equal(root.get("login"), login);
+
+// Add the conditions to the query
+		criteriaQuery.select(root).where(loginCondition);
+
+// Add an order by clause
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("loginId")));
+
+// Execute the query
+		List<Login3VO> loginList = entityManager.createQuery(criteriaQuery).getResultList();
 		if (loginList != null && loginList.size() > 0){
 			return loginList.get(0);
 		}

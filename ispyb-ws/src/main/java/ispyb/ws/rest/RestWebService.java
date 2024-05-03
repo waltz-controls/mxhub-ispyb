@@ -7,9 +7,8 @@ import java.util.Map;
 import ispyb.server.common.vos.login.Login3VO;
 import ispyb.ws.ParentWebService;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
-@Path("/")
 public class RestWebService extends ParentWebService {
 	protected long now;
 		

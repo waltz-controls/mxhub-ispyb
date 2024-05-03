@@ -21,8 +21,8 @@ package ispyb.server.mx.services.autoproc.phasingStep;
 
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import ispyb.server.mx.vos.autoproc.PhasingStepVO;
 

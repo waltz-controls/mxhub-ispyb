@@ -21,14 +21,15 @@ package ispyb.server.common.services.shipping;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
 import ispyb.server.common.exceptions.AccessDeniedException;
@@ -175,14 +176,28 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 	public List<DewarTransportHistory3VO> findByDewarId(final Integer dewarId)
 			throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(DewarTransportHistory3VO.class);
-		
-		if (dewarId != null){
-			criteria.createCriteria("dewarVO").add(Restrictions.eq("dewarId", dewarId));
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery object for DewarTransportHistory3VO
+		CriteriaQuery<DewarTransportHistory3VO> criteriaQuery = criteriaBuilder.createQuery(DewarTransportHistory3VO.class);
+
+// Define the root of the query (the main entity to query from)
+		Root<DewarTransportHistory3VO> root = criteriaQuery.from(DewarTransportHistory3VO.class);
+
+// Optionally join related entities and add conditions
+		if (dewarId != null) {
+			Predicate dewarIdCondition = criteriaBuilder.equal(root.join("dewarVO").get("dewarId"), dewarId);
+			criteriaQuery.where(dewarIdCondition);
 		}
-		
-		return criteria.list();
+
+// Prepare the query to be executed
+		criteriaQuery.select(root);
+
+// Execute the query
+		List<DewarTransportHistory3VO> result = entityManager.createQuery(criteriaQuery).getResultList();
+
+		return result;
 	}
 	
 	

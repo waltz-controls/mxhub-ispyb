@@ -35,9 +35,9 @@ import org.apache.log4j.Logger;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.NoResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.NoResultException;
 
 import org.apache.log4j.Logger;
 

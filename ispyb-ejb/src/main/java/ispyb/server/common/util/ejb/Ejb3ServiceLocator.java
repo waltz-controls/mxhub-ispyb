@@ -148,15 +148,7 @@ public class Ejb3ServiceLocator {
 	/* PRIVATE METHODS */
 
 	private Object getObjectRef(String serviceJndiName, Properties properties) throws NamingException {
-		Context initialCtx;
-		if (properties == null) {
-			properties = new Properties();
-			properties.put(Context.URL_PKG_PREFIXES, PKG_INTERFACES);
-			properties.put("jboss.naming.client.ejb.context", true);
-		} else {
-			properties.put(Context.URL_PKG_PREFIXES, PKG_INTERFACES);
-		}
-		initialCtx = new InitialContext(properties);
+		Context initialCtx = new InitialContext(properties);
 		
 		Object objref = initialCtx.lookup(serviceJndiName);
 		return objref;

@@ -58,8 +58,8 @@ import java.util.Set;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;

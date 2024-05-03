@@ -18,17 +18,19 @@
  ****************************************************************************************************/
 package ispyb.server.common.services.proposals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.exceptions.AccessDeniedException;
@@ -165,20 +167,42 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	@SuppressWarnings("unchecked")
 	public List<Laboratory3VO> findFiltered(String laboratoryName, String city, String country) {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(Laboratory3VO.class);
+// Create a CriteriaQuery object for Laboratory3VO
+		CriteriaQuery<Laboratory3VO> criteriaQuery = criteriaBuilder.createQuery(Laboratory3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Define the root of the query (the main entity to query from)
+		Root<Laboratory3VO> root = criteriaQuery.from(Laboratory3VO.class);
 
-		if (!StringUtils.isEmpty(laboratoryName))
-			crit.add(Restrictions.like("name", laboratoryName));
-		if (!StringUtils.isEmpty(city))
-			crit.add(Restrictions.like("city", city));
-		if (!StringUtils.isEmpty(country))
-			crit.add(Restrictions.like("country", country));
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
 
-		return crit.list();
+// Add conditions based on method parameters
+		if (!StringUtils.isEmpty(laboratoryName)) {
+			predicates.add(criteriaBuilder.like(root.get("name"), "%" + laboratoryName + "%"));
+		}
+		if (!StringUtils.isEmpty(city)) {
+			predicates.add(criteriaBuilder.like(root.get("city"), "%" + city + "%"));
+		}
+		if (!StringUtils.isEmpty(country)) {
+			predicates.add(criteriaBuilder.like(root.get("country"), "%" + country + "%"));
+		}
+
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
+
+// Prepare the query to be executed
+		CriteriaQuery<Laboratory3VO> select = criteriaQuery.select(root);
+
+// Execute the query
+		List<Laboratory3VO> result = entityManager.createQuery(select).getResultList();
+
+		return result;
 
 	}
 

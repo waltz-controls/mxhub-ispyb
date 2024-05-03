@@ -15,7 +15,8 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.ext.Provider;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
@@ -37,7 +38,7 @@ public class SecurityInterceptor implements ContainerRequestFilter {
 	private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN).entity("Nobody can access this resource").build();
 
 	@Context
-	private MessageContext messageContext;
+	private ResourceInfo info;
 //	private Response getUnauthorizedResponse(){
 //		return Response.status(401) 
 //				.header("Access-Control-Allow-Origin", "*").build();
@@ -45,9 +46,7 @@ public class SecurityInterceptor implements ContainerRequestFilter {
 	
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-		Message message = (Message) messageContext.get(Message.class);
-		OperationResourceInfo operationInfo = message.getExchange().get(OperationResourceInfo.class);
-		Method method = operationInfo.getMethodToInvoke();
+		Method method = info.getResourceMethod();
 
 		/** Allowing cross-domain **/
 		ArrayList<String> header = new ArrayList<String>();

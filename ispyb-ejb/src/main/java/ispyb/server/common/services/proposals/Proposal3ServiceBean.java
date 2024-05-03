@@ -30,17 +30,15 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
@@ -329,26 +327,42 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@SuppressWarnings("unchecked")
 	@WebMethod
 	public List<Proposal3VO> findFiltered(final String code, final String number, final String title) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(Proposal3VO.class);
+// Create a CriteriaQuery object for Proposal3VO
+		CriteriaQuery<Proposal3VO> criteriaQuery = criteriaBuilder.createQuery(Proposal3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Define the root of the query (the main entity to query from)
+		Root<Proposal3VO> root = criteriaQuery.from(Proposal3VO.class);
 
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
+
+// Add conditions based on method parameters
 		if (code != null && !code.isEmpty()) {
-			crit.add(Restrictions.like("code", code.toUpperCase()));
+			predicates.add(criteriaBuilder.like(criteriaBuilder.upper(root.get("code")), "%" + code.toUpperCase() + "%"));
 		}
-
 		if (number != null && !number.isEmpty()) {
-			crit.add(Restrictions.eq("number", number));
+			predicates.add(criteriaBuilder.equal(root.get("number"), number));
+		}
+		if (title != null && !title.isEmpty()) {
+			predicates.add(criteriaBuilder.like(root.get("title"), "%" + title + "%"));
 		}
 
-		if (title != null && !title.isEmpty())
-			crit.add(Restrictions.like("title", title));
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 
-		crit.addOrder(Order.desc("proposalId"));
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
 
-		return crit.list();
+// Order the results
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("proposalId")));
+
+// Prepare the query to be executed
+		List<Proposal3VO> result = entityManager.createQuery(criteriaQuery).getResultList();
+
+		return result;
 	}
 
 	public Integer[] updateProposalFromIds(final Integer newProposalId, final Integer oldProposalId) throws Exception {

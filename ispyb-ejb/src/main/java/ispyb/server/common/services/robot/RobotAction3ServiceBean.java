@@ -26,9 +26,9 @@ package ispyb.server.common.services.robot;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
 import ispyb.server.common.vos.proposals.Person3VO;
 import ispyb.server.common.vos.robot.RobotAction3VO;
