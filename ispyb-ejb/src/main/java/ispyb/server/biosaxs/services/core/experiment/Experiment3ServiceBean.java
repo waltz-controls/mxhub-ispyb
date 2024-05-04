@@ -209,9 +209,9 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 	
 	@Override
 	public List<Map<String, Object>> getExperimentDescription(Integer experimentId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GetExperimentDescriptionByExperimentId);
-		query.setParameter("experimentId", experimentId);
+		String session = GetExperimentDescriptionByExperimentId
+				.replace(":experimentId", String.valueOf(experimentId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

@@ -19,7 +19,9 @@
 package ispyb.server.mx.services.sample;
 
 
+import ispyb.server.common.vos.proposals.Proposal3VO;
 import ispyb.server.mx.services.ws.rest.WsServiceBean;
+import ispyb.server.mx.vos.sample.Crystal3VO;
 import ispyb.server.mx.vos.sample.Protein3VO;
 
 import java.util.List;
@@ -33,6 +35,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
 
 /**
@@ -167,31 +170,39 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 
 	@SuppressWarnings("unchecked")
 	public List<Protein3VO> findByAcronymAndProposalId(final Integer proposalId, final String acronym, final boolean withCrystal, final boolean sortByAcronym) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Protein3VO.class);
-		Criteria subCrit = crit.createCriteria("proposalVO");
+		EntityManager entityManager = this.entityManager;  // Assuming EntityManager is injected or retrieved beforehand
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Protein3VO> cq = cb.createQuery(Protein3VO.class);
+		Root<Protein3VO> root = cq.from(Protein3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Join with Proposal
+		Join<Protein3VO, Proposal3VO> proposalJoin = root.join("proposalVO");
 
 		if (proposalId != null) {
-			subCrit.add(Restrictions.eq("proposalId", proposalId));
+			cq.where(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
 		if (acronym != null && !acronym.isEmpty()) {
-			crit.add(Restrictions.like("acronym", acronym.toUpperCase()));
+			cq.where(cb.like(cb.upper(root.get("acronym")), acronym.toUpperCase()));
 		}
 
+// Handling fetch join with Crystal based on the withCrystal flag
 		if (withCrystal) {
-			crit.setFetchMode("crystalVOs", FetchMode.JOIN);
+			Fetch<Protein3VO, Crystal3VO> crystalFetch = root.fetch("crystalVOs");
 		}
-		if (sortByAcronym) {
-			crit.addOrder(Order.asc("acronym"));
-		} else
-			crit.addOrder(Order.desc("proteinId"));
 
-		List<Protein3VO> foundEntities = crit.list();
+// Sorting
+		if (sortByAcronym) {
+			cq.orderBy(cb.asc(root.get("acronym")));
+		} else {
+			cq.orderBy(cb.desc(root.get("proteinId")));
+		}
+
+		cq.distinct(true);  // Ensures that the results returned are distinct
+
+// Execute the query
+		List<Protein3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	
@@ -288,11 +299,10 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	
 	@Override
 	public List<Map<String, Object>>  getStatsByProposal(int proposalId) {
-		String mySQLQuery = getViewTableQuery() + " where proposalId = :proposalId";		
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);		
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		String mySQLQuery = getViewTableQuery() + " where proposalId = :proposalId";
+		mySQLQuery = mySQLQuery
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

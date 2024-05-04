@@ -30,6 +30,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import jakarta.persistence.Query;
+import sun.rmi.server.MarshalOutputStream;
 
 
 @Stateless
@@ -54,38 +55,37 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByExperimentId(int proposalId, Integer experimentId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByExperimentId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("experimentId", experimentId);
+		String session = ByExperimentId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":experimentId", String.valueOf(experimentId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionBySessionId(int proposalId, Integer sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
+		String session = BySessionId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sessionId", String.valueOf(sessionId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByMacromoleculeId(int proposalId, Integer macromoleculeId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByMacromoleculeId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("macromoleculeId", macromoleculeId);
-		System.out.println(query);
+		String session = ByMacromoleculeId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":macromoleculeId", String.valueOf(macromoleculeId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionId(int proposalId, Integer dataCollectionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("dataCollectionId", dataCollectionId);
+		String session = ByDataCollectionId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":dataCollectionId", String.valueOf(dataCollectionId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

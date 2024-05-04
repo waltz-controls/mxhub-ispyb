@@ -21,6 +21,7 @@ package ispyb.server.mx.services.autoproc;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
+import ispyb.server.mx.vos.autoproc.PhasingAnalysis3VO;
 import ispyb.server.mx.vos.autoproc.SubstructureDetermination3VO;
 
 import java.util.List;
@@ -33,11 +34,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -164,17 +162,26 @@ public class SubstructureDetermination3ServiceBean implements SubstructureDeterm
 
 	@SuppressWarnings("unchecked")
 	public List<SubstructureDetermination3VO> findFiltered(final Integer phasingAnalysisId) throws Exception {
-	
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(SubstructureDetermination3VO.class);
-		
+
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<SubstructureDetermination3VO> cq = cb.createQuery(SubstructureDetermination3VO.class);
+		Root<SubstructureDetermination3VO> root = cq.from(SubstructureDetermination3VO.class);
+
 		if (phasingAnalysisId != null) {
-			Criteria subCrit = criteria.createCriteria("phasingAnalysisVO");
-			subCrit.add(Restrictions.eq("phasingAnalysisId", phasingAnalysisId));
-			subCrit.addOrder(Order.asc("phasingAnalysisId"));
+			// Create a join with PhasingAnalysisVO
+			Join<SubstructureDetermination3VO, PhasingAnalysis3VO> phasingAnalysisJoin = root.join("phasingAnalysisVO");
+			// Add condition on phasingAnalysisId
+			Predicate condition = cb.equal(phasingAnalysisJoin.get("phasingAnalysisId"), phasingAnalysisId);
+			cq.where(condition);
+			// Order by phasingAnalysisId
+			cq.orderBy(cb.asc(phasingAnalysisJoin.get("phasingAnalysisId")));
 		}
-		
-		List<SubstructureDetermination3VO> foundEntities = criteria.list();
+
+		cq.distinct(true);  // Ensure distinct results
+
+// Execute the query
+		List<SubstructureDetermination3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

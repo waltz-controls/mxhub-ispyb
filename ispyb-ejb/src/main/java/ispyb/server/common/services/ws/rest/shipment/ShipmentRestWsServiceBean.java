@@ -43,11 +43,10 @@ public class ShipmentRestWsServiceBean extends WsServiceBean implements Shipment
 	@Override
 	public List<Map<String, Object>> getShipmentHistoryByShipmentId(int proposalId, int shipmentId) {
 		
-		String mySQLQuery = getHistoryQuery + " where Shipping_shippingId = :shippingId and Shipping_proposalId = :proposalId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("shippingId", shipmentId);
+		String mySQLQuery = getHistoryQuery + " where Shipping_shippingId = :shippingId and Shipping_proposalId = :proposalId"
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":shippingId", String.valueOf(shipmentId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 

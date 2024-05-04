@@ -25,10 +25,7 @@ import java.util.Map;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -41,7 +38,7 @@ public class SampleRestWsServiceBean implements SampleRestWsService, SampleRestW
 	private String ByProposalId = getDewarViewTableQuery() + " where v_mx_sample.Protein_proposalId = :proposalId";
 	private String BySessionId = getDewarViewTableQuery() + " where v_mx_sample.DataCollectionGroup_sessionId = :sessionId and v_mx_sample.Protein_proposalId = :proposalId";
 	private String ByContainerId = getDewarViewTableQuery() + " where v_mx_sample.Container_containerId = :containerId and v_mx_sample.Protein_proposalId = :proposalId";
-	private String ByShippingId = getDewarViewTableQuery() + " where v_mx_sample.Shipping_shippingId = :shipingId and v_mx_sample.Protein_proposalId = :proposalId";
+	private String ByShippingId = getDewarViewTableQuery() + " where v_mx_sample.Shipping_shippingId = :shippingId and v_mx_sample.Protein_proposalId = :proposalId";
 	private String ByDewarId = getDewarViewTableQuery() + " where v_mx_sample.Dewar_dewarId = :dewarId and v_mx_sample.Protein_proposalId = :proposalId";
 	
 	private String getDataCollectionIdQuery(){
@@ -58,58 +55,55 @@ public class SampleRestWsServiceBean implements SampleRestWsService, SampleRestW
 		return "select *, " + getDataCollectionIdQuery() + " from v_mx_sample";
 	}
 
-	
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query ){
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
-		return aliasToValueMapList;
-	}
-
 
 	@Override
 	public List<Map<String, Object>> getSamplesByProposalId(int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProposalId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = ByProposalId
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesBySessionId(int proposalId,int sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = BySessionId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sessionId", String.valueOf(sessionId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByContainerId(int proposalId,int containerId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByContainerId);
-		query.setParameter("containerId", containerId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = ByContainerId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":containerId", String.valueOf(containerId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 
 	@Override
-	public List<Map<String, Object>> getSamplesByShipmentId(int proposalId,int shipingId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByShippingId);
+	public List<Map<String, Object>> getSamplesByShipmentId(int proposalId,int shippingId) {
+		String session = ByShippingId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":shippingId", String.valueOf(shippingId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
 		
-		query.setParameter("shipingId", shipingId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByDewarId(int proposalId, int dewarId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDewarId);
-		query.setParameter("dewarId", dewarId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = ByDewarId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":dewarId", String.valueOf(dewarId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 
 }

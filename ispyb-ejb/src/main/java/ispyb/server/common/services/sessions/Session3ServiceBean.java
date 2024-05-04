@@ -722,9 +722,9 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 // Calculate date ranges based on delay and window
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger); // Adjusted by delay
+		cal.add(Calendar.HOUR_OF_DAY, -delay); // Adjusted by delay
 		Date date2 = cal.getTime();
-		cal.add(Calendar.HOUR_OF_DAY, -windowForTrigger); // Adjusted by window
+		cal.add(Calendar.HOUR_OF_DAY, -window); // Adjusted by window
 		Date date1 = cal.getTime();
 
 // Add date range conditions
@@ -736,7 +736,7 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 		predicates.add(root.get("beamlineName").in((Object[]) beamlinesToProtect));
 
 // Add subquery to filter out specific proposal codes
-		Join<Session3VO, ProposalVO> proposalJoin = root.join("proposalVO");
+		Join<Session3VO, Proposal3VO> proposalJoin = root.join("proposalVO");
 		String[] accountNotToProtect = new String[] {"opid*", "opd*", "mxihr*"}; // example pattern codes
 		predicates.add(cb.not(proposalJoin.get("code").in((Object[]) accountNotToProtect)));
 

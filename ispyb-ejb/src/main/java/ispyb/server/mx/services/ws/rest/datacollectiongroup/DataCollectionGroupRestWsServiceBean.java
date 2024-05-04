@@ -47,10 +47,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionBySessionId(int proposalId, int sessionId) {
 		String mySQLQuery = getViewTableQuery() + " where DataCollectionGroup_sessionId = :sessionId and BLSession_proposalId = :proposalId ";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId order by DataCollection_startTime desc ";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
+		mySQLQuery = mySQLQuery
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
@@ -59,10 +59,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		String mySQLQuery = getViewTableQuery() + " where DataCollectionGroup_sessionId = :sessionId and BLSession_proposalId = :proposalId ";
 		mySQLQuery = mySQLQuery + " and DataCollection_numberOfImages is not null ";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId order by DataCollection_startTime desc ";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
+		mySQLQuery = mySQLQuery
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(sessionId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
@@ -70,11 +70,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionByProteinAcronym(int proposalId, String proteinAcronym) {
 		String mySQLQuery = getViewTableQuery() + " where BLSession_proposalId = :proposalId and Protein_acronym = :proteinAcronym";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("proteinAcronym", proteinAcronym);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":proteinAcronym", String.valueOf(proteinAcronym));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
@@ -82,11 +81,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionBySampleId(int proposalId, int sampleId) {
 		String mySQLQuery = getViewTableQuery() + " where BLSession_proposalId = :proposalId and DataCollectionGroup_blSampleId = :sampleId";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sampleId", sampleId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sampleId", String.valueOf(sampleId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
@@ -94,11 +92,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionBySampleName(int proposalId, String name) {
 		String mySQLQuery = getViewTableQuery() + " where BLSession_proposalId = :proposalId and BLSample_name = :name";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("name", name);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":name", name);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
@@ -106,11 +103,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionByImagePrefix(int proposalId, String prefix) {
 		String mySQLQuery = getViewTableQuery() + " where BLSession_proposalId = :proposalId and DataCollection_imagePrefix = :prefix";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("prefix", prefix);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":prefix", prefix);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
@@ -118,11 +114,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public Collection<? extends Map<String, Object>> getViewDataCollectionByDataCollectionId(int proposalId, int dataCollectionId) {
 		String mySQLQuery = getViewTableQuery() + " where DataCollection_dataCollectionId = :dataCollectionId and BLSession_proposalId = :proposalId ";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("dataCollectionId", dataCollectionId);
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":dataCollectionId", String.valueOf(dataCollectionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
@@ -130,11 +125,10 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 	public List<Map<String, Object>> getViewDataCollectionByWorkflowId(Integer proposalId, Integer workflowId) {
 		String mySQLQuery = getViewTableQuery() + " where Workflow_workflowId = :Workflow_workflowId and BLSession_proposalId = :proposalId ";
 		mySQLQuery = mySQLQuery + " group by v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId, v_datacollection_summary.DataCollectionGroup_dataCollectionGroupId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("Workflow_workflowId", workflowId);
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		mySQLQuery = mySQLQuery
+				.replace(":Workflow_workflowId", String.valueOf(workflowId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 

@@ -25,11 +25,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.admin.AdminActivity3VO;
@@ -167,35 +166,42 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AdminActivity3VO> findByAction(final String action) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminActivity3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager entityManager = this.entityManager;  // Assuming EntityManager is injected or retrieved beforehand
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AdminActivity3VO> cq = cb.createQuery(AdminActivity3VO.class);
+		Root<AdminActivity3VO> root = cq.from(AdminActivity3VO.class);
 
 		if (action != null && !action.isEmpty()) {
-			crit.add(Restrictions.eq("action", action));
+			cq.where(cb.equal(root.get("action"), action));
 		}
 
-		return crit.list();
+		cq.distinct(true);  // Ensures that the results returned are distinct
+
+// Execute the query
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery(cq).getResultList();
+		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<AdminActivity3VO> findByUsername(final String username) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminActivity3VO.class);
-
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager entityManager = this.entityManager;  // Assumed to be injected or retrieved somehow
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AdminActivity3VO> cq = cb.createQuery(AdminActivity3VO.class);
+		Root<AdminActivity3VO> root = cq.from(AdminActivity3VO.class);
 
 		if (username != null && !username.isEmpty()) {
-			String bla = username;
-			bla = username.toLowerCase();
-			crit.add(Restrictions.eq("username", bla));
-			crit.addOrder(Order.desc("action"));
+			String usernameLower = username.toLowerCase();
+			cq.where(cb.equal(cb.lower(root.get("username")), usernameLower));
+			cq.orderBy(cb.desc(root.get("action")));
 		}
 
-		return crit.list();
+		cq.distinct(true);  // Ensure distinct results are returned
+
+// Execute the query
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery(cq).getResultList();
+		return foundEntities;
 	}
 
 	/**

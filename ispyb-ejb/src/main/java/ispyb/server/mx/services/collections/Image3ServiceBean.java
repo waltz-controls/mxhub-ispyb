@@ -21,8 +21,11 @@ package ispyb.server.mx.services.collections;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
+import ispyb.server.mx.vos.collections.DataCollection3VO;
+import ispyb.server.mx.vos.collections.DataCollectionGroup3VO;
 import ispyb.server.mx.vos.collections.Image3VO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.annotation.Resource;
@@ -33,6 +36,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
 
 /**
@@ -178,64 +182,85 @@ public class Image3ServiceBean implements Image3Service,
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Image3VO> findFiltered(final String fileLocation, final String fileName) throws Exception{
-	
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Image3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		// Assuming entityManager is properly instantiated and available
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Image3VO> cq = cb.createQuery(Image3VO.class);
+		Root<Image3VO> image = cq.from(Image3VO.class);
 
+		List<Predicate> predicates = new ArrayList<>();
+
+// Applying conditions based on method arguments.
 		if (fileLocation != null && !fileLocation.isEmpty()) {
-			crit.add(Restrictions.like("fileLocation", fileLocation));
+			predicates.add(cb.like(image.get("fileLocation"), fileLocation));
 		}
 
 		if (fileName != null && !fileName.isEmpty()) {
-			crit.add(Restrictions.like("fileName", fileName));
+			predicates.add(cb.like(image.get("fileName"), fileName));
 		}
-		
-		crit.addOrder(Order.desc("imageId"));
 
-		List<Image3VO> foundEntities = crit.list();
+		cq.where(predicates.toArray(new Predicate[0]));
+		cq.orderBy(cb.desc(image.get("imageId")));
+
+// Execute the query
+		List<Image3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Image3VO> findByDataCollectionId(final Integer dataCollectionId) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Image3VO.class);
+		// Assuming entityManager is properly instantiated and available
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Image3VO> cq = cb.createQuery(Image3VO.class);
+		Root<Image3VO> image = cq.from(Image3VO.class);
 
-		Criteria subCrit = crit.createCriteria("dataCollectionVO");
+// Joining with DataCollectionVO
+		Join<Image3VO, DataCollection3VO> dataCollection = image.join("dataCollectionVO");
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		
+		List<Predicate> predicates = new ArrayList<>();
+
+// Condition based on dataCollectionId
 		if (dataCollectionId != null) {
-			subCrit.add(Restrictions.eq("dataCollectionId", dataCollectionId));
+			predicates.add(cb.equal(dataCollection.get("dataCollectionId"), dataCollectionId));
 		}
-		
-		crit.addOrder(Order.desc("imageId"));
-		
-		List<Image3VO> foundEntities = crit.list();
+
+		cq.where(predicates.toArray(new Predicate[0]));
+		cq.orderBy(cb.desc(image.get("imageId")));
+
+// Execute the query
+		List<Image3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Image3VO> findByDataCollectionGroupId(final Integer dataCollectionGroupId) throws Exception {
-	
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Image3VO.class);
 
-		Criteria subCrit = crit.createCriteria("dataCollectionVO");
+		// Assuming entityManager is properly instantiated and available
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Image3VO> cq = cb.createQuery(Image3VO.class);
+		Root<Image3VO> image = cq.from(Image3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Joining with DataCollectionVO and then DataCollectionGroupVO
+		Join<Image3VO, DataCollection3VO> dataCollection = image.join("dataCollectionVO");
+		Join<DataCollection3VO, DataCollectionGroup3VO> dataCollectionGroup = dataCollection.join("dataCollectionGroupVO");
 
-		if (dataCollectionGroupId != null){
-			Criteria dataCollectionGroupCrit = subCrit.createCriteria("dataCollectionGroupVO");
-			dataCollectionGroupCrit.add(Restrictions.eq("dataCollectionGroupId", dataCollectionGroupId));
+		List<Predicate> predicates = new ArrayList<>();
+
+// Condition based on dataCollectionGroupId
+		if (dataCollectionGroupId != null) {
+			predicates.add(cb.equal(dataCollectionGroup.get("dataCollectionGroupId"), dataCollectionGroupId));
 		}
 
-		crit.addOrder(Order.desc("imageId"));
+		cq.where(predicates.toArray(new Predicate[0]));
+		cq.orderBy(cb.desc(image.get("imageId")));
 
-		List<Image3VO> foundEntities = crit.list();
+// Execute the query
+		List<Image3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

@@ -23,6 +23,7 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -68,115 +69,138 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 
 	@Override
 	public List getSamplesBy(String start, String end) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GET_SAMPLES_COUNT_BY_DATE);
-		query.setParameter("START", start);
-		query.setParameter("END", end);
-		return query.list();
+		String session = GET_SAMPLES_COUNT_BY_DATE
+				.replace(":START", start)
+				.replace(":END", end);
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		return query.getResultList();
 	}
 
 	@Override
 	public List getSessionsBy(String start, String end) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GET_SESSIONS);
-		query.setParameter("START", start);
-		query.setParameter("END", end);
-		return query.list();
+		String queryString = GET_SESSIONS
+				.replace(":START", "'" + start + "'")
+				.replace(":END", "'" + end + "'");
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
 	}
 
 	@Override
 	public List getExperimentsBy(String type, String start, String end) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GET_EXPERIMENT_COUNT_BY_DATE);
-		query.setParameter("TYPE", type);
-		query.setParameter("START", start);
-		query.setParameter("END", end);
-		return query.list();
+		String queryString = GET_EXPERIMENT_COUNT_BY_DATE
+				.replace(":TYPE", "'" + type + "'")
+				.replace(":START", "'" + start + "'")
+				.replace(":END", "'" + end + "'");
+		Query query = this.entityManager.createNativeQuery(queryString);
+		return query.getResultList();
 	}
 
 	@Override
 	public List getFramesBy(String start, String end) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GET_FRAMES_COUNT_BY_DATE);
-		query.setParameter("START", start);
-		query.setParameter("END", end);
-		return query.list();
+		String queryString = GET_FRAMES_COUNT_BY_DATE
+				.replace(":START", "'" + start + "'")
+				.replace(":END", "'" + end + "'");
+		Query query = this.entityManager.createNativeQuery(queryString);
+		return query.getResultList();
 	}
 
 	@Override
 	public List<Map<String, Object>> getAutoprocStatsByDate(
 			String autoprocStatisticsType, Date startDate, Date endDate) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(AUTOPROCSTATS_QUERY);
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameter("TYPE", autoprocStatisticsType);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String queryString = AUTOPROCSTATS_QUERY
+				.replace(":START", "'" + dt1.format(startDate) + "'")
+				.replace(":END", "'" + dt1.format(endDate) + "'")
+				.replace(":TYPE", "'" + autoprocStatisticsType + "'");
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getAutoprocStatsByDate(
 			String autoprocStatisticsType, Date startDate, Date endDate, String beamline) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(AUTOPROCSTATS_QUERY + "  and beamLineName = :BEAMLINENAME ");
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameter("TYPE", autoprocStatisticsType);
-		query.setParameter("BEAMLINENAME",beamline);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String queryString = AUTOPROCSTATS_QUERY
+				+ " and beamLineName = '" + beamline + "'" // Directly replacing the placeholder for the beamline name.
+				.replace(":START", "'" + dt1.format(startDate) + "'")
+				.replace(":END", "'" + dt1.format(endDate) + "'")
+				.replace(":TYPE", "'" + autoprocStatisticsType + "'");
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getDatacollectionStatsByDate(
 			String datacollectionImages, Date startDate, Date endDate, String[] datacollectionTestProposals) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(DATACOLLECTIONSTATS_QUERY);
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameter("LIMITIMAGES", Integer.valueOf(datacollectionImages));
-		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String formattedStart = dt1.format(startDate);
+		String formattedEnd = dt1.format(endDate);
+		String formattedImages = datacollectionImages;
+		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+
+		String queryString = DATACOLLECTIONSTATS_QUERY
+				.replace(":START", "'" + formattedStart + "'")
+				.replace(":END", "'" + formattedEnd + "'")
+				.replace(":LIMITIMAGES", formattedImages)
+				.replace(":TESTPROPOSALS", "'" + proposalList + "'"); // Ensure correct SQL format for list inputs.
+
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getDatacollectionStatsByDate(
 			String datacollectionImages, Date startDate, Date endDate, String[] datacollectionTestProposals, String beamline) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(DATACOLLECTIONSTATS_QUERY + "  and beamLineName = :BEAMLINENAME ");
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameter("LIMITIMAGES", Integer.valueOf(datacollectionImages));
-		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-		query.setParameter("BEAMLINENAME",beamline);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String formattedStart = dt1.format(startDate);
+		String formattedEnd = dt1.format(endDate);
+		String formattedImages = datacollectionImages;
+		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+
+		String queryString = DATACOLLECTIONSTATS_QUERY
+				.concat(" and beamLineName = :BEAMLINENAME ")
+				.replace(":START", "'" + formattedStart + "'")
+				.replace(":END", "'" + formattedEnd + "'")
+				.replace(":LIMITIMAGES", formattedImages)
+				.replace(":TESTPROPOSALS", "'" + proposalList + "'");
+
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("BEAMLINENAME", beamline); // Directly setting the parameter for BEAMLINENAME
+		return query.getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getExperimentStatsByDate(
 			Date startDate, Date endDate, String[] datacollectionTestProposals) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(EXPERIMENTSTATS_QUERY);
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String formattedStart = dt1.format(startDate);
+		String formattedEnd = dt1.format(endDate);
+		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+
+		String queryString = EXPERIMENTSTATS_QUERY
+				.replace(":START", "'" + formattedStart + "'")
+				.replace(":END", "'" + formattedEnd + "'")
+				.replace(":TESTPROPOSALS", "'" + proposalList + "'");
+
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getExperimentStatsByDate(
 			Date startDate, Date endDate, String[] datacollectionTestProposals, String beamline) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(EXPERIMENTSTATS_QUERY + "  and beamLineName = :BEAMLINENAME ");
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		query.setParameter("START", dt1.format(startDate));
-		query.setParameter("END", dt1.format(endDate));
-		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-		query.setParameter("BEAMLINENAME",beamline);
-        return (List<Map<String, Object>>) ((Query) query).getResultList();
+		String formattedStart = dt1.format(startDate);
+		String formattedEnd = dt1.format(endDate);
+		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+
+		String queryString = EXPERIMENTSTATS_QUERY + " and beamLineName = :BEAMLINENAME "
+				.replace(":START", "'" + formattedStart + "'")
+				.replace(":END", "'" + formattedEnd + "'")
+				.replace(":TESTPROPOSALS", "'" + proposalList + "'")
+				.replace(":BEAMLINENAME", "'" + beamline + "'");
+
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		return query.getResultList();
     }
 }
