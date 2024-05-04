@@ -28,8 +28,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -52,7 +51,7 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 		query.setParameter("dataCollectionId", dataCollectionId);
 		query.setParameter("proposalId", proposalId);
 		System.out.println(query.toString());
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 }

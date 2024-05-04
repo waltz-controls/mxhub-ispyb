@@ -28,9 +28,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -70,9 +68,9 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 		SQLQuery query = session.createSQLQuery(BySessionId);
 		/** Setting the parameters **/
 		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);	
-		return executeSQLQuery(query);
-	}
+		query.setParameter("proposalId", proposalId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	
 	@Override
@@ -81,8 +79,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 		SQLQuery query = session.createSQLQuery(ByProposalId);
 		/** Setting the parameters **/
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate) {
@@ -90,8 +88,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 		SQLQuery query = session.createSQLQuery(ByDates);
 		query.setParameter("startDate", startDate);
 		query.setParameter("endDate", endDate);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByProposalAndDates(int proposalId, String startDate, String endDate) {
@@ -100,16 +98,16 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 		query.setParameter("startDate", startDate);
 		query.setParameter("endDate", endDate);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByBeamlineOperator( String beamlineOperator) {
 		Session session = (Session) this.entityManager.getDelegate();
 		SQLQuery query = session.createSQLQuery(ByBeamlineOperator);
 		query.setParameter("beamlineOperator", "%" +  beamlineOperator + "%");
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate, String siteId) {
@@ -118,7 +116,7 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 		query.setParameter("startDate", startDate);
 		query.setParameter("endDate", endDate);
 		query.setParameter("siteId", siteId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 }

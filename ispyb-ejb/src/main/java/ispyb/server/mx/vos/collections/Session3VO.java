@@ -23,19 +23,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityResult;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SqlResultSetMapping;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.OrderBy;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
@@ -136,12 +126,12 @@ public class Session3VO extends ISPyBValueObject implements Cloneable {
 
 	@OneToMany//(fetch = FetchType.LAZY)
 	@JoinColumn(name = "sessionId")
-	@OrderBy(clause = "startTime DESC")
+	@OrderBy("startTime DESC")
 	private Set<XFEFluorescenceSpectrum3VO> xfeSpectrumVOs;
 
 	@OneToMany//(fetch = FetchType.LAZY)
 	@JoinColumn(name = "sessionId")
-	@OrderBy(clause = "startTime DESC")
+	@OrderBy("startTime DESC")
 	private Set<EnergyScan3VO> energyScanVOs;
 	
 	@Column(name = "externalId")

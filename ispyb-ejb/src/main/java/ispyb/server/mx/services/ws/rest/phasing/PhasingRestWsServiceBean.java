@@ -28,9 +28,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -61,8 +59,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		query.setParameter("dataCollectionGroupId", dataCollectionGroupId);
 		query.setParameter("proposalId", proposalId);
 		System.out.println(query.getQueryString());
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByDataCollectionId(int dataCollectionId, int proposalId) {
@@ -71,8 +69,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		query.setParameter("dataCollectionId", dataCollectionId);
 		query.setParameter("proposalId", proposalId);
 		System.out.println(query.getQueryString());
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByAutoProcIntegrationId(int autoprocIntegrationId, int proposalId) {
@@ -80,8 +78,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(ByAutoProcIntegrationId);
 		query.setParameter("autoprocIntegrationId", autoprocIntegrationId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByBlSampleId(int blSampleId, int proposalId) {
@@ -89,8 +87,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(BySampleId);
 		query.setParameter("blSampleId", blSampleId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByProteinId(int proteinId,
@@ -99,8 +97,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(ByProteinId);
 		query.setParameter("proteinId", proteinId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getPhasingViewBySessionId(int sessionId, int proposalId) {
@@ -108,8 +106,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(BySessionId);
 		query.setParameter("sessionId", sessionId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByStepId(int phasingStepId, int proposalId) {
@@ -117,8 +115,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(ByPhasingStepId);
 		query.setParameter("phasingStepId", phasingStepId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	
 	
@@ -141,8 +139,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		SQLQuery query = session.createSQLQuery(FilesByPhasingStepId);
 		query.setParameter("phasingStepId", phasingStepId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByPhasingProgramAttachmentId(int phasingProgramAttachmentId, int proposalId) {
@@ -153,8 +151,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 		System.out.println(String.valueOf(phasingProgramAttachmentId));
 		query.setParameter("phasingProgramAttachmentId", phasingProgramAttachmentId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 

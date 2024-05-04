@@ -30,15 +30,10 @@ import java.util.Set;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import javax.naming.NamingException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 
 import ispyb.server.biosaxs.services.core.ExperimentScope;
 import ispyb.server.biosaxs.services.core.plateType.PlateType3Service;
@@ -217,8 +212,8 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		Session session = (Session) this.entityManager.getDelegate();
 		SQLQuery query = session.createSQLQuery(GetExperimentDescriptionByExperimentId);
 		query.setParameter("experimentId", experimentId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	
 

@@ -29,9 +29,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -51,8 +49,8 @@ public class DataCollectionRestWsServiceBean extends WsServiceBean implements Da
 		SQLQuery query = session.createSQLQuery(mySQLQuery);
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("workflowId", workflowId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	@Override
@@ -62,7 +60,7 @@ public class DataCollectionRestWsServiceBean extends WsServiceBean implements Da
 		SQLQuery query = session.createSQLQuery(mySQLQuery);
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("dataCollectionGroupId", dataCollectionGroupId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 }

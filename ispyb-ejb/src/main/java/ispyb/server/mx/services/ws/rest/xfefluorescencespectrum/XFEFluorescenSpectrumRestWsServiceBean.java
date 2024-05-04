@@ -28,8 +28,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -50,9 +49,9 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 		
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("sessionId", sessionId);
-		
-		return executeSQLQuery(query);
-	}
+
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int xfeFluorescenceSpectrumId) {
@@ -61,9 +60,9 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 		
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("xfeFluorescenceSpectrumId", xfeFluorescenceSpectrumId);
-		
-		return executeSQLQuery(query);
-	}
+
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	

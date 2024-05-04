@@ -35,8 +35,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.mx.vos.collections.DataCollection3VO;
@@ -85,12 +83,10 @@ public class Screening3VO extends ISPyBValueObject implements Cloneable {
 	@Column(name = "xmlSampleInformation")
 	protected String xmlSampleInformation;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningId")
 	private Set<ScreeningRank3VO> screeningRankVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningId")
 	private Set<ScreeningOutput3VO> screeningOutputVOs;

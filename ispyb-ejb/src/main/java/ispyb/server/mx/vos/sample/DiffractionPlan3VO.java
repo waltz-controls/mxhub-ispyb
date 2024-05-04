@@ -33,9 +33,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
 /**
  * DiffractionPlan3 value object mapping table DiffractionPlan
  * 
@@ -153,7 +150,6 @@ public class DiffractionPlan3VO extends ISPyBValueObject implements Cloneable {
 	protected Double axisRange;
 	
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "diffractionPlanId")
 	private Set<ExperimentKindDetails3VO> experimentKindVOs;

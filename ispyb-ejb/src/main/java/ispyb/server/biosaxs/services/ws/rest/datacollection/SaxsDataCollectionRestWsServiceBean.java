@@ -22,14 +22,14 @@ package ispyb.server.biosaxs.services.ws.rest.datacollection;
 import ispyb.server.mx.services.ws.rest.WsServiceBean;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -58,8 +58,8 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 		SQLQuery query = session.createSQLQuery(ByExperimentId);
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("experimentId", experimentId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionBySessionId(int proposalId, Integer sessionId) {
@@ -67,8 +67,8 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 		SQLQuery query = session.createSQLQuery(BySessionId);
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("sessionId", sessionId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByMacromoleculeId(int proposalId, Integer macromoleculeId) {
@@ -77,8 +77,8 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("macromoleculeId", macromoleculeId);
 		System.out.println(query);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionId(int proposalId, Integer dataCollectionId) {
@@ -86,8 +86,8 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("dataCollectionId", dataCollectionId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	

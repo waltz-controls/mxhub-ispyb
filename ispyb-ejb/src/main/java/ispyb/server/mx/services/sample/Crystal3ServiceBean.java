@@ -43,12 +43,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import org.apache.axis.utils.StringUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 
 

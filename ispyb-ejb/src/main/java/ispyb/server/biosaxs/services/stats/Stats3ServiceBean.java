@@ -30,8 +30,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 @Stateless
 public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
@@ -113,8 +112,8 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("START", dt1.format(startDate));
 		query.setParameter("END", dt1.format(endDate));
 		query.setParameter("TYPE", autoprocStatisticsType);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getAutoprocStatsByDate(
@@ -126,8 +125,8 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("END", dt1.format(endDate));
 		query.setParameter("TYPE", autoprocStatisticsType);
 		query.setParameter("BEAMLINENAME",beamline);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getDatacollectionStatsByDate(
@@ -139,8 +138,8 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("END", dt1.format(endDate));
 		query.setParameter("LIMITIMAGES", Integer.valueOf(datacollectionImages));
 		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getDatacollectionStatsByDate(
@@ -153,8 +152,8 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("LIMITIMAGES", Integer.valueOf(datacollectionImages));
 		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
 		query.setParameter("BEAMLINENAME",beamline);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getExperimentStatsByDate(
@@ -165,8 +164,8 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("START", dt1.format(startDate));
 		query.setParameter("END", dt1.format(endDate));
 		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getExperimentStatsByDate(
@@ -178,6 +177,6 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		query.setParameter("END", dt1.format(endDate));
 		query.setParameterList("TESTPROPOSALS", datacollectionTestProposals);
 		query.setParameter("BEAMLINENAME",beamline);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 }

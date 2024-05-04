@@ -23,6 +23,7 @@ import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
 import ispyb.server.mx.vos.collections.XFEFluorescenceSpectrum3VO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.annotation.Resource;
@@ -33,11 +34,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -175,31 +173,34 @@ public class XFEFluorescenceSpectrum3ServiceBean implements XFEFluorescenceSpect
 	@SuppressWarnings("unchecked")
 	public List<XFEFluorescenceSpectrum3VO> findFiltered(final Integer sessionId, final Integer sampleId, final Integer proposalId) throws Exception{
 
-		Session session = (Session)entityManager.getDelegate();
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<XFEFluorescenceSpectrum3VO> cq = cb.createQuery(XFEFluorescenceSpectrum3VO.class);
+		Root<XFEFluorescenceSpectrum3VO> root = cq.from(XFEFluorescenceSpectrum3VO.class);
 
-		Criteria crit = session.createCriteria(XFEFluorescenceSpectrum3VO.class);
-		
-		Criteria subCritSess = crit.createCriteria("sessionVO");
-
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Handling joins
+// Conditions and filters
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (sessionId != null) {
-			subCritSess.add(Restrictions.eq("sessionId", sessionId));
+			predicates.add(cb.equal(root.join("sessionVO", JoinType.LEFT).get("sessionId"), sessionId));
 		}
-		
+
 		if (proposalId != null) {
-			Criteria subCritProposal = subCritSess.createCriteria("proposalVO");
-			subCritProposal.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(root.join("sessionVO", JoinType.LEFT).join("proposalVO", JoinType.LEFT).get("proposalId"), proposalId));
 		}
-		
+
 		if (sampleId != null) {
-			Criteria subCritSample = crit.createCriteria("blSampleVO");
-			subCritSample.add(Restrictions.eq("blSampleId", sampleId));
+			predicates.add(cb.equal(root.join("blSampleVO", JoinType.LEFT).get("blSampleId"), sampleId));
 		}
 
-		crit.addOrder(Order.desc("xfeFluorescenceSpectrumId"));
+// Applying DISTINCT results
+		cq.select(root).distinct(true);
+		cq.where(predicates.toArray(new Predicate[0]));
 
-		List<XFEFluorescenceSpectrum3VO> foundEntities = crit.list();
+// Ordering
+		cq.orderBy(cb.desc(root.get("xfeFluorescenceSpectrumId")));
+
+		List<XFEFluorescenceSpectrum3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

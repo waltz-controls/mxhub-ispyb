@@ -34,13 +34,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 /**
  * <p>
@@ -300,7 +293,7 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 		SQLQuery query = session.createSQLQuery(mySQLQuery);
 		query.setParameter("proposalId", proposalId);		
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 }

@@ -33,11 +33,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -173,26 +172,27 @@ public class EnergyScan3ServiceBean implements EnergyScan3Service,
 	
 	@SuppressWarnings("unchecked")
 	public List<EnergyScan3VO> findFiltered(final Integer sessionId , final Integer sampleId) throws Exception{
-	
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(EnergyScan3VO.class);
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<EnergyScan3VO> cq = cb.createQuery(EnergyScan3VO.class);
+		Root<EnergyScan3VO> root = cq.from(EnergyScan3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Applying DISTINCT results
+		cq.select(root).distinct(true);
 
+// Join conditions based on method inputs
 		if (sessionId != null) {
-			Criteria subCritSess = crit.createCriteria("sessionVO");
-			subCritSess.add(Restrictions.eq("sessionId", sessionId));
+			cq.where(cb.equal( root.join("sessionVO").get("sessionId"), sessionId));
 		}
-		
+
 		if (sampleId != null) {
-			Criteria subCritSample = crit.createCriteria("blSampleVO");
-			subCritSample.add(Restrictions.eq("blSampleId", sampleId));
+			cq.where(cb.equal(root.join("blSampleVO").get("blSampleId"), sampleId));
 		}
 
-		crit.addOrder(Order.desc("energyScanId"));
+// Ordering
+		cq.orderBy(cb.desc(root.get("energyScanId")));
 
-		List<EnergyScan3VO> foundEntities = crit.list();
+		List<EnergyScan3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

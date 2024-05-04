@@ -29,9 +29,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -53,8 +51,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		SQLQuery query = session.createSQLQuery(mySQLQuery);
 		query.setParameter("sessionId", sessionId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionBySessionIdHavingImages(int proposalId, int sessionId) {
@@ -65,8 +63,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		SQLQuery query = session.createSQLQuery(mySQLQuery);
 		query.setParameter("sessionId", sessionId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionByProteinAcronym(int proposalId, String proteinAcronym) {
@@ -77,8 +75,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("proteinAcronym", proteinAcronym);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionBySampleId(int proposalId, int sampleId) {
@@ -89,8 +87,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("sampleId", sampleId);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionBySampleName(int proposalId, String name) {
@@ -101,8 +99,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("name", name);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionByImagePrefix(int proposalId, String prefix) {
@@ -113,8 +111,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("proposalId", proposalId);
 		query.setParameter("prefix", prefix);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public Collection<? extends Map<String, Object>> getViewDataCollectionByDataCollectionId(int proposalId, int dataCollectionId) {
@@ -125,8 +123,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("dataCollectionId", dataCollectionId);
 		query.setParameter("proposalId", proposalId);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getViewDataCollectionByWorkflowId(Integer proposalId, Integer workflowId) {
@@ -137,8 +135,8 @@ public class DataCollectionGroupRestWsServiceBean extends WsServiceBean implemen
 		query.setParameter("Workflow_workflowId", workflowId);
 		query.setParameter("proposalId", proposalId);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	
 	

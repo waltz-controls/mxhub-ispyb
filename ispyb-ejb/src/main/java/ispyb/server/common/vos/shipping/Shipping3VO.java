@@ -42,8 +42,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * Shipping3 value object mapping table Shipping
@@ -123,7 +121,6 @@ public class Shipping3VO extends ISPyBValueObject implements Cloneable {
 	@JoinColumn(name = "shippingId")
 	protected Set<Dewar3VO> dewarVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "ShippingHasSession", joinColumns = { @JoinColumn(name = "shippingId", referencedColumnName = "shippingId") }, inverseJoinColumns = { @JoinColumn(name = "sessionId", referencedColumnName = "sessionId") })
 	protected Set<Session3VO> sessions;

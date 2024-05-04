@@ -36,8 +36,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * ScreeningOutput3 value object mapping table ScreeningOutput
@@ -131,12 +129,10 @@ public class ScreeningOutput3VO extends ISPyBValueObject implements Cloneable {
 	@Column(name = "rFriedel")
 	protected Double rFriedel;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningOutputId")
 	private Set<ScreeningStrategy3VO> screeningStrategyVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningOutputId")
 	private Set<ScreeningOutputLattice3VO> screeningOutputLatticeVOs;

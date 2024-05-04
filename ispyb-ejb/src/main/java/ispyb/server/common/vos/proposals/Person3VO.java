@@ -38,8 +38,6 @@ import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * Person3 value object mapping table Person
@@ -96,7 +94,6 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 	@JoinColumn(name = "personId")
 	private Set<Proposal3VO> proposalDirectVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "ProposalHasPerson", joinColumns = { @JoinColumn(name = "personId", referencedColumnName = "personId") }, inverseJoinColumns = { @JoinColumn(name = "proposalId", referencedColumnName = "proposalId") })
 	private Set<Proposal3VO> proposalVOs;

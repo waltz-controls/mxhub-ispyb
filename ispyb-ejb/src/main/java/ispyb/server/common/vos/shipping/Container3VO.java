@@ -34,8 +34,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.common.vos.proposals.Person3VO;
@@ -97,7 +95,6 @@ public class Container3VO extends ISPyBValueObject implements Cloneable {
 	@JoinColumn(name = "ownerId")
 	private Person3VO personVO;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "containerId")
 	protected Set<BLSample3VO> sampleVOs;

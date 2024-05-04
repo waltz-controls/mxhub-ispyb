@@ -36,8 +36,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.common.vos.shipping.Shipping3VO;

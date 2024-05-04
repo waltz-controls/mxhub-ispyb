@@ -21,7 +21,6 @@ package ispyb.server.em.services.collections;
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.services.proposals.Proposal3Service;
 import ispyb.server.common.services.sessions.Session3Service;
-import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 import ispyb.server.common.vos.proposals.Proposal3VO;
 import ispyb.server.em.vos.CTF;
 import ispyb.server.em.vos.MotionCorrection;
@@ -55,17 +54,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.Criteria;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,11 +126,10 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	
 	@Override
 	public List<Map<String, Object>> getMoviesDataByDataCollectionId(int proposalId, int dataCollectionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
+		Query query = entityManager.createNativeQuery(ByDataCollectionId, Map.class);;
 		query.setParameter("dataCollectionId", dataCollectionId);
 		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		return (List<Map<String, Object>>) query.getResultList();
 	}
 	
 	private Integer getProposalId(String proposal, String beamlineName) throws Exception {
@@ -410,42 +409,42 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	}
 
 	public Movie findMovieByMovieFullPath(String movieFullPath) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Movie.class);
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
+		Root<Movie> movie = cq.from(Movie.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																	// RESULTS !
-		crit.add(Restrictions.eq("movieFullPath", movieFullPath));
-		crit.addOrder(Order.desc("movieId"));
+		// Applying conditions
+		cq.select(movie).where(cb.equal(movie.get("movieFullPath"), movieFullPath));
+		cq.orderBy(cb.desc(movie.get("movieId"))); // Ordering
 
-		@SuppressWarnings("unchecked")
-		List<Movie> movies = (List<Movie>) crit.list();
+		List<Movie> movies = entityManager.createQuery(cq).getResultList();
 
-		if (movies.size() > 0) {
-			return movies.get(0);
+		if (!movies.isEmpty()) {
+			return movies.get(0); // Return the first movie
+		} else {
+			LOG.error("Found no movies for movieFullPath: " + movieFullPath);
+			return null; // Return null if no movies found
 		}
-		LOG.error("Found no movies for movieFullPath {}. movieFullPath={}", movieFullPath, movieFullPath);
-		return null;
 	}
 
 	public MotionCorrection findMotionCorrectionByMovieFullPath(String movieFullPath) {
 		Movie movie = this.findMovieByMovieFullPath(movieFullPath);
 		if (movie != null) {
-			Session session = (Session) this.entityManager.getDelegate();
-			Criteria crit = session.createCriteria(MotionCorrection.class);
-			crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																		// RESULTS
-																		// !
-			crit.add(Restrictions.eq("movieId", movie.getMovieId()));
-			crit.addOrder(Order.desc("motionCorrectionId"));
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<MotionCorrection> cq = cb.createQuery(MotionCorrection.class);
+			Root<MotionCorrection> motionCorrection = cq.from(MotionCorrection.class);
 
-			@SuppressWarnings("unchecked")
-			List<MotionCorrection> motions = (List<MotionCorrection>) crit.list();
-			if (motions.size() > 0) {
-				return motions.get(0);
+			// Applying conditions
+			cq.select(motionCorrection).where(cb.equal(motionCorrection.get("movieId"), movie.getMovieId()));
+			cq.orderBy(cb.desc(motionCorrection.get("motionCorrectionId"))); // Ordering
+
+			List<MotionCorrection> motions = entityManager.createQuery(cq).getResultList();
+
+			if (!motions.isEmpty()) {
+				return motions.get(0); // Return the first motion correction
 			} else {
-				LOG.error("Found no motionCorrection for movieFullPath {}. movieFullPath={}", movieFullPath, movieFullPath);
-				return null;
+				LOG.error("Found no motionCorrection for movieFullPath: " + movieFullPath);
+				return null; // Return null if no motion correction found
 			}
 		}
 		LOG.error("Found no movies for movieFullPath {}. movieFullPath={}", movieFullPath, movieFullPath);
@@ -615,8 +614,22 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	public List<Movie> getMoviesByDataCollectionId(int proposalId, int dataCollectionId) throws Exception{
 		List<DataCollection3VO> dataCollections =  dataCollection3Service.findByProposalId(proposalId, dataCollectionId);
 		if (dataCollections.size() == 1){
-			Session session = (Session) this.entityManager.getDelegate();
-			return session.createCriteria(Movie.class).add(Restrictions.eq("dataCollectionId", dataCollectionId)).addOrder(Order.desc("movieId")).list();
+			// Get the CriteriaBuilder from the EntityManager, which is used to create a CriteriaQuery
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+			// Create a CriteriaQuery object for Movie class
+			CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
+
+			// Declare a range variable, root of the query, corresponding to the Movie class
+			Root<Movie> movie = cq.from(Movie.class);
+
+			// Specify the criteria: where the dataCollectionId of the movie equals the provided dataCollectionId
+			cq.select(movie)
+					.where(cb.equal(movie.get("dataCollectionId"), dataCollectionId))
+					.orderBy(cb.desc(movie.get("movieId"))); // Order by movieId in descending order
+
+			// Execute the query and get the list of results
+			return entityManager.createQuery(cq).getResultList();
 		}
 		return null;
 	}
@@ -626,10 +639,20 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	public Movie getMovieByDataCollectionId(int proposalId, int dataCollectionId, int movieId) throws Exception{
 		List<DataCollection3VO> dataCollections =  dataCollection3Service.findByProposalId(proposalId, dataCollectionId);
 		if (dataCollections.size() == 1){
-			Session session = (Session) this.entityManager.getDelegate();
-			return (Movie) session.createCriteria(Movie.class)
-					.add(Restrictions.eq("dataCollectionId", dataCollectionId))
-					.add(Restrictions.eq("movieId", movieId)).addOrder(Order.asc("movieId")).list().get(0);
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
+			Root<Movie> movie = cq.from(Movie.class);
+
+			// Adding conditions to match both dataCollectionId and movieId
+			cq.select(movie)
+					.where(cb.and(
+							cb.equal(movie.get("dataCollectionId"), dataCollectionId),
+							cb.equal(movie.get("movieId"), movieId)
+					))
+					.orderBy(cb.asc(movie.get("movieId"))); // Sorting by movieId in ascending order
+
+			// Execute the query expecting a single result
+			return entityManager.createQuery(cq).setMaxResults(1).getSingleResult();
 		}
 		return null;
 	}
@@ -649,11 +672,19 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	public MotionCorrection getMotionCorrectionByMovieId(int proposalId, int dataCollectionId, int movieId) throws Exception {
 		Movie movie = this.getMovieByDataCollectionId(proposalId, dataCollectionId, movieId);
 		if (movie != null){
-			Session session = (Session) this.entityManager.getDelegate();
-			@SuppressWarnings("unchecked")
-			List<MotionCorrection> motionCorrectionList = session.createCriteria(MotionCorrection.class).add(Restrictions.eq("movieId", movie.getMovieId())).addOrder(Order.desc("motionCorrectionId")).list();
-			if (motionCorrectionList.size() > 0){
-				return motionCorrectionList.get(0);
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<MotionCorrection> cq = cb.createQuery(MotionCorrection.class);
+			Root<MotionCorrection> motionCorrection = cq.from(MotionCorrection.class);
+
+			// Condition to match movieId
+			cq.select(motionCorrection)
+					.where(cb.equal(motionCorrection.get("movieId"), movieId))
+					.orderBy(cb.desc(motionCorrection.get("motionCorrectionId"))); // Sorting by motionCorrectionId in descending order
+
+			// Execute the query and get the first result
+			List<MotionCorrection> results = entityManager.createQuery(cq).setMaxResults(1).getResultList();
+			if (!results.isEmpty()) {
+				return results.get(0); // Returns the first (and only) result
 			}
 		}
 		return null;
@@ -663,67 +694,109 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	public CTF getCTFByMovieId(int proposalId, int dataCollectionId, int movieId) throws Exception {
 		MotionCorrection motion = this.getMotionCorrectionByMovieId(proposalId, dataCollectionId, movieId);
 		if (motion != null){
-			Session session = (Session) this.entityManager.getDelegate();
-			@SuppressWarnings("unchecked")
-			List<CTF> ctfs = session.createCriteria(CTF.class).add(Restrictions.eq("motionCorrectionId", motion.getMotionCorrectionId())).addOrder(Order.desc("CTFid")).list();
-			if (ctfs.size() > 0){
-				return ctfs.get(0);
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<CTF> cq = cb.createQuery(CTF.class);
+			Root<CTF> ctf = cq.from(CTF.class);
+
+			// Condition to match motionCorrectionId
+			cq.select(ctf)
+					.where(cb.equal(ctf.get("motionCorrectionId"), motion.getMotionCorrectionId()))
+					.orderBy(cb.desc(ctf.get("CTFid"))); // Sorting by CTFid in descending order
+
+			// Execute the query and get the first result
+			List<CTF> results = entityManager.createQuery(cq).setMaxResults(1).getResultList();
+			if (!results.isEmpty()) {
+				return results.get(0); // Returns the first (and only) result
 			}
-	
+
 		}
 		return null;
 	}
 
 	@Override
 	public List<Map<String, Object>> getStatsByDataCollectionIds(int proposalId, String dataCollectionIdList) {
-		
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		String queryString = StatsByDataCollectionId.replace(":dataCollectionIdList", dataCollectionIdList).replace(":proposalId", String.valueOf(proposalId));
-		System.out.println(queryString);
-		SQLQuery query = session.createSQLQuery(queryString);
-		return executeSQLQuery(query);
-		
+
+
+		String queryString = StatsByDataCollectionId
+				.replace(":dataCollectionIdList", dataCollectionIdList)
+				.replace(":proposalId", String.valueOf(proposalId));
+		System.out.println(queryString); // Optionally log the query
+
+		// Execute the native SQL query
+		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString)
+				.setHint("jakarta.persistence.resultType", Map.class)
+				.getResultList();
+
+		return results;
+
 	}
 
 	@Override
 	public Collection<? extends Map<String, Object>> getStatsByDataDataCollectionGroupId(Integer dataCollectionGroupId) {
-		Session session = (Session) this.entityManager.getDelegate();
 		String queryString = StatsByDataCollectionGroupId.replace(":dataCollectionGroupId", String.valueOf(dataCollectionGroupId));
-		System.out.println(queryString);
-		SQLQuery query = session.createSQLQuery(queryString);
-		return executeSQLQuery(query);
+
+		// Execute the native SQL query
+		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString, Map.class).getResultList();
+
+		return results;
 	}
 
 	@Override
 	public List<Map<String, Object>> getStatsBySessionId(int proposalId, int sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(getStatsBySessionId);
-		System.out.println(getStatsBySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}	
+		String queryString = getStatsBySessionId
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = entityManager.createNativeQuery(queryString, Map.class);
+
+		// Execute the query and retrieve the list of results
+		List<Map<String, Object>> results = query.getResultList();
+
+		return results;
+	}
 	
 	@Override
 	public List<Map<String, Object>> getClassificationBySessionId(int proposalId, int sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(getClassificationBySessionId);
-		System.out.println(getClassificationBySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}	
+		// Assume getClassificationBySessionId is a SQL string
+//		System.out.println(getClassificationBySessionId); // Optionally log the query
+
+		String queryString = getClassificationBySessionId
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(queryString, Tuple.class);
+
+		// Execute the query and retrieve the list of results
+		List<Tuple> results = query.getResultList();
+
+		// Transform the Tuple results into a List of Maps
+		return results.stream()
+				.map(tuple -> tuple.getElements().stream()
+						.collect(Collectors.toMap(
+								tupleElement -> tupleElement.getAlias(),
+								tupleElement -> tuple.get(tupleElement.getAlias()),
+								(existing, replacement) -> existing)))
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	public ParticleClassification getClassificationByClassificationId(int proposalId, int particleClassificationId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		@SuppressWarnings("unchecked")
-		List<ParticleClassification> ParticleClassificationList = session.createCriteria(ParticleClassification.class).add(Restrictions.eq("particleClassificationId", particleClassificationId)).list();
-		if (ParticleClassificationList.size() > 0){
-			return ParticleClassificationList.get(0);
-		}
-		return null;
+		// Obtain the CriteriaBuilder from the EntityManager
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+		// Create a CriteriaQuery object for ParticleClassification
+		CriteriaQuery<ParticleClassification> query = cb.createQuery(ParticleClassification.class);
+
+		// Define the root of the query (i.e., ParticleClassification)
+		Root<ParticleClassification> root = query.from(ParticleClassification.class);
+
+		// Add a condition (where clause)
+		query.select(root).where(cb.equal(root.get("particleClassificationId"), particleClassificationId));
+
+		// Execute the query and get the result list
+		List<ParticleClassification> results = entityManager.createQuery(query).getResultList();
+
+		// Return the first element if the result list is not empty, otherwise return null
+		return results.isEmpty() ? null : results.get(0);
 	}
 	
 	private void updateSessionLastUpdate(Session3VO vo) throws Exception {

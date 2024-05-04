@@ -40,9 +40,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
 /**
  * BLSample3 value object mapping table BLSample
  * 
@@ -127,13 +124,11 @@ public class BLSample3VO extends ISPyBValueObject implements Cloneable {
 	@OneToMany
 	@JoinColumn(name = "blSampleId")
 	private Set<EnergyScan3VO> energyScanVOs;
-	
-	@Fetch(value = FetchMode.SELECT)
+
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "blSampleId")
 	protected Set<BLSubSample3VO> blSubSampleVOs;
 	
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "blSampleId")
 	protected Set<BLSampleImage3VO> blsampleImageVOs;
