@@ -46,10 +46,10 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 	
 	@Override
 	public List<Map<String, Object>> getViewByDataCollectionId(int proposalId, int dataCollectionId) {
-		String sqlQuery = ByDataCollectionId
-				.replace(":dataCollectionId", String.valueOf(dataCollectionId))
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		String sqlQuery = ByDataCollectionId;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("dataCollectionId", dataCollectionId)
+				.setParameter("proposalId", proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

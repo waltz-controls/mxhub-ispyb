@@ -63,9 +63,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId)
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -73,10 +73,10 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId, String experimentType) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId, experimentType)
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":experimentType", experimentType);
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId, experimentType);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("experimentType", experimentType);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -86,11 +86,11 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListBySessionId(
 			Integer proposalId, Integer sessionId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListBySessionId(proposalId, sessionId)
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":sessionId", String.valueOf(sessionId));
+		String mySQLQuery = SQLQueryKeeper.getExperimentListBySessionId(proposalId, sessionId);
 
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("sessionId", sessionId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -99,10 +99,10 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListByExperimentId(
 			Integer proposalId, Integer experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByExperimentId(proposalId, experimentId)
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":experimentId", String.valueOf(experimentId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery);
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByExperimentId(proposalId, experimentId);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery)
+				.setParameter("proposalId", proposalId)
+				.setParameter("experimentId", experimentId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -110,9 +110,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getCompactAnalysisByExperimentId(int experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByExperimentId()
-				.replace(":experimentId", String.valueOf(experimentId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByExperimentId();
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("experimentId", experimentId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -120,9 +120,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByProposalId(Integer proposalId, Integer limit) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(limit)
-						.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(limit);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -130,9 +130,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByProposalId(Integer proposalId, Integer start, Integer limit) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(start, limit)
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(start, limit);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -140,9 +140,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public BigInteger getCountCompactAnalysisByExperimentId(Integer proposalId) {
-		String mySQLQuery = SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId(proposalId)
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, BigInteger.class);
+		String mySQLQuery = SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId(proposalId);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, BigInteger.class)
+				.setParameter("proposalId", proposalId);
 		return 	(BigInteger) query.getResultList()
 				.stream()
 				.findAny()
@@ -151,9 +151,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisBySubtractionId(String subtractionId) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryBySubtractionId()
-				.replace(":subtractionId", subtractionId);
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryBySubtractionId();
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("subtractionId", subtractionId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
@@ -168,10 +168,10 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByMacromoleculeId(Integer proposalId, Integer macromoleculeId) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByMacromoleculeId()
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":macromoleculeId", String.valueOf(macromoleculeId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByMacromoleculeId();
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("macromoleculeId", macromoleculeId);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;

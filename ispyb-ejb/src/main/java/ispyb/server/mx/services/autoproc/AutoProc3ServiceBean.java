@@ -186,8 +186,8 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 		
 		String query = FIND_BY_ANOMALOUS_DATACOLLECTIONID;
 		List<AutoProc3VO> listVOs = this.entityManager.createNativeQuery(query, "autoProcNativeQuery")
-				.setParameter("dataCollectionId", dataCollectionId).
-				setParameter("anomalous", anomalous).getResultList();
+						.setParameter("dataCollectionId", dataCollectionId)
+						.setParameter("anomalous", anomalous).getResultList();
 		return listVOs;
 	}
 

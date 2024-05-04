@@ -69,50 +69,61 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 
 	@Override
 	public List getSamplesBy(String start, String end) {
-		String session = GET_SAMPLES_COUNT_BY_DATE
-				.replace(":START", start)
-				.replace(":END", end);
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String queryString = GET_SAMPLES_COUNT_BY_DATE;
+
+		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", start); // Bind the start parameter
+		query.setParameter("END", end);     // Bind the end parameter
+
 		return query.getResultList();
 	}
 
 	@Override
 	public List getSessionsBy(String start, String end) {
-		String queryString = GET_SESSIONS
-				.replace(":START", "'" + start + "'")
-				.replace(":END", "'" + end + "'");
+		String queryString = GET_SESSIONS;
+
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", start); // Bind the start date parameter
+		query.setParameter("END", end);     // Bind the end date parameter
+
 		return query.getResultList();
 	}
 
 	@Override
 	public List getExperimentsBy(String type, String start, String end) {
-		String queryString = GET_EXPERIMENT_COUNT_BY_DATE
-				.replace(":TYPE", "'" + type + "'")
-				.replace(":START", "'" + start + "'")
-				.replace(":END", "'" + end + "'");
+		String queryString = GET_EXPERIMENT_COUNT_BY_DATE;
+
 		Query query = this.entityManager.createNativeQuery(queryString);
+		query.setParameter("TYPE", type);  // Bind the type parameter
+		query.setParameter("START", start); // Bind the start date parameter
+		query.setParameter("END", end);     // Bind the end date parameter
+
 		return query.getResultList();
 	}
 
 	@Override
 	public List getFramesBy(String start, String end) {
-		String queryString = GET_FRAMES_COUNT_BY_DATE
-				.replace(":START", "'" + start + "'")
-				.replace(":END", "'" + end + "'");
+		String queryString = GET_FRAMES_COUNT_BY_DATE;
+
 		Query query = this.entityManager.createNativeQuery(queryString);
+		query.setParameter("START", start); // Bind the start date parameter
+		query.setParameter("END", end);     // Bind the end date parameter
+
 		return query.getResultList();
+
 	}
 
 	@Override
 	public List<Map<String, Object>> getAutoprocStatsByDate(
 			String autoprocStatisticsType, Date startDate, Date endDate) {
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-		String queryString = AUTOPROCSTATS_QUERY
-				.replace(":START", "'" + dt1.format(startDate) + "'")
-				.replace(":END", "'" + dt1.format(endDate) + "'")
-				.replace(":TYPE", "'" + autoprocStatisticsType + "'");
+		String queryString = AUTOPROCSTATS_QUERY;
+
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", dt1.format(startDate)); // Bind the start date parameter
+		query.setParameter("END", dt1.format(endDate));     // Bind the end date parameter
+		query.setParameter("TYPE", autoprocStatisticsType); // Bind the type parameter
+
 		return query.getResultList();
     }
 	
@@ -121,11 +132,14 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 			String autoprocStatisticsType, Date startDate, Date endDate, String beamline) {
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
 		String queryString = AUTOPROCSTATS_QUERY
-				+ " and beamLineName = '" + beamline + "'" // Directly replacing the placeholder for the beamline name.
-				.replace(":START", "'" + dt1.format(startDate) + "'")
-				.replace(":END", "'" + dt1.format(endDate) + "'")
-				.replace(":TYPE", "'" + autoprocStatisticsType + "'");
+				+ " and beamLineName = :BEAMLINENAME"; // Use a parameter placeholder for the beamline name.
+
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", dt1.format(startDate));
+		query.setParameter("END", dt1.format(endDate));
+		query.setParameter("TYPE", autoprocStatisticsType);
+		query.setParameter("BEAMLINENAME", beamline); // Set the parameter for the beamline name safely
+
 		return query.getResultList();
     }
 
@@ -138,13 +152,14 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String formattedImages = datacollectionImages;
 		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
 
-		String queryString = DATACOLLECTIONSTATS_QUERY
-				.replace(":START", "'" + formattedStart + "'")
-				.replace(":END", "'" + formattedEnd + "'")
-				.replace(":LIMITIMAGES", formattedImages)
-				.replace(":TESTPROPOSALS", "'" + proposalList + "'"); // Ensure correct SQL format for list inputs.
+		String queryString = DATACOLLECTIONSTATS_QUERY;
 
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", formattedStart);
+		query.setParameter("END", formattedEnd);
+		query.setParameter("LIMITIMAGES", Integer.parseInt(formattedImages));
+		query.setParameter("TESTPROPOSALS", proposalList); // Assumes proposalList is a collection type compatible with the query
+
 		return query.getResultList();
     }
 
@@ -158,14 +173,15 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
 
 		String queryString = DATACOLLECTIONSTATS_QUERY
-				.concat(" and beamLineName = :BEAMLINENAME ")
-				.replace(":START", "'" + formattedStart + "'")
-				.replace(":END", "'" + formattedEnd + "'")
-				.replace(":LIMITIMAGES", formattedImages)
-				.replace(":TESTPROPOSALS", "'" + proposalList + "'");
+				.concat(" and beamLineName = :BEAMLINENAME ");
 
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
-		query.setParameter("BEAMLINENAME", beamline); // Directly setting the parameter for BEAMLINENAME
+		query.setParameter("START", formattedStart);
+		query.setParameter("END", formattedEnd);
+		query.setParameter("LIMITIMAGES", formattedImages);
+		query.setParameter("TESTPROPOSALS", proposalList);
+		query.setParameter("BEAMLINENAME", beamline); // Setting the parameter for BEAMLINENAME as before
+
 		return query.getResultList();
     }
 
@@ -177,12 +193,13 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String formattedEnd = dt1.format(endDate);
 		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
 
-		String queryString = EXPERIMENTSTATS_QUERY
-				.replace(":START", "'" + formattedStart + "'")
-				.replace(":END", "'" + formattedEnd + "'")
-				.replace(":TESTPROPOSALS", "'" + proposalList + "'");
+		String queryString = EXPERIMENTSTATS_QUERY;
 
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", formattedStart);
+		query.setParameter("END", formattedEnd);
+		query.setParameter("TESTPROPOSALS", proposalList);
+
 		return query.getResultList();
     }
 
@@ -194,13 +211,14 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String formattedEnd = dt1.format(endDate);
 		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
 
-		String queryString = EXPERIMENTSTATS_QUERY + " and beamLineName = :BEAMLINENAME "
-				.replace(":START", "'" + formattedStart + "'")
-				.replace(":END", "'" + formattedEnd + "'")
-				.replace(":TESTPROPOSALS", "'" + proposalList + "'")
-				.replace(":BEAMLINENAME", "'" + beamline + "'");
+		String queryString = EXPERIMENTSTATS_QUERY + " and beamLineName = :BEAMLINENAME";
 
 		Query query = this.entityManager.createNativeQuery(queryString, Map.class);
+		query.setParameter("START", formattedStart);
+		query.setParameter("END", formattedEnd);
+		query.setParameter("TESTPROPOSALS", proposalList);
+		query.setParameter("BEAMLINENAME", beamline);
+
 		return query.getResultList();
     }
 }

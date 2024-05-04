@@ -43,20 +43,20 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
-		String sqlQuery = BySessionId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":sessionId", String.valueOf(sessionId));
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		String sqlQuery = BySessionId;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("sessionId", sessionId);
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int xfeFluorescenceSpectrumId) {
-		String sqlQuery = ById
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":xfeFluorescenceSpectrumId", String.valueOf(xfeFluorescenceSpectrumId));
-		Query query = this.entityManager.createNativeQuery(ById, Map.class);
+		String sqlQuery = ById;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("xfeFluorescenceSpectrumId", xfeFluorescenceSpectrumId);
 		
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();

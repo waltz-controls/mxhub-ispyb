@@ -524,7 +524,8 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	
 	private List findProposalByProposalId(Integer proposalId){
-		Query query = this.entityManager.createNativeQuery(String.format("select %s from Proposal where proposalId=%s", SqlTableMapper.getProposalTable(),  proposalId));
+		Query query = this.entityManager.createNativeQuery("select %s from Proposal where proposalId= :proposalId", SqlTableMapper.getProposalTable())
+				.setParameter("proposalId", proposalId);
 		return query.getResultList();
 	}
 	

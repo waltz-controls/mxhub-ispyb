@@ -55,37 +55,37 @@ public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implement
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByExperimentId(int proposalId, Integer experimentId) {
-		String session = ByExperimentId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":experimentId", String.valueOf(experimentId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByExperimentId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("experimentId", experimentId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionBySessionId(int proposalId, Integer sessionId) {
-		String session = BySessionId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":sessionId", String.valueOf(sessionId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = BySessionId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("sessionId", sessionId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByMacromoleculeId(int proposalId, Integer macromoleculeId) {
-		String session = ByMacromoleculeId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":macromoleculeId", String.valueOf(macromoleculeId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByMacromoleculeId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("macromoleculeId", macromoleculeId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionId(int proposalId, Integer dataCollectionId) {
-		String session = ByDataCollectionId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":dataCollectionId", String.valueOf(dataCollectionId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByDataCollectionId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("dataCollectionId", dataCollectionId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

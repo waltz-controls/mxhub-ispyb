@@ -45,10 +45,9 @@ public class DataCollectionRestWsServiceBean extends WsServiceBean implements Da
 	@Override
 	public Collection<? extends Map<String, Object>> getViewDataCollectionsByWorkflowId(int proposalId, Integer workflowId) {
 		String mySQLQuery = this.getViewTableQuery() + " where proposalId = :proposalId and workflowId = :workflowId  group by v_datacollection.dataCollectionId";
-		mySQLQuery = mySQLQuery
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":workflowId", String.valueOf(workflowId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery)
+				.setParameter("proposalId", proposalId)
+				.setParameter("workflowId", workflowId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
@@ -56,10 +55,9 @@ public class DataCollectionRestWsServiceBean extends WsServiceBean implements Da
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionGroupId(int proposalId, Integer dataCollectionGroupId) {
 		String mySQLQuery = this.getViewTableQuery() + " where proposalId = :proposalId and dataCollectionGroupId = :dataCollectionGroupId  group by v_datacollection.dataCollectionId";
-		mySQLQuery = mySQLQuery
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":dataCollectionGroupId", String.valueOf(dataCollectionGroupId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("dataCollectionGroupId", dataCollectionGroupId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

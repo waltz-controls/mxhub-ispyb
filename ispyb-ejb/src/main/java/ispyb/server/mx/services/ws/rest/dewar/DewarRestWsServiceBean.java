@@ -49,19 +49,19 @@ public class DewarRestWsServiceBean implements DewarRestWsService, DewarRestWsSe
 
 	@Override
 	public List<Map<String, Object>> getDewarViewBySessionId(int sessionId,int proposalId) {
-		String sqlQuery = BySessionId
-				.replace(":sessionId", String.valueOf(sessionId))
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		String sqlQuery = BySessionId;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("sessionId", sessionId)
+				.setParameter("proposalId", proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 
 	public List<Map<String, Object>> getDewarViewByProposalId(int proposalId) {
-		String sqlQuery = ByProposalId
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		String sqlQuery = ByProposalId;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("proposalId", proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}

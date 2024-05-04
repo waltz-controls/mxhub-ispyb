@@ -298,9 +298,9 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		String mySQLQuery = FIND_BY_SHIPPING_ID()
-				.replace(":shippingId", String.valueOf(shippingId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = FIND_BY_SHIPPING_ID();
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("shippingId", shippingId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
@@ -313,9 +313,9 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		String mySQLQuery = FIND_BY_PROPOSAL_ID()
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		String mySQLQuery = FIND_BY_PROPOSAL_ID();
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter("proposalId", proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
@@ -432,7 +432,7 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	public List<Shipping3VO> findByProposal(final Integer proposalId,final boolean fetchDewars, final boolean fetchContainers, final boolean fetchSamples) throws Exception {
 		
 		try {
-			return  entityManager.createQuery(FIND_BY_PROPOSAL_ID(fetchDewars, fetchContainers, fetchSamples))
+			return  entityManager.createNativeQuery(FIND_BY_PROPOSAL_ID(fetchDewars, fetchContainers, fetchSamples))
 					.setParameter("proposalId", proposalId)
 					.getResultList();
 		} catch (NoResultException e) {

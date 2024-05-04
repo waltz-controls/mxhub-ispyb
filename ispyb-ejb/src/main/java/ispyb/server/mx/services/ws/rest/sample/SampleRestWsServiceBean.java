@@ -58,39 +58,39 @@ public class SampleRestWsServiceBean implements SampleRestWsService, SampleRestW
 
 	@Override
 	public List<Map<String, Object>> getSamplesByProposalId(int proposalId) {
-		String session = ByProposalId
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByProposalId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesBySessionId(int proposalId,int sessionId) {
-		String session = BySessionId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":sessionId", String.valueOf(sessionId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = BySessionId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("sessionId", sessionId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByContainerId(int proposalId,int containerId) {
-		String session = ByContainerId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":containerId", String.valueOf(containerId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByContainerId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("containerId", containerId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 	@Override
 	public List<Map<String, Object>> getSamplesByShipmentId(int proposalId,int shippingId) {
-		String session = ByShippingId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":shippingId", String.valueOf(shippingId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByShippingId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("shippingId", shippingId);
 		
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
@@ -98,10 +98,10 @@ public class SampleRestWsServiceBean implements SampleRestWsService, SampleRestW
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByDewarId(int proposalId, int dewarId) {
-		String session = ByDewarId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":dewarId", String.valueOf(dewarId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByDewarId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("dewarId", dewarId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}

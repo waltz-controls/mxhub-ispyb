@@ -64,56 +64,56 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewBySessionId(int proposalId, int sessionId) {
-		String session = BySessionId
-				.replace(":sessionId", String.valueOf(sessionId))
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = BySessionId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("sessionId", sessionId)
+				.setParameter("proposalId", proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByProposalId(int proposalId) {
-		String session = ByProposalId
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByProposalId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("proposalId", proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate) {
-		String session = ByDates
-				.replace(":startDate", startDate)
-				.replace(":endDate", endDate);
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByDates;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("startDate", startDate)
+				.setParameter("endDate", endDate);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByProposalAndDates(int proposalId, String startDate, String endDate) {
-		String session = ByProposalAndDates
-				.replace(":startDate", startDate)
-				.replace(":endDate", endDate)
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByProposalAndDates;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("startDate", startDate)
+				.setParameter("endDate", endDate)
+				.setParameter("proposalId", String.valueOf(proposalId));
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByBeamlineOperator( String beamlineOperator) {
-		String session = ByBeamlineOperator
-				.replace(":beamlineOperator", "%" +  beamlineOperator + "%");
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByBeamlineOperator;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("beamlineOperator", "%" +  beamlineOperator + "%");
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate, String siteId) {
-		String session = ByDatesAndSiteId
-				.replace(":startDate", startDate)
-				.replace(":endDate", endDate)
-				.replace(":siteId", siteId);
-		Query query = this.entityManager.createNativeQuery(session, Map.class);
+		String session = ByDatesAndSiteId;
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter("startDate", startDate)
+				.setParameter("endDate", endDate)
+				.setParameter("siteId", siteId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 

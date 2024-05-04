@@ -40,11 +40,11 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
-		String sqlQuery = BySessionId
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":sessionId", String.valueOf(sessionId));
+		String sqlQuery = BySessionId;
 
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("sessionId", sessionId);
 
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
@@ -52,10 +52,10 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int energyScanId) {
-		String sqlQuery = ById
-				.replace(":proposalId", String.valueOf(proposalId))
-				.replace(":energyScanId", String.valueOf(energyScanId));
-		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		String sqlQuery = ById;
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter("proposalId", proposalId)
+				.setParameter("energyScanId", energyScanId);
 		
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
