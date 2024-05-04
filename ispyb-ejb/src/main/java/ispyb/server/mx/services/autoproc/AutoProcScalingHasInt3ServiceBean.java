@@ -21,6 +21,7 @@ package ispyb.server.mx.services.autoproc;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
+import ispyb.server.mx.vos.autoproc.AutoProcIntegration3VO;
 import ispyb.server.mx.vos.autoproc.AutoProcScalingHasInt3VO;
 
 import java.util.List;
@@ -33,11 +34,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -169,20 +167,27 @@ public class AutoProcScalingHasInt3ServiceBean implements AutoProcScalingHasInt3
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AutoProcScalingHasInt3VO> findFiltered(final Integer autoProcIntegrationId) throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AutoProcScalingHasInt3VO.class);
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaQuery<AutoProcScalingHasInt3VO> cq = cb.createQuery(AutoProcScalingHasInt3VO.class);
+		Root<AutoProcScalingHasInt3VO> root = cq.from(AutoProcScalingHasInt3VO.class);
 
+// Joining with AutoProcIntegrationVO
+		Join<AutoProcScalingHasInt3VO, AutoProcIntegration3VO> autoProcIntegrationJoin = root.join("autoProcIntegrationVO", JoinType.INNER);
+
+// Applying conditions
 		if (autoProcIntegrationId != null) {
-			Criteria subCrit = crit.createCriteria("autoProcIntegrationVO");
-			subCrit.add(Restrictions.eq("autoProcIntegrationId", autoProcIntegrationId));
+			Predicate condition = cb.equal(autoProcIntegrationJoin.get("autoProcIntegrationId"), autoProcIntegrationId);
+			cq.where(condition);
 		}
-		
-		crit.addOrder(Order.asc("autoProcScalingHasIntId"));
 
-		List<AutoProcScalingHasInt3VO> foundEntities = crit.list();
+// Ordering
+		cq.orderBy(cb.asc(root.get("autoProcScalingHasIntId")));
+
+// Ensuring distinct results
+		cq.distinct(true);
+
+		List<AutoProcScalingHasInt3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

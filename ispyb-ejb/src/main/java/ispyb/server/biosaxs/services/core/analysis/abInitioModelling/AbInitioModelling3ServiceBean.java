@@ -35,9 +35,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.datacollection.AbInitioModel3VO;
@@ -74,11 +71,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	}
 	
 	private List<Map<String, Object>> getAll(String mySQLQuery) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -95,11 +90,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<Map<String, Object>> getAnalysisCalibrationByProposalId(int experimentId) {
 		String mySQLQuery = SQLQueryKeeper.getAnalysisCalibrationByProposalId(experimentId);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -107,11 +100,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<Map<String, Object>> getAnalysisInformation(int limit) {
 		String mySQLQuery = SQLQueryKeeper.getAnalysis(limit);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	

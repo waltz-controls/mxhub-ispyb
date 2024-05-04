@@ -40,7 +40,6 @@ import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.services.shipping.Container3Service;
-import ispyb.server.common.util.ejb.CastDecimalOrder;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;

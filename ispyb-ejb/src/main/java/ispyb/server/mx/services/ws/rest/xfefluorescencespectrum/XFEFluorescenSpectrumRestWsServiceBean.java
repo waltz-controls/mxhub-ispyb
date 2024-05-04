@@ -16,7 +16,7 @@
  * 
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
-
+//TODO do we need this class?
 package ispyb.server.mx.services.ws.rest.xfefluorescencespectrum;
 
 import ispyb.server.mx.services.ws.rest.WsServiceBean;
@@ -43,23 +43,21 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
-
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
+		String sqlQuery = BySessionId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sessionId", String.valueOf(sessionId));
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int xfeFluorescenceSpectrumId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ById);
+		String sqlQuery = ById
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":xfeFluorescenceSpectrumId", String.valueOf(xfeFluorescenceSpectrumId));
+		Query query = this.entityManager.createNativeQuery(ById, Map.class);
 		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("xfeFluorescenceSpectrumId", xfeFluorescenceSpectrumId);
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }

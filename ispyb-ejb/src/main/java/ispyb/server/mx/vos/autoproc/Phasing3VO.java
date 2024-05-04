@@ -36,8 +36,6 @@ import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.ISPyBValueObject;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * Phasing3 value object mapping table Phasing

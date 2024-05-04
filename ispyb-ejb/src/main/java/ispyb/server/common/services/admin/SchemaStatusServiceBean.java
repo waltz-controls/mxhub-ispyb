@@ -3,16 +3,18 @@ package ispyb.server.common.services.admin;
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.admin.SchemaStatusVO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 @Stateless
 public class SchemaStatusServiceBean implements SchemaStatusService, SchemaStatusServiceLocal {
@@ -29,22 +31,35 @@ public class SchemaStatusServiceBean implements SchemaStatusService, SchemaStatu
 	@Override
 	public List<SchemaStatusVO> findFiltered(Integer schemaStatusId, String scriptName, String schemaStatus)
 			throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(SchemaStatusVO.class);
+		CriteriaQuery<SchemaStatusVO> cq = cb.createQuery(SchemaStatusVO.class);
+		Root<SchemaStatusVO> root = cq.from(SchemaStatusVO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
-		if (!StringUtils.isEmpty(scriptName))
-			crit.add(Restrictions.like("scriptName", scriptName));
-		
-		if (!StringUtils.isEmpty(schemaStatus))
-			crit.add(Restrictions.like("schemaStatus", schemaStatus));
-		
-		if (schemaStatusId != null)
-			crit.add(Restrictions.like("schemaStatusId", schemaStatusId));
+// Applying conditions based on the input
+		if (!StringUtils.isEmpty(scriptName)) {
+			predicates.add(cb.like(root.get("scriptName"), "%" + scriptName + "%"));
+		}
 
-		return crit.list();
+		if (!StringUtils.isEmpty(schemaStatus)) {
+			predicates.add(cb.like(root.get("schemaStatus"), "%" + schemaStatus + "%"));
+		}
+
+		if (schemaStatusId != null) {
+			predicates.add(cb.equal(root.get("schemaStatusId"), schemaStatusId));
+		}
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+// Ensuring distinct results
+		cq.distinct(true);
+
+		List<SchemaStatusVO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	};
 	
 

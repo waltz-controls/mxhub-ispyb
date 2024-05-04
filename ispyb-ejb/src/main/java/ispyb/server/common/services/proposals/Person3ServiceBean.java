@@ -18,7 +18,6 @@
  ****************************************************************************************************/
 package ispyb.server.common.services.proposals;
 
-import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,13 +26,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
-import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.proposals.Person3VO;
 import ispyb.server.common.vos.proposals.PersonWS3VO;
 	
@@ -112,7 +111,11 @@ public class Person3ServiceBean implements Person3Service, Person3ServiceLocal {
 	public void deleteByPk(final Integer pk) throws Exception {
 		
 		Person3VO vo = findByPk(pk);
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		delete(vo);
 	}
 
@@ -186,43 +189,68 @@ public class Person3ServiceBean implements Person3Service, Person3ServiceLocal {
 	
 	@SuppressWarnings("unchecked")
 	public List<Person3VO> findFiltered(String familyName, String givenName, String login) {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager; // Ensure your EntityManager is properly initialized
 
-		Criteria criteria = session.createCriteria(Person3VO.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Person3VO> cq = cb.createQuery(Person3VO.class);
+		Root<Person3VO> person = cq.from(Person3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (givenName != null) {
-			criteria.add(Restrictions.like("givenName", givenName));
+			Predicate givenNamePredicate = cb.like(person.get("givenName"), givenName);
+			predicates.add(givenNamePredicate);
 		}
 
 		if (familyName != null) {
-			criteria.add(Restrictions.like("familyName", familyName));
+			Predicate familyNamePredicate = cb.like(person.get("familyName"), familyName);
+			predicates.add(familyNamePredicate);
 		}
 
-		if (!StringUtils.isEmpty(login)) {
-			criteria.add(Restrictions.like("login", login));
+		if (login != null && !login.isEmpty()) {
+			Predicate loginPredicate = cb.like(person.get("login"), login);
+			predicates.add(loginPredicate);
 		}
-		criteria.addOrder(Order.desc("personId"));
 
-		return criteria.list();
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(person.get("personId")));
+
+		TypedQuery<Person3VO> query = em.createQuery(cq);
+		List<Person3VO> results = query.getResultList();
+		return results;
+
 
 	}
 
 	@SuppressWarnings("unchecked")
 	public Person3VO findPersonByLastNameAndFirstNameLetter(String lastName, String firstNameLetter) {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager; // Ensure your EntityManager is properly initialized
 
-		Criteria crit = session.createCriteria(Person3VO.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Person3VO> cq = cb.createQuery(Person3VO.class);
+		Root<Person3VO> person = cq.from(Person3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+
 		if (lastName != null) {
-			crit.add(Restrictions.like("familyName", lastName));
+			Predicate lastNamePredicate = cb.like(person.get("familyName"), lastName);
+			predicates.add(lastNamePredicate);
 		}
+
 		if (firstNameLetter != null) {
-			firstNameLetter = firstNameLetter.replace('*', '%');
-			crit.add(Restrictions.like("givenName", firstNameLetter));
+			String firstNameLikePattern = firstNameLetter.replace('*', '%');
+			Predicate firstNamePredicate = cb.like(person.get("givenName"), firstNameLikePattern);
+			predicates.add(firstNamePredicate);
 		}
-		List<Person3VO> list = crit.list();
-		if (list == null || list.isEmpty())
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.select(person); // selects the root, i.e., Person3VO
+
+		TypedQuery<Person3VO> query = em.createQuery(cq);
+		List<Person3VO> results = query.getResultList();
+		if (results == null || results.isEmpty())
 			return null;
-		return list.get(0);
+		return results.get(0); // Return the first element of the list, if available
 	}
 	
 	@SuppressWarnings("unchecked")	
@@ -389,20 +417,6 @@ public class Person3ServiceBean implements Person3Service, Person3ServiceLocal {
 		// check value object
 		vo.checkValues(create);
 		// TODO check primary keys for existence in DB
-	}
-	
-	/**
-	 * Check if user has access rights to create, change and remove Person3 entities. If not set rollback only and throw
-	 * AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-		
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
 	}
 
 

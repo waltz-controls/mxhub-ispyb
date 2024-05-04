@@ -29,7 +29,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import ispyb.server.common.vos.proposals.Proposal3VO;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
@@ -40,10 +42,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -753,16 +752,21 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	}
 	
 	private List<Session3VO> findSessionNotProtectedToBeProtected(Date date1, Date date2) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Assume entityManager is already injected or created
+		EntityManager entityManager = this.entityManager;
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
+		Root<Session3VO> root = cq.from(Session3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		Integer delayToTrigger = 8;
-		Integer windowForTrigger = 14 * 24;
+		int delayToTrigger = 8;
+		int windowForTrigger = 14 * 24;
 
+// Calculate the dates
 		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger);
 		// launch the protection of sessions which have not been protected during the last 14 days.
 		if (date2 == null)
@@ -774,34 +778,35 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 			date1 = cal.getTime();
 		}
 
+// Adding date conditions
 		if (date1 != null)
-			crit.add(Restrictions.ge("lastUpdate", date1));
+			predicates.add(cb.greaterThanOrEqualTo(root.get("lastUpdate"), date1));
 		if (date2 != null)
-			crit.add(Restrictions.le("lastUpdate", date2));
+			predicates.add(cb.lessThanOrEqualTo(root.get("lastUpdate"), date2));
 
-		crit.add(Restrictions.in("beamlineName", beamlinesToProtect));
+// Filter by beamline names that need protection
+		predicates.add(root.get("beamlineName").in(beamlinesToProtect));
 
-		crit.add(Restrictions.isNull("protectedData"));
+// Sessions without protected data
+		predicates.add(cb.isNull(root.get("protectedData")));
 
-		// account not to protect: opid*, opd*, mxihr*
-		Criteria subCrit = crit.createCriteria("proposalVO");
+// Filter out specific account codes
+		Join<Session3VO, Proposal3VO> joinProposal = root.join("proposalVO");
+		predicates.add(cb.not(joinProposal.get("code").in(account_not_to_protect)));
 
-		subCrit.add(Restrictions.not(Restrictions.in("code", account_not_to_protect)));
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.asc(root.get("lastUpdate")));
 
-		crit.addOrder(Order.asc("lastUpdate"));
+		List<Session3VO> resultList = entityManager.createQuery(cq).getResultList();
 
-		List<Session3VO> listNotProtected = crit.list();
+// Log information about the query
 		LOG.info("find not protected sessions between " + date1 + " and  " + date2);
-		if (listNotProtected != null) {
-			String sessionsIds = "";
-			for (Iterator iterator = listNotProtected.iterator(); iterator.hasNext();) {
-				Session3VO session3vo = (Session3VO) iterator.next();
-				sessionsIds = sessionsIds + ", " + session3vo.getSessionId();
-			}
-			LOG.info(listNotProtected.size() + " sessions found : " + sessionsIds);
+		if (resultList != null) {
+			String sessionsIds = resultList.stream().map(s -> s.getSessionId().toString()).collect(Collectors.joining(", "));
+			LOG.info(resultList.size() + " sessions found: " + sessionsIds);
 		}
 
-		return listNotProtected;
+		return resultList;
 	}
 	
 	/**
@@ -860,46 +865,55 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	private List<Session3VO> findFiltered(Integer proposalId, Integer nbMax, String beamline, Date date1, Date date2, Date dateEnd,
 			boolean usedFlag, Integer nbShifts, String operatorSiteNumber) {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Assume entityManager is already injected or created
+		EntityManager entityManager = this.entityManager;
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
+		Root<Session3VO> session = cq.from(Session3VO.class);
 
+		List<Predicate> predicates = new ArrayList<>();
+
+// Adding conditions based on method parameters
 		if (proposalId != null) {
-			Criteria subCrit = crit.createCriteria("proposalVO");
-			subCrit.add(Restrictions.eq("proposalId", proposalId));
+			Join<Session3VO, Proposal3VO> proposalJoin = session.join("proposalVO");
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
-		if (beamline != null)
-			crit.add(Restrictions.like("beamlineName", beamline));
-
-		if (date1 != null)
-			crit.add(Restrictions.ge("startDate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("startDate", date2));
-
-		if (dateEnd != null)
-			crit.add(Restrictions.ge("endDate", dateEnd));
-
-		// usedFlag =1 or endDate >= yesterday
-		
+		if (beamline != null) {
+			predicates.add(cb.like(session.get("beamlineName"), beamline));
+		}
+		if (date1 != null) {
+			predicates.add(cb.greaterThanOrEqualTo(session.<Date>get("startDate"), date1));
+		}
+		if (date2 != null) {
+			predicates.add(cb.lessThanOrEqualTo(session.<Date>get("startDate"), date2));
+		}
+		if (dateEnd != null) {
+			predicates.add(cb.greaterThanOrEqualTo(session.<Date>get("endDate"), dateEnd));
+		}
 		if (usedFlag) {
-			crit.add(Restrictions.sqlRestriction("(usedFlag = 1 OR endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " )"));
+			// Assuming Constants.MYSQL_ORACLE_CURRENT_DATE is a static import or available as a constant
+			predicates.add(cb.or(
+					cb.equal(session.get("usedFlag"), 1),
+					cb.greaterThanOrEqualTo(session.<Date>get("endDate"), cb.currentDate())
+			));
 		}
-
-		if (nbMax != null)
-			crit.setMaxResults(nbMax);
-
 		if (nbShifts != null) {
-			crit.add(Restrictions.eq("nbShifts", nbShifts));
+			predicates.add(cb.equal(session.get("nbShifts"), nbShifts));
 		}
-
 		if (operatorSiteNumber != null) {
-			crit.add(Restrictions.eq("operatorSiteNumber", operatorSiteNumber));
+			predicates.add(cb.equal(session.get("operatorSiteNumber"), operatorSiteNumber));
 		}
 
-		crit.addOrder(Order.desc("startDate"));
-		List<Session3VO> ret = crit.list();
-		return ret;
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(session.get("startDate")));
+
+// Set the maximum results if specified
+		if (nbMax != null) {
+			return entityManager.createQuery(cq).setMaxResults(nbMax).getResultList();
+		} else {
+			return entityManager.createQuery(cq).getResultList();
+		}
 	}
 	
 	/**

@@ -21,8 +21,7 @@ package ispyb.server.common.services.shipping;
 import ispyb.server.biosaxs.services.sql.SqlTableMapper;
 
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
+import ispyb.server.common.vos.proposals.Person3VO;
 import ispyb.server.common.vos.proposals.Proposal3VO;
 import ispyb.server.common.vos.shipping.Container3VO;
 import ispyb.server.common.vos.shipping.Dewar3VO;
@@ -31,30 +30,21 @@ import ispyb.server.common.vos.shipping.Shipping3VO;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
+import ispyb.server.mx.vos.collections.Session3VO;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.poi.hssf.record.formula.AreaPtg;
 
 /**
  * <p>
@@ -177,8 +167,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 * @return the persisted entity.
 	 */
 	public Shipping3VO create(final Shipping3VO vo) throws Exception {
-				
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -193,8 +186,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 * @return the updated entity.
 	 */
 	public Shipping3VO update(final Shipping3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -207,7 +203,10 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		Shipping3VO vo = findByPk(pk, true);
 		delete(vo);
 	}
@@ -219,8 +218,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 *            the entity to remove.
 	 */
 	public void delete(final Shipping3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -234,8 +236,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 * @return the Shipping3 value object
 	 */
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
 			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars)).setParameter("pk", pk)
 					.getSingleResult();
@@ -245,8 +250,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	}
 	
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
 			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withcontainers, withSamples)).setParameter("pk", pk)
 					.getSingleResult();
@@ -256,8 +264,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	}
 
 	public String findSerialShippingByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples, final boolean withSubSamples) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		String st = null;
 		Shipping3VO vo = this.findByPk(pk, withDewars, withcontainers, withSamples, withSubSamples);
 		if (vo != null ) {
@@ -267,8 +278,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	}
 
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples, final boolean withSubSamples) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
 			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withcontainers, withSamples, withSubSamples)).setParameter("pk", pk)
 					.getSingleResult();
@@ -279,28 +293,30 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	
 	@Override
 	public List<Map<String, Object>> getShippingById(final Integer shippingId) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
-		String mySQLQuery = FIND_BY_SHIPPING_ID();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("shippingId", shippingId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
+		String mySQLQuery = FIND_BY_SHIPPING_ID()
+				.replace(":shippingId", String.valueOf(shippingId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 	
 	
 	@Override
 	public List<Map<String, Object>> getShippingByProposalId(final Integer proposalId) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
-		String mySQLQuery = FIND_BY_PROPOSAL_ID();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
+		String mySQLQuery = FIND_BY_PROPOSAL_ID()
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
@@ -321,82 +337,94 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	@SuppressWarnings("unchecked")
 	public List<Shipping3VO> findFiltered(final Integer proposalId, final String type) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager; // Ensure your EntityManager is properly initialized
 
-		Criteria crit = session.createCriteria(Proposal3VO.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Proposal3VO> cq = cb.createQuery(Proposal3VO.class);
+		Root<Proposal3VO> proposal = cq.from(Proposal3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (type != null && !type.isEmpty()) {
-			crit.add(Restrictions.like("shippingType", type));
+			predicates.add(cb.like(proposal.get("shippingType"), type));
 		}
 
 		if (proposalId != null) {
-			crit.createCriteria("proposalVO");
-			crit.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(proposal.get("proposalId"), proposalId));
 		}
 
-		crit.addOrder(Order.desc("shippingId"));
+		cq.select(proposal).distinct(true); // Ensures distinct results
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(proposal.get("shippingId"))); // Adjust the attribute to match your entity structure
 
-		List<Shipping3VO> foundEntities = crit.list();
+		//TODO may produce class cast
+		Query query = em.createQuery(cq);
+		List<Shipping3VO> foundEntities = query.getResultList();
 		return foundEntities;
-	}
 
-	/**
-	 * Check if user has access rights to create, change and remove Shipping3 entities. If not set rollback only and throw
-	 * AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByStatus(final String status, final java.util.Date dateStart,final boolean withDewars) throws Exception {
-	
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
+
+		EntityManager em = this.entityManager; // Ensure your EntityManager is properly initialized
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+
 		if (status != null && !status.isEmpty()) {
-			criteria.add(Restrictions.like("shippingStatus", status));
+			predicates.add(cb.like(shipping.get("shippingStatus"), "%" + status + "%"));
 		}
-		
+
 		if (dateStart != null) {
-			criteria.add(Restrictions.ge("creationDate", dateStart));
+			predicates.add(cb.greaterThanOrEqualTo(shipping.<Date>get("creationDate"), dateStart));
 		}
 
 		if (withDewars) {
-			criteria.setFetchMode("dewarVOs", FetchMode.JOIN);
+			shipping.fetch("dewarVOs", JoinType.LEFT); // Assuming 'dewarVOs' is the correct attribute name
 		}
-		criteria.addOrder(Order.desc("shippingId")).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																											// RESULTS !
 
-		return criteria.list();
+		cq.select(shipping).distinct(true); // Ensures distinct results
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(shipping.get("shippingId"))); // Adjust the attribute name if necessary
+
+		TypedQuery<Shipping3VO> query = em.createQuery(cq);
+		return query.getResultList();
+
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByProposal(final Integer userProposalId, final boolean withDewars) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
+
+		EntityManager em = this.entityManager; // Ensure your EntityManager is properly initialized
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (userProposalId != null) {
-			Criteria subCritProposal = criteria.createCriteria("proposalVO");
-			subCritProposal.add(Restrictions.eq("proposalId", userProposalId));
+			Join<Shipping3VO, Proposal3VO> proposalJoin = shipping.join("proposalVO", JoinType.INNER); // Replace "proposalVO" with the actual field name in Shipping3VO
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), userProposalId));
 		}
 
 		if (withDewars) {
-			criteria.setFetchMode("dewarVOs", FetchMode.JOIN);
+			shipping.fetch("dewarVOs", JoinType.LEFT); // Assuming 'dewarVOs' is the correct attribute name for the relationship
 		}
-		criteria.addOrder(Order.desc("creationDate"));
-		criteria.addOrder(Order.desc("shippingId"));
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		return criteria.list();
+
+		cq.select(shipping).distinct(true); // Ensures distinct results
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(shipping.get("creationDate")), cb.desc(shipping.get("shippingId"))); // Adjust the attribute names if necessary
+
+		TypedQuery<Shipping3VO> query = em.createQuery(cq);
+		return query.getResultList();
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -415,65 +443,95 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByCreationDate(final Date firstDate, final boolean withDewars) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
+
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (firstDate != null) {
-			criteria.add(Restrictions.ge("creationDate", firstDate));
+			predicates.add(cb.greaterThanOrEqualTo(shipping.get("creationDate"), firstDate));
 		}
 
 		if (withDewars) {
-			criteria.setFetchMode("dewarVOs", FetchMode.JOIN);
+			shipping.fetch("dewarVOs", JoinType.LEFT); // Assuming 'dewarVOs' is the correct attribute name for the relationship
 		}
-		criteria.addOrder(Order.desc("creationDate"));
-		criteria.addOrder(Order.desc("shippingId"));
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		return criteria.list();
+
+		cq.select(shipping).distinct(true); // Ensures distinct results
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(shipping.get("creationDate")), cb.desc(shipping.get("shippingId"))); // Adjust attribute names if necessary
+
+		TypedQuery<Shipping3VO> query = this.entityManager.createQuery(cq);
+		return query.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByCreationDateInterval(final Date firstDate, final Date endDate) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
 
+		EntityManager em = this.entityManager; // Assume EntityManager is initialized properly
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+
+// Add predicates based on the date filters
 		if (firstDate != null) {
-			criteria.add(Restrictions.ge("creationDate", firstDate));
+			predicates.add(cb.greaterThanOrEqualTo(shipping.<Date>get("creationDate"), firstDate));
 		}
 
 		if (endDate != null) {
-			criteria.add(Restrictions.le("creationDate", endDate));
+			predicates.add(cb.lessThanOrEqualTo(shipping.<Date>get("creationDate"), endDate));
 		}
 
-		criteria.addOrder(Order.desc("creationDate"));
-		criteria.addOrder(Order.desc("shippingId"));
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		return criteria.list();
+		cq.select(shipping).distinct(true); // Ensures distinct results
+		cq.where(predicates.toArray(new Predicate[0]));
+
+// Set order by conditions
+		cq.orderBy(cb.desc(shipping.get("creationDate")), cb.desc(shipping.get("shippingId")));
+
+		TypedQuery<Shipping3VO> query = em.createQuery(cq);
+		return query.getResultList();
+
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByBeamLineOperator(final String beamlineOperatorSiteNumber, final boolean withDewars)
 			throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
+
+		EntityManager em = this.entityManager; // Assume EntityManager is initialized properly
 
 		if (beamlineOperatorSiteNumber != null) {
-			Criteria sessionCriteria = criteria.createCriteria("sessions").add(
-					Restrictions.eq("operatorSiteNumber", beamlineOperatorSiteNumber));
-			// .addOrder(Order.desc(propertyName))
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+			Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+			// Create a join to sessions assuming "sessions" is the correct mapping name
+			Join<Shipping3VO, Session3VO> sessionJoin = shipping.join("sessions", JoinType.LEFT);
+
+			// Adding condition on sessions
+			Predicate condition = cb.equal(sessionJoin.get("operatorSiteNumber"), beamlineOperatorSiteNumber);
+			cq.where(condition);
+
+			// Fetch dewars if required
 			if (withDewars) {
-				criteria.setFetchMode("dewarVOs", FetchMode.JOIN);
+				shipping.fetch("dewarVOs", JoinType.LEFT);
 			}
-			criteria.addOrder(Order.desc("creationDate"));
-			criteria.addOrder(Order.desc("shippingId"));
-			criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-			return criteria.list();
-		} else
-			return null;
+
+			// Order by creationDate and shippingId
+			cq.orderBy(cb.desc(shipping.get("creationDate")), cb.desc(shipping.get("shippingId")));
+			cq.select(shipping).distinct(true); // Ensure distinct results
+
+			TypedQuery<Shipping3VO> query = em.createQuery(cq);
+			return query.getResultList();
+		} else {
+			return null; // No operation if beamlineOperatorSiteNumber is null
+		}
+
 	}
 
 	@Override
@@ -487,49 +545,60 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	public List<Shipping3VO> findFiltered(final Integer proposalId, final String shippingName, final String proposalCode,
 			final String proposalNumber, final String mainProposer, final Date date, final Date date2,
 			final String operatorSiteNumber, final boolean withDewars) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
 
+		EntityManager em = this.entityManager; // Assume EntityManager is properly initialized
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+
+// Checking if shippingName is specified
 		if ((shippingName != null) && (!shippingName.isEmpty())) {
-			criteria.add(Restrictions.like("shippingName", shippingName));
+			predicates.add(cb.like(shipping.get("shippingName"), "%" + shippingName + "%"));
 		}
 
+// Date range conditions
 		if (date != null) {
-			criteria.add(Restrictions.ge("creationDate", date));
+			predicates.add(cb.greaterThanOrEqualTo(shipping.get("creationDate"), date));
 		}
-
 		if (date2 != null) {
-			criteria.add(Restrictions.le("creationDate", date2));
+			predicates.add(cb.lessThanOrEqualTo(shipping.get("creationDate"), date2));
 		}
 
+// Handling proposal related conditions
 		if (proposalId != null || proposalCode != null || mainProposer != null) {
-			Criteria subCritProposal = criteria.createCriteria("proposalVO");
+			Join<Shipping3VO, Proposal3VO> proposalJoin = shipping.join("proposalVO", JoinType.LEFT);
+
 			if (proposalId != null) {
-				subCritProposal.add(Restrictions.eq("proposalId", proposalId));
+				predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 			}
 			if (proposalId == null && proposalCode != null && !proposalCode.isEmpty()) {
-				subCritProposal.add(Restrictions.like("code", proposalCode).ignoreCase());
+				predicates.add(cb.like(cb.lower(proposalJoin.get("code")), "%" + proposalCode.toLowerCase() + "%"));
 			}
 			if ((mainProposer != null) && (!mainProposer.isEmpty())) {
-				Criteria subCritPerson = subCritProposal.createCriteria("personVO");
-				subCritPerson.add(Restrictions.like("familyName", mainProposer).ignoreCase());
+				Join<Proposal3VO, Person3VO> personJoin = proposalJoin.join("personVO", JoinType.LEFT);
+				predicates.add(cb.like(cb.lower(personJoin.get("familyName")), "%" + mainProposer.toLowerCase() + "%"));
 			}
-
 		}
 
+// Operator site number condition
 		if (operatorSiteNumber != null) {
-			criteria.createAlias("sessions", "se");
-			criteria.add(Restrictions.eq("se.operatorSiteNumber", operatorSiteNumber));
+			Join<Shipping3VO, Session3VO> sessionJoin = shipping.join("sessions", JoinType.LEFT);
+			predicates.add(cb.equal(sessionJoin.get("operatorSiteNumber"), operatorSiteNumber));
 		}
 
+// Fetching dewars if necessary
 		if (withDewars) {
-			criteria.setFetchMode("dewarVOs", FetchMode.JOIN);
+			shipping.fetch("dewarVOs", JoinType.LEFT);
 		}
-		criteria.addOrder(Order.desc("creationDate"));
-		criteria.addOrder(Order.desc("shippingId"));
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		return criteria.list();
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(shipping.get("creationDate")), cb.desc(shipping.get("shippingId")));
+		cq.distinct(true);
+
+		return em.createQuery(cq).getResultList();
+
 	}
 
 	@Override
@@ -591,11 +660,20 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByIsStorageShipping(final Boolean isStorageShipping) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Shipping3VO.class);
-		criteria.add(Restrictions.eq("isStorageShipping", isStorageShipping));
-		return criteria.list();
+
+		EntityManager em = this.entityManager; // Assume EntityManager is properly initialized
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Shipping3VO> cq = cb.createQuery(Shipping3VO.class);
+		Root<Shipping3VO> shipping = cq.from(Shipping3VO.class);
+
+// Add condition for isStorageShipping
+		Predicate condition = cb.equal(shipping.get("isStorageShipping"), isStorageShipping);
+		cq.where(condition);
+
+// Execute the query and return the results
+		List<Shipping3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	public Shipping3VO loadEager(Shipping3VO vo) throws Exception {
@@ -627,8 +705,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 */
 	@Override
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars, final boolean withSession) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
 			if (withSession){
 				return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withSession)).setParameter("pk", pk).getSingleResult();

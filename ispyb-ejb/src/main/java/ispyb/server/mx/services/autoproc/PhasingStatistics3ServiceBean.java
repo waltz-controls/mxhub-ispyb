@@ -18,18 +18,19 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.autoproc;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import ispyb.server.mx.vos.autoproc.AutoProc3VO;
+import ispyb.server.mx.vos.autoproc.AutoProcScaling3VO;
+import ispyb.server.mx.vos.autoproc.PhasingHasScaling3VO;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -161,28 +162,44 @@ public class PhasingStatistics3ServiceBean implements PhasingStatistics3Service,
 	 */
 	@SuppressWarnings("unchecked")
 	public List<PhasingStatistics3VO> findFiltered(final Integer autoProcId, final String metric, final Boolean withOverall)throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(PhasingStatistics3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<PhasingStatistics3VO> cq = cb.createQuery(PhasingStatistics3VO.class);
+		Root<PhasingStatistics3VO> root = cq.from(PhasingStatistics3VO.class);
+
+// Establishing the joins with the nested entities
+		Join<PhasingStatistics3VO, PhasingHasScaling3VO> phasingHasScalingJoin = root.join("phasingHasScaling1VO");
+		Join<PhasingHasScaling3VO, AutoProcScaling3VO> autoProcScalingJoin = phasingHasScalingJoin.join("autoProcScalingVO");
+		Join<AutoProcScaling3VO, AutoProc3VO> autoProcJoin = autoProcScalingJoin.join("autoProcVO");
+
+// Applying conditions
+		List<Predicate> predicates = new ArrayList<>();
+
 		if (autoProcId != null) {
-			Criteria subCritPhasingHasScaling = crit.createCriteria("phasingHasScaling1VO");
-			Criteria subCritAutoProcScaling = subCritPhasingHasScaling.createCriteria("autoProcScalingVO");
-			Criteria subCritAutoProc = subCritAutoProcScaling.createCriteria("autoProcVO");
-			subCritAutoProc.add(Restrictions.eq("autoProcId", autoProcId));
-		}
-		if (metric != null && metric.trim().length() > 0){
-			crit.add(Restrictions.eq("metric", metric));
-		}
-		if (withOverall != null && !withOverall){
-			crit.add(Restrictions.not(Restrictions.eq("binNumber", 999)));
+			predicates.add(cb.equal(autoProcJoin.get("autoProcId"), autoProcId));
 		}
 
-		crit.addOrder(Order.desc("phasingStatisticsId"));
+		if (metric != null && !metric.trim().isEmpty()) {
+			predicates.add(cb.equal(root.get("metric"), metric));
+		}
 
-		List<PhasingStatistics3VO> foundEntities = crit.list();
+		if (withOverall != null && !withOverall) {
+			predicates.add(cb.notEqual(root.get("binNumber"), 999));
+		}
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+// Ordering
+		cq.orderBy(cb.desc(root.get("phasingStatisticsId")));
+
+// Selecting distinct results
+		cq.select(root).distinct(true);
+
+// Execute the query and return the results
+		List<PhasingStatistics3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 
 	/* Private methods ------------------------------------------------------ */

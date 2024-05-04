@@ -54,67 +54,66 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 
 	@Override
 	public List<Map<String, Object>> getPhasingViewByDataCollectionGroupId(int dataCollectionGroupId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionGroupId);
-		query.setParameter("dataCollectionGroupId", dataCollectionGroupId);
-		query.setParameter("proposalId", proposalId);
-		System.out.println(query.getQueryString());
+		String sqlQuery = ByDataCollectionGroupId
+				.replace(":dataCollectionGroupId", String.valueOf(dataCollectionGroupId))
+				.replace(":proposalId", String.valueOf(proposalId));
+
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByDataCollectionId(int dataCollectionId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
-		query.setParameter("dataCollectionId", dataCollectionId);
-		query.setParameter("proposalId", proposalId);
-		System.out.println(query.getQueryString());
+		String session = ByDataCollectionId
+				.replace(":dataCollectionId", String.valueOf(dataCollectionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByAutoProcIntegrationId(int autoprocIntegrationId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByAutoProcIntegrationId);
-		query.setParameter("autoprocIntegrationId", autoprocIntegrationId);
-		query.setParameter("proposalId", proposalId);
+		String session = ByAutoProcIntegrationId
+				.replace(":autoprocIntegrationId", String.valueOf(autoprocIntegrationId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByBlSampleId(int blSampleId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySampleId);
-		query.setParameter("blSampleId", blSampleId);
-		query.setParameter("proposalId", proposalId);
+		String session = BySampleId
+				.replace(":blSampleId", String.valueOf(blSampleId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByProteinId(int proteinId,
 			int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProteinId);
-		query.setParameter("proteinId", proteinId);
-		query.setParameter("proposalId", proposalId);
+		String session = ByProteinId
+				.replace(":proteinId", String.valueOf(proteinId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getPhasingViewBySessionId(int sessionId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
+		String session = BySessionId
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByStepId(int phasingStepId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByPhasingStepId);
-		query.setParameter("phasingStepId", phasingStepId);
-		query.setParameter("proposalId", proposalId);
+		String session = ByPhasingStepId
+				.replace(":phasingStepId", String.valueOf(phasingStepId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
@@ -135,22 +134,19 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 	
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByStepId(int phasingStepId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(FilesByPhasingStepId);
-		query.setParameter("phasingStepId", phasingStepId);
-		query.setParameter("proposalId", proposalId);
+		String session = FilesByPhasingStepId
+				.replace(":phasingStepId", String.valueOf(phasingStepId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByPhasingProgramAttachmentId(int phasingProgramAttachmentId, int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(FilesByPhasingProgramAttachmentId);
-		System.out.println("SQL ----------------");
-		System.out.println(FilesByPhasingProgramAttachmentId);
-		System.out.println(String.valueOf(phasingProgramAttachmentId));
-		query.setParameter("phasingProgramAttachmentId", phasingProgramAttachmentId);
-		query.setParameter("proposalId", proposalId);
+		String session = FilesByPhasingProgramAttachmentId
+				.replace(":phasingProgramAttachmentId", String.valueOf(phasingProgramAttachmentId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(session, Map.class);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	

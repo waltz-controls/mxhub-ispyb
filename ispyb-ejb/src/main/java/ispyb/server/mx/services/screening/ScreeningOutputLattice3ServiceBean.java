@@ -18,6 +18,9 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.screening;
 
+import ispyb.server.mx.vos.collections.DataCollection3VO;
+import ispyb.server.mx.vos.screening.Screening3VO;
+import ispyb.server.mx.vos.screening.ScreeningOutput3VO;
 import ispyb.server.mx.vos.screening.ScreeningOutputLattice3VO;
 import ispyb.server.mx.vos.screening.ScreeningOutputLatticeWS3VO;
 
@@ -31,11 +34,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -180,22 +183,28 @@ public class ScreeningOutputLattice3ServiceBean implements ScreeningOutputLattic
 	@SuppressWarnings("unchecked")
 	public List<ScreeningOutputLattice3VO> findFiltered(final Integer dataCollectionId) throws Exception{
 
-		Session session = (Session) this.entityManager.getDelegate();
+		// Assume entityManager is already injected or created
+		EntityManager entityManager = this.entityManager;
 
-		Criteria crit = session.createCriteria(ScreeningOutputLattice3VO.class);
-		Criteria subCritScOut = crit.createCriteria("screeningOutputVO");
-		Criteria subCritSc = subCritScOut.createCriteria("screeningVO");
-		Criteria subCritDc = subCritSc.createCriteria("dataCollectionVO");
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ScreeningOutputLattice3VO> cq = cb.createQuery(ScreeningOutputLattice3VO.class);
+		Root<ScreeningOutputLattice3VO> root = cq.from(ScreeningOutputLattice3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Setup joins through the entity graph
+		Join<ScreeningOutputLattice3VO, ScreeningOutput3VO> joinScreeningOutput = root.join("screeningOutputVO");
+		Join<ScreeningOutput3VO, Screening3VO> joinScreening = joinScreeningOutput.join("screeningVO");
+		Join<Screening3VO, DataCollection3VO> joinDataCollection = joinScreening.join("dataCollectionVO");
 
+// Applying condition
 		if (dataCollectionId != null) {
-			subCritDc.add(Restrictions.eq("dataCollectionId", dataCollectionId));
+			cq.where(cb.equal(joinDataCollection.get("dataCollectionId"), dataCollectionId));
 		}
-		
-		crit.addOrder(Order.desc("screeningOutputLatticeId"));
 
-		List<ScreeningOutputLattice3VO> foundEntities = crit.list();
+// Adding order
+		cq.orderBy(cb.desc(root.get("screeningOutputLatticeId")));
+
+// Perform query
+		List<ScreeningOutputLattice3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	

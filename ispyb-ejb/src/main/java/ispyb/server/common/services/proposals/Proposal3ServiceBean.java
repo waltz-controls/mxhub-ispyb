@@ -485,11 +485,9 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	
 	@Override
 	public List<Map<String, Object>> findProposals() {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal");
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal", Map.class);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -526,11 +524,8 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	
 	private List findProposalByProposalId(Integer proposalId){
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal where proposalId= :proposalId");
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return query.list();
+		Query query = this.entityManager.createNativeQuery(String.format("select %s from Proposal where proposalId=%s", SqlTableMapper.getProposalTable(),  proposalId));
+		return query.getResultList();
 	}
 	
 	/*    end of coming from SaxsProposalService  */	
