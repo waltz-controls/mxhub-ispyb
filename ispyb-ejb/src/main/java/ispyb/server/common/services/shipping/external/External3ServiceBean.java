@@ -31,10 +31,8 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.Query;
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.common.util.upload.UploadShipmentUtils;
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
@@ -276,15 +274,16 @@ public class External3ServiceBean implements External3Service, External3ServiceL
 
 	@Override
 	public List<Map<String, Object>> getDataCollectionByProposal(String proposalCode, String proposalNumber) {
-		String mySQLQuery = SQLQueryKeeper.getDataCollectionByProposal();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalCode", proposalCode);
-		query.setParameter("proposalNumber", proposalNumber);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aliasToValueMapList = query.list();
-		return aliasToValueMapList;
+		// Retrieve the SQL query string from a method or constant
+		String mySQLQuery = SQLQueryKeeper.getDataCollectionByProposal()
+				.replace(":proposalCode",proposalCode)
+				.replace(":proposalNumber", proposalNumber);
+
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+
+		// Execute the query and map the results manually or use a constructor expression in the SQL query
+		return query.getResultList();
 	}
 
 	/**
@@ -295,47 +294,41 @@ public class External3ServiceBean implements External3Service, External3ServiceL
 	 */
 	@Override
 	public List<Map<String, Object>> getSessionsByProposalCodeAndNumber(String proposalCode, String proposalNumber){
-		String mySQLQuery = SQLQueryKeeper.getSessionByCodeAndNumber();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalCode", proposalCode);
-		query.setParameter("proposalNumber", proposalNumber);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-		
+		String mySQLQuery = SQLQueryKeeper.getSessionByCodeAndNumber()
+				.replace(":proposalCode", proposalCode)
+				.replace(":proposalNumber", proposalNumber);
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+
+		// Execute the query and map the results manually or use a constructor expression in the SQL query
+		return query.getResultList();
+
 	}
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query){
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> aliasToValueMapList = query.list();
-		return aliasToValueMapList;
-	}
-	
+
 	@Override
 	public List<Map<String, Object>> getDataCollectionFromShippingId(int shippingId){
-		String mySQLQuery = this.getDataCollectionFromShippingId();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("shippingId", shippingId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-		
+		String mySQLQuery = this.getDataCollectionFromShippingId()
+				.replace(":shippingId", String.valueOf(shippingId));
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+		// Execute the query and map the results manually or use a constructor expression in the SQL query
+		return query.getResultList();
+
 	}
 	
 	@Override
 	public List<Map<String, Object>> getAllDataCollectionFromShippingId(int shippingId){
-		String mySQLQuery = this.getAllDataCollectionFromShippingId();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("shippingId", shippingId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
-		
+		String mySQLQuery = this.getAllDataCollectionFromShippingId()
+				.replace(":shippingId", String.valueOf(shippingId));
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+		// Execute the query and map the results manually or use a constructor expression in the SQL query
+		return query.getResultList();
 	}
 	
 	
 	
-	
+	//TODO extract into a static class
 	public String getDataCollectionFromShippingId() {
 		return "select " + 
 				SqlTableMapper.getShippingTable() + " ," + 
@@ -544,24 +537,22 @@ public class External3ServiceBean implements External3Service, External3ServiceL
 	public List<Map<String, Object>> getAutoprocResultByDataCollectionIdList(
 			ArrayList<Integer> dataCollectionIdList) {
 		
-		String mySQLQuery = this.getAutoprocResultByDataCollectionIdListQuery();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameterList("dataCollectionIdList", dataCollectionIdList);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
+		String mySQLQuery = this.getAutoprocResultByDataCollectionIdListQuery()
+				.replace(":dataCollectionIdList", String.valueOf(dataCollectionIdList));
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+		return query.getResultList();
 	}
 	
 
 	@Override
 	public List<Map<String, Object>> getPhasingAnalysisByDataCollectionIdListQuery( Integer autoProcIntegrationId) {
 		
-		String mySQLQuery = this.getPhasingAnalysisByDataCollectionIdListQuery();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("autoProcIntegrationId", autoProcIntegrationId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return executeSQLQuery(query);
+		String mySQLQuery = this.getPhasingAnalysisByDataCollectionIdListQuery()
+				.replace(":autoProcIntegrationId", String.valueOf(autoProcIntegrationId));
+		// Create a native query using the EntityManager
+		Query query = entityManager.createNativeQuery(mySQLQuery, Map.class);
+		return query.getResultList();
 	}
 	
 	

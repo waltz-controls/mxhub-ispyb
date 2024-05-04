@@ -23,18 +23,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import ispyb.server.common.vos.shipping.Shipping3VO;
+import ispyb.server.mx.vos.collections.Session3VO;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
@@ -400,79 +399,85 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 			final String dewarStatus, final String storageLocation, final Integer dewarId, final Integer firstExperimentId, final boolean fetchSession,
 			final boolean withDewarHistory, final boolean withContainer) throws Exception {
 
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<Dewar3VO> cq = cb.createQuery(Dewar3VO.class);
+		Root<Dewar3VO> dewarRoot = cq.from(Dewar3VO.class);
+		List<Predicate> predicates = new ArrayList<>();
+
+		if (dewarId != null) {
+			predicates.add(cb.equal(dewarRoot.get("dewarId"), dewarId));
+		}
+
+		if (firstExperimentId != null) {
+			Join<Dewar3VO, Session3VO> sessionJoin = dewarRoot.join("sessionVO");
+			predicates.add(cb.equal(sessionJoin.get("sessionId"), firstExperimentId));
+		}
+
+		if (proposalId != null || shippingId != null || date1 != null || date2 != null) {
+			Join<Dewar3VO, Shipping3VO> shippingJoin = dewarRoot.join("shippingVO");
+
+			if (proposalId != null) {
+				Join<Shipping3VO, Proposal3VO> proposalJoin = shippingJoin.join("proposalVO");
+				predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
+			}
+
+			if (shippingId != null) {
+				predicates.add(cb.equal(shippingJoin.get("shippingId"), shippingId));
+			}
+
+			if (date1 != null) {
+				predicates.add(cb.greaterThanOrEqualTo(shippingJoin.get("creationDate"), date1));
+			}
+
+			if (date2 != null) {
+				predicates.add(cb.lessThanOrEqualTo(shippingJoin.get("creationDate"), date2));
+			}
+		}
+
+		if (type != null && !type.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("type"), type));
+		}
+
+		if (code != null && !code.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("code"), code));
+		}
+
+		if (barCode != null && !barCode.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("barCode"), barCode));
+		}
+
+		if (comments != null && !comments.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("comments"), comments));
+		}
+
+		if (dewarStatus != null && !dewarStatus.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("dewarStatus"), dewarStatus));
+		}
+
+		if (storageLocation != null && !storageLocation.isEmpty()) {
+			predicates.add(cb.like(dewarRoot.get("storageLocation"), storageLocation));
+		}
+
+		if (fetchSession) {
+			dewarRoot.fetch("sessionVO", JoinType.LEFT);
+		}
+
+		if (withDewarHistory) {
+			dewarRoot.fetch("dewarTransportHistoryVOs", JoinType.LEFT);
+		}
+
+		if (withContainer) {
+			dewarRoot.fetch("containerVOs", JoinType.LEFT);
+		}
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(dewarRoot.get("dewarId")));
+
+		cq.distinct(true);
+
 		try {
-			Session session = (Session) this.entityManager.getDelegate();
-			Criteria criteria = session.createCriteria(Dewar3VO.class);
-
-			if (dewarId != null) {
-				criteria.add(Restrictions.eq("dewarId", dewarId));
-			}
-
-			if (firstExperimentId != null) {
-				Criteria  sessionCriteria = criteria.createCriteria("sessionVO");
-				sessionCriteria.add(Restrictions.eq("sessionId", firstExperimentId));
-			}
-			if (proposalId != null || shippingId != null || (date1 != null) || (date2 != null)) {
-
-				Criteria shippingCriteria = criteria.createCriteria("shippingVO");
-				if (proposalId != null) {
-
-					Criteria proposalCriteria = shippingCriteria.createCriteria("proposalVO");
-					proposalCriteria.add(Restrictions.eq("proposalId", proposalId));
-				}
-
-				if (shippingId != null) {
-					shippingCriteria.add(Restrictions.eq("shippingId", shippingId));
-				}
-
-				if ((date1 != null) || (date2 != null)) {
-					if (date1 != null)
-						shippingCriteria.add(Restrictions.ge("creationDate", date1));
-					if (date2 != null)
-						shippingCriteria.add(Restrictions.le("creationDate", date2));
-				}
-			}
-
-			if (type != null && !type.isEmpty()) {
-				criteria.add(Restrictions.like("type", type));
-			}
-
-			if (code != null && !code.isEmpty()) {
-				criteria.add(Restrictions.like("code", code));
-			}
-
-			if (barCode != null && !barCode.isEmpty()) {
-				criteria.add(Restrictions.like("barCode", barCode));
-			}
-
-			if (comments != null && !comments.isEmpty()) {
-				criteria.add(Restrictions.like("comments", comments));
-			}
-
-			if (dewarStatus != null && !dewarStatus.isEmpty()) {
-				criteria.add(Restrictions.like("dewarStatus", dewarStatus));
-			}
-
-			if (storageLocation != null && !storageLocation.isEmpty()) {
-				criteria.add(Restrictions.like("storageLocation", storageLocation));
-			}
-
-			if (fetchSession) {
-				criteria.setFetchMode("sessionVO", FetchMode.JOIN);
-				criteria.createCriteria("sessionVO");
-			}
-
-			if (withDewarHistory) {
-				criteria.setFetchMode("dewarTransportHistoryVOs", FetchMode.JOIN);
-			}
-
-			if (withContainer) {
-				criteria.setFetchMode("containerVOs", FetchMode.JOIN);
-			}
-
-			criteria.addOrder(Order.desc("dewarId"));
-
-			return criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+			return this.entityManager.createQuery(cq).getResultList();
 		} catch (Exception exp) {
 			exp.printStackTrace();
 			return null;
@@ -496,20 +501,32 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 	}
 
 	public List<Dewar3VO> findByDateWithHistory(final java.sql.Date firstDate) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Dewar3VO.class);
-		Criteria shippingCriteria = criteria.createCriteria("shippingVO");
 
-		if (firstDate != null)
-			shippingCriteria.add(Restrictions.ge("creationDate", firstDate));
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		criteria.addOrder(Order.desc("dewarId"));
-		criteria.setFetchMode("dewarTransportHistoryVOs", FetchMode.JOIN);
-		
-		List<Dewar3VO> dewars = criteria.list();
-		// dewars = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+		CriteriaQuery<Dewar3VO> cq = cb.createQuery(Dewar3VO.class);
+		Root<Dewar3VO> dewarRoot = cq.from(Dewar3VO.class);
 
+// Fetch joins
+		dewarRoot.fetch("dewarTransportHistoryVOs", JoinType.LEFT);
+
+// Join with Shipping3VO
+		Join<Dewar3VO, Shipping3VO> shippingJoin = dewarRoot.join("shippingVO");
+
+// Adding conditions
+		if (firstDate != null) {
+			cq.where(cb.greaterThanOrEqualTo(shippingJoin.get("creationDate"), firstDate));
+		}
+
+// Ordering
+		cq.orderBy(cb.desc(dewarRoot.get("dewarId")));
+
+// Set distinct true to mimic `setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)`
+		cq.distinct(true);
+
+// Execute query
+		List<Dewar3VO> dewars = em.createQuery(cq).getResultList();
 		return dewars;
 	}
 

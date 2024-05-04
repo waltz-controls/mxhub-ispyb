@@ -27,8 +27,6 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.server.biosaxs.services.core.measurement.Measurement3ServiceLocal;
 import ispyb.server.mx.services.ws.rest.datacollectiongroup.DataCollectionGroupRestWsServiceLocal;

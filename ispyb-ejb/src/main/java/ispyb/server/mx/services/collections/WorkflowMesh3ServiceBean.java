@@ -21,6 +21,7 @@ package ispyb.server.mx.services.collections;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
+import ispyb.server.mx.vos.collections.Workflow3VO;
 import ispyb.server.mx.vos.collections.WorkflowMesh3VO;
 
 import java.util.List;
@@ -33,11 +34,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -177,18 +175,21 @@ public class WorkflowMesh3ServiceBean implements WorkflowMesh3Service,
 	@SuppressWarnings("unchecked")
 	public List<WorkflowMesh3VO> findByWorkflowId(final Integer workflowId) throws Exception{
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(WorkflowMesh3VO.class);
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaQuery<WorkflowMesh3VO> cq = cb.createQuery(WorkflowMesh3VO.class);
+		Root<WorkflowMesh3VO> workflowMeshRoot = cq.from(WorkflowMesh3VO.class);
 
+// Join to workflowVO if workflowId is provided
 		if (workflowId != null) {
-			Criteria subCrit = crit.createCriteria("workflowVO");
-			subCrit.add(Restrictions.eq("workflowId", workflowId));
+			Join<WorkflowMesh3VO, Workflow3VO> workflowJoin = workflowMeshRoot.join("workflowVO", JoinType.INNER);
+			cq.where(cb.equal(workflowJoin.get("workflowId"), workflowId));
 		}
-		crit.addOrder(Order.asc("workflowMeshId"));
 
-		List<WorkflowMesh3VO> foundEntities = crit.list();
+		cq.orderBy(cb.asc(workflowMeshRoot.get("workflowMeshId")));
+
+// Execute the query
+		List<WorkflowMesh3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	

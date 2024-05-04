@@ -25,10 +25,7 @@ import java.util.Map;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -49,30 +46,24 @@ public class DewarRestWsServiceBean implements DewarRestWsService, DewarRestWsSe
 				"from v_dewar_summary ";
 	}
 
-	
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query ){
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
+
+	@Override
+	public List<Map<String, Object>> getDewarViewBySessionId(int sessionId,int proposalId) {
+		String sqlQuery = BySessionId
+				.replace(":sessionId", String.valueOf(sessionId))
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 
-	@Override
-	public List<Map<String, Object>> getDewarViewBySessionId(int sessionId,int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
-
-
 	public List<Map<String, Object>> getDewarViewByProposalId(int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProposalId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String sqlQuery = ByProposalId
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 
 

@@ -23,6 +23,7 @@ package ispyb.server.biosaxs.services.core.analysis;
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.datacollection.SaxsDataCollection3VO;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,9 @@ import java.util.Map;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 
 
@@ -46,11 +45,9 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 
 
 	private List<Map<String, Object>> getAll(String mySQLQuery) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -66,26 +63,22 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId)
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId, String experimentType) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId, experimentType);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("experimentType", experimentType);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId, experimentType)
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":experimentType", experimentType);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -93,85 +86,76 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListBySessionId(
 			Integer proposalId, Integer sessionId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListBySessionId(proposalId, sessionId);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getExperimentListBySessionId(proposalId, sessionId)
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sessionId", String.valueOf(sessionId));
+
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getExperimentListByExperimentId(
 			Integer proposalId, Integer experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByExperimentId(proposalId, experimentId);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("experimentId", experimentId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByExperimentId(proposalId, experimentId)
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":experimentId", String.valueOf(experimentId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String,Object>> getCompactAnalysisByExperimentId(int experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByExperimentId();
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("experimentId", experimentId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByExperimentId()
+				.replace(":experimentId", String.valueOf(experimentId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByProposalId(Integer proposalId, Integer limit) {
-		StringBuilder mySQLQuery = new StringBuilder(SQLQueryKeeper.getAnalysisCompactQueryByProposalId(limit));
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery.toString());
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(limit)
+						.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByProposalId(Integer proposalId, Integer start, Integer limit) {
-		StringBuilder mySQLQuery = new StringBuilder(SQLQueryKeeper.getAnalysisCompactQueryByProposalId(start, limit));
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery.toString());
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByProposalId(start, limit)
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
 	@Override
-	public  java.math.BigInteger getCountCompactAnalysisByExperimentId(Integer proposalId) {
-		StringBuilder mySQLQuery = new StringBuilder(SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId(proposalId));
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery.toString());
-		query.setParameter("proposalId", proposalId);
-		return 	( java.math.BigInteger)query.uniqueResult();
+	public BigInteger getCountCompactAnalysisByExperimentId(Integer proposalId) {
+		String mySQLQuery = SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId(proposalId)
+				.replace(":proposalId", String.valueOf(proposalId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, BigInteger.class);
+		return 	(BigInteger) query.getResultList()
+				.stream()
+				.findAny()
+				.get();//TODO NPE, class cast safety
 	}
 	
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisBySubtractionId(String subtractionId) {
-		StringBuilder mySQLQuery = new StringBuilder(SQLQueryKeeper.getAnalysisCompactQueryBySubtractionId());
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery.toString());
-		query.setParameter("subtractionId", subtractionId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryBySubtractionId()
+				.replace(":subtractionId", subtractionId);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -184,16 +168,12 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 
 	@Override
 	public List<Map<String, Object>> getCompactAnalysisByMacromoleculeId(Integer proposalId, Integer macromoleculeId) {
-		StringBuilder mySQLQuery = new StringBuilder(SQLQueryKeeper.getAnalysisCompactQueryByMacromoleculeId());
-		System.out.println(mySQLQuery.toString());
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery.toString());
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("macromoleculeId", macromoleculeId);
-		
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		@SuppressWarnings("unchecked")   
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisCompactQueryByMacromoleculeId()
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":macromoleculeId", String.valueOf(macromoleculeId));
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	

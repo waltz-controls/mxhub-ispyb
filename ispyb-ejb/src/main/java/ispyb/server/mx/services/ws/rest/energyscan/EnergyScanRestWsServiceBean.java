@@ -25,10 +25,7 @@ import java.util.Map;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -43,30 +40,24 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
+		String sqlQuery = BySessionId
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":sessionId", String.valueOf(sessionId));
 
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
-		
-		return executeSQLQuery(query);
-	}
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query ){
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
+
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int energyScanId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ById);
+		String sqlQuery = ById
+				.replace(":proposalId", String.valueOf(proposalId))
+				.replace(":energyScanId", String.valueOf(energyScanId));
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
 		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("energyScanId", energyScanId);
-		
-		return executeSQLQuery(query);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 }

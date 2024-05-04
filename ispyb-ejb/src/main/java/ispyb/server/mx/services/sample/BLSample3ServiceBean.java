@@ -24,19 +24,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import ispyb.server.common.vos.shipping.Dewar3VO;
+import ispyb.server.common.vos.shipping.Shipping3VO;
 import jakarta.annotation.Resource;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.common.util.StringUtils;
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
@@ -111,7 +108,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public BLSample3VO create(final BLSample3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -126,7 +122,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public BLSample3VO update(final BLSample3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -139,7 +134,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
 		BLSample3VO vo = findByPk(pk, false, false, false);
 		delete(vo);
 	}
@@ -152,7 +146,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public void delete(final BLSample3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
 		entityManager.remove(vo);
 	}
 
@@ -167,7 +160,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public BLSample3VO findByPk(final Integer pk, final boolean withEnergyScan, final boolean withSubSamples, final boolean withSampleImages) throws Exception {
 	
-		checkCreateChangeRemoveAccess();
 		try {
 			return (BLSample3VO) entityManager.createQuery(FIND_BY_PK(withEnergyScan, withSubSamples, withSampleImages)).setParameter("pk", pk)
 					.getSingleResult();
@@ -194,65 +186,45 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 			final Integer containerId, final String dmCode, Integer sortView) throws Exception {
 
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(BLSample3VO.class);
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-
-		Criteria containerCriteria = criteria.createCriteria("containerVO");
-		Criteria dewarCriteria = containerCriteria.createCriteria("dewarVO");
-
-		List<BLSample3VO> ret = new ArrayList<BLSample3VO>();
-
-		if (sortView == null) {
-			sortView = 0;
-		}
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<BLSample3VO> cq = cb.createQuery(BLSample3VO.class);
+		Root<BLSample3VO> sample = cq.from(BLSample3VO.class);
+		Join<BLSample3VO, Container3VO> container = sample.join("containerVO");
+		Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
 
 		if (!StringUtils.isEmpty(dmCode)) {
-			criteria.add(Restrictions.like("code", dmCode));
+			cq.where(cb.like(sample.get("code"), dmCode));
 		}
 
 		if (containerId != null) {
-			containerCriteria.add(Restrictions.eq("containerId", containerId));
-			criteria.addOrder(new CastDecimalOrder("location", true));
-			// ret = criteria.addOrder(Order.asc("location")).list();
-			List<BLSample3VO> foundEntities = criteria.list();
-			return foundEntities;
+			cq.where(cb.equal(container.get("containerId"), containerId));
+			cq.orderBy(cb.asc(sample.get("location"))); // Handling CastDecimalOrder in JPA might need custom function or logic.
 		}
-		if (dewarIds != null) {
-			dewarCriteria.add(Restrictions.in("dewarId", dewarIds));
 
-			if (sortView.equals(2)) {
-				dewarCriteria.addOrder(Order.asc("code"));
-				containerCriteria.addOrder(Order.asc("code"));
-				// criteria.addOrder(Order.asc("location"));
-				criteria.addOrder(new CastDecimalOrder("location", true));
+		if (dewarIds != null) {
+			cq.where(dewar.get("dewarId").in(dewarIds));
+			if (sortView != null && sortView.equals(2)) {
+				cq.orderBy(cb.asc(dewar.get("code")), cb.asc(container.get("code")), cb.asc(sample.get("location")));
 			} else {
-				Criteria proteinCriteria = session.createCriteria("crystalVO").createCriteria("proteinVO");
-				//criteria.addOrder(Order.asc("name"));
-				proteinCriteria.addOrder(Order.asc("acronym"));
+				Join<BLSample3VO, Crystal3VO> crystal = sample.join("crystalVO");
+				Join<Crystal3VO, Protein3VO> protein = crystal.join("proteinVO");
+				cq.orderBy(cb.asc(protein.get("acronym")));
 			}
-			List<BLSample3VO> foundEntities = criteria.list();
-			return foundEntities;
 		}
 
 		if (shippingId != null) {
-			Criteria shippingCriteria = dewarCriteria.createCriteria("shippingVO");
-			shippingCriteria.add(Restrictions.eq("shippingId", shippingId));
-			if (sortView.equals(2)) {
-				dewarCriteria.addOrder(Order.asc("code"));
-				containerCriteria.addOrder(Order.asc("code"));
-				// criteria.addOrder(Order.asc("location"));
-				criteria.addOrder(new CastDecimalOrder("location", true));
+			Join<Dewar3VO, Shipping3VO> shipping = dewar.join("shippingVO");
+			cq.where(cb.equal(shipping.get("shippingId"), shippingId));
+			if (sortView != null && sortView.equals(2)) {
+				cq.orderBy(cb.asc(dewar.get("code")), cb.asc(container.get("code")), cb.asc(sample.get("location")));
 			} else {
-				Criteria proteinCriteria = session.createCriteria("crystalVO").createCriteria("proteinVO");
-				proteinCriteria.addOrder(Order.asc("acronym"));
-				criteria.addOrder(Order.asc("name"));
+				Join<BLSample3VO, Crystal3VO> crystal = sample.join("crystalVO");
+				Join<Crystal3VO, Protein3VO> protein = crystal.join("proteinVO");
+				cq.orderBy(cb.asc(protein.get("acronym")), cb.asc(sample.get("name")));
 			}
-			List<BLSample3VO> foundEntities = criteria.list();
-			return foundEntities;
 		}
 
-		return ret;
+		return entityManager.createQuery(cq).getResultList();
 	}
 	
 	public List<BLSample3VO> findByShippingId(final Integer shippingId, final Integer sortView) throws Exception {
@@ -264,9 +236,29 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 		EJBAccessTemplate template = new EJBAccessTemplate(LOG, context, this);
 		List orders = (List) template.execute(new EJBAccessCallback() {
 			public Object doInEJBAccess(Object parent) throws Exception {
-				Session session = (Session) entityManager.getDelegate();
-				List foundIds = session.createCriteria(BLSample3VO.class).createCriteria("containerVO").createCriteria("dewarVO")
-						.createCriteria("shippingVO").add(Restrictions.eq("shippingId", shippingId)).list();
+				// Obtain an instance of CriteriaBuilder from the EntityManager
+				CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+// Create an instance of CriteriaQuery for the BLSample3VO
+				CriteriaQuery<BLSample3VO> cq = cb.createQuery(BLSample3VO.class);
+
+// Define the root of the query from which paths originate
+				Root<BLSample3VO> sample = cq.from(BLSample3VO.class);
+
+// Define joins across the entity associations
+				Join<BLSample3VO, Container3VO> container = sample.join("containerVO");
+				Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
+				Join<Dewar3VO, Shipping3VO> shipping = dewar.join("shippingVO");
+
+// Add the condition (where clause)
+				cq.where(cb.equal(shipping.get("shippingId"), shippingId));
+
+// Prepare the query to execute
+				TypedQuery<BLSample3VO> query = entityManager.createQuery(cq);
+
+// Execute the query and get the results
+				List<BLSample3VO> foundIds = query.getResultList();
+
 				return foundIds;
 			}
 		});
@@ -300,10 +292,31 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<BLSample3VO> findByContainerId(final Integer containerId) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		return session.createCriteria(BLSample3VO.class).createCriteria("containerVO")
-				.add(Restrictions.eq("containerId", containerId)).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-				.list();
+		// Obtain the CriteriaBuilder from the EntityManager
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery for BLSample3VO
+		CriteriaQuery<BLSample3VO> cq = cb.createQuery(BLSample3VO.class);
+
+// Define the root of the query, starting from BLSample3VO
+		Root<BLSample3VO> sampleRoot = cq.from(BLSample3VO.class);
+
+// Perform a join to navigate the association from BLSample3VO to ContainerVO
+		Join<BLSample3VO, Container3VO> containerJoin = sampleRoot.join("containerVO");
+
+// Specify the distinct true to get distinct results
+		cq.select(sampleRoot).distinct(true);
+
+// Add a where clause to the CriteriaQuery
+		cq.where(cb.equal(containerJoin.get("containerId"), containerId));
+
+// Create the TypedQuery
+		TypedQuery<BLSample3VO> query = entityManager.createQuery(cq);
+
+// Execute the query and get the result list
+		List<BLSample3VO> results = query.getResultList();
+
+		return results;
 	}
 	
 	public List<BLSample3VO> findByCodeAndShippingId(final String dmCode, final Integer shippingId) throws Exception {
@@ -621,20 +634,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	}
 
 	/**
-	 * Check if user has access rights to create, change and remove BLSample3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
-	}
-
-	/**
 	 * Get all BLSample3 entity VOs from a collection of BLSample3 local entities.
 	 * 
 	 * @param localEntities
@@ -743,7 +742,6 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	public BLSampleWS3VO findForWSByPk(final Integer pk, final boolean withEnergyScan, final boolean withSubSamples, final boolean withSampleImages) throws Exception {
 	
-		checkCreateChangeRemoveAccess();
 		try {
 			BLSample3VO found = (BLSample3VO) entityManager.createQuery(FIND_BY_PK(withEnergyScan, withSubSamples, withSampleImages)).setParameter("pk", pk)
 					.getSingleResult();
@@ -799,25 +797,42 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	@SuppressWarnings("unchecked")
 	public List<BLSample3VO> findByProposalIdAndDewarNull(final Integer proposalId) throws Exception {
 
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
+		// Obtain the EntityManager and CriteriaBuilder
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria criteria = session.createCriteria(BLSample3VO.class);
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		criteria.add(Restrictions.isNull("containerVO"));
-		// Criteria subCritContainer = criteria.createCriteria("containerVO");
-		// subCritContainer.add(Restrictions.isNull("dewarVO"));
+// Create a CriteriaQuery for BLSample3VO
+		CriteriaQuery<BLSample3VO> cq = cb.createQuery(BLSample3VO.class);
 
+// Define the root of the query, starting from BLSample3VO
+		Root<BLSample3VO> sampleRoot = cq.from(BLSample3VO.class);
+
+// Specify that the results should be distinct
+		cq.select(sampleRoot).distinct(true);
+
+// Add condition to check if 'containerVO' is null
+		sampleRoot.join("containerVO", JoinType.LEFT); // Create a left join
+		Predicate containerIsNull = cb.isNull(sampleRoot.get("containerVO"));
+		cq.where(containerIsNull);
+
+// Check if proposalId is not null and then add necessary joins and conditions
 		if (proposalId != null) {
-			Criteria subCritCrystal = criteria.createCriteria("crystalVO");
-			Criteria subCritProtein = subCritCrystal.createCriteria("proteinVO");
-			Criteria subsubCritProposal = subCritProtein.createCriteria("proposalVO");
-			subsubCritProposal.add(Restrictions.eq("proposalId", proposalId));
-			// criteria.createAlias("proposalVO", "ps");
-			// criteria.add(Restrictions.eq("ps.proposalId", proposalId));
+			Join<BLSample3VO, Crystal3VO> crystalJoin = sampleRoot.join("crystalVO");
+			Join<Crystal3VO, Protein3VO> proteinJoin = crystalJoin.join("proteinVO");
+			Join<Protein3VO, Proposal3VO> proposalJoin = proteinJoin.join("proposalVO");
+
+			// Add a condition on proposalId
+			Predicate proposalIdEquals = cb.equal(proposalJoin.get("proposalId"), proposalId);
+			cq.where(proposalIdEquals);
 		}
 
-		return criteria.list();
+// Create the TypedQuery
+		TypedQuery<BLSample3VO> query = em.createQuery(cq);
+
+// Execute the query and get the result list
+		List<BLSample3VO> results = query.getResultList();
+
+		return results;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -826,77 +841,72 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 			final Integer crystalId, final String name, final String code, final String status,
 			final Byte isInSampleChanger, final Integer shippingId, final String sortType) throws Exception {
 
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(BLSample3VO.class);
-		Criteria subCritCrystal = null;
-		Criteria subCritProtein = null;
-		Criteria subCritProposal = null;
-		Criteria subCritContainer = null;
-		Criteria subCritDewar = null;
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+		CriteriaQuery<BLSample3VO> cq = cb.createQuery(BLSample3VO.class);
+		Root<BLSample3VO> sampleRoot = cq.from(BLSample3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (proposalId != null) {
-			subCritCrystal = criteria.createCriteria("crystalVO");
-			subCritProtein = subCritCrystal.createCriteria("proteinVO");
-			subCritProposal = subCritProtein.createCriteria("proposalVO");
-			subCritProposal.add(Restrictions.eq("proposalId", proposalId));
+			Join<BLSample3VO, Crystal3VO> crystalJoin = sampleRoot.join("crystalVO");
+			Join<Crystal3VO, Protein3VO> proteinJoin = crystalJoin.join("proteinVO");
+			Join<Protein3VO, Proposal3VO> proposalJoin = proteinJoin.join("proposalVO");
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
 		if (proteinId != null || acronym != null) {
-			if (subCritCrystal == null)
-				subCritCrystal = criteria.createCriteria("crystalVO");
-			if (subCritProtein == null)
-				subCritProtein = subCritCrystal.createCriteria("proteinVO");
+			Join<BLSample3VO, Crystal3VO> crystalJoin = sampleRoot.join("crystalVO", JoinType.LEFT);
+			Join<Crystal3VO, Protein3VO> proteinJoin = crystalJoin.join("proteinVO", JoinType.LEFT);
 			if (proteinId != null)
-				subCritProtein.add(Restrictions.eq("proteinId", proteinId));
-			if (acronym != null) {
-				subCritProtein.add(Restrictions.ilike("acronym", acronym));
-			}
-
+				predicates.add(cb.equal(proteinJoin.get("proteinId"), proteinId));
+			if (acronym != null)
+				predicates.add(cb.like(proteinJoin.get("acronym"), acronym));
 		}
 
 		if (crystalId != null) {
-			if (subCritCrystal == null)
-				subCritCrystal = criteria.createCriteria("crystalVO");
-			subCritCrystal.add(Restrictions.eq("crystalId", crystalId));
+			Join<BLSample3VO, Crystal3VO> crystalJoin = sampleRoot.join("crystalVO", JoinType.LEFT);
+			predicates.add(cb.equal(crystalJoin.get("crystalId"), crystalId));
 		}
 
-		if ((name != null) && (!name.isEmpty())) {
-			System.out.println("Addid restriction Name: " + name + " proposalId: " + proposalId);
-			criteria.add(Restrictions.like("name", name));
+		if (name != null && !name.isEmpty()) {
+			predicates.add(cb.like(sampleRoot.get("name"), name));
 		}
 
-		if ((code != null) && (!code.isEmpty())) {
-			criteria.add(Restrictions.like("code", code));
+		if (code != null && !code.isEmpty()) {
+			predicates.add(cb.like(sampleRoot.get("code"), code));
 		}
 
-		if ((status != null) && (!status.isEmpty())) {
-			criteria.add(Restrictions.eq("blSampleStatus", status));
+		if (status != null && !status.isEmpty()) {
+			predicates.add(cb.equal(sampleRoot.get("blSampleStatus"), status));
 		}
 
 		if (isInSampleChanger != null) {
-			criteria.add(Restrictions.eq("isInSampleChanger", isInSampleChanger));
-		}
-		if (shippingId != null) {
-			subCritContainer = criteria.createCriteria("containerVO");
-			subCritDewar = subCritContainer.createCriteria("dewarVO");
-			Criteria subCritShipping = subCritDewar.createCriteria("shippingVO");
-			subCritShipping.add(Restrictions.eq("shippingId", shippingId));
+			predicates.add(cb.equal(sampleRoot.get("isInSampleChanger"), isInSampleChanger));
 		}
 
+		if (shippingId != null) {
+			Join<BLSample3VO, Container3VO> containerJoin = sampleRoot.join("containerVO");
+			Join<Container3VO, Dewar3VO> dewarJoin = containerJoin.join("dewarVO");
+			Join<Dewar3VO, Shipping3VO> shippingJoin = dewarJoin.join("shippingVO");
+			predicates.add(cb.equal(shippingJoin.get("shippingId"), shippingId));
+		}
+
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
 		if (sortType != null) {
-			if (sortType.equals("container")) {
-				subCritContainer = criteria.createCriteria("containerVO");
-				subCritDewar = subCritContainer.createCriteria("dewarVO");
-				subCritDewar.addOrder(Order.asc("code"));
-				subCritContainer.addOrder(Order.asc("code"));
-			} else if (sortType.equals("name")) {
-				subCritProtein.addOrder(Order.asc("acronym"));
-				criteria.addOrder(Order.asc("name"));
+			if ("container".equals(sortType)) {
+				Join<BLSample3VO, Container3VO> containerJoin = sampleRoot.join("containerVO", JoinType.LEFT);
+				Join<Container3VO, Dewar3VO> dewarJoin = containerJoin.join("dewarVO", JoinType.LEFT);
+				cq.orderBy(cb.asc(dewarJoin.get("code")), cb.asc(containerJoin.get("code")));
+			} else if ("name".equals(sortType)) {
+				cq.orderBy(cb.asc(sampleRoot.get("name")));
 			}
 		}
-			
-		return criteria.list();
+
+		TypedQuery<BLSample3VO> query = em.createQuery(cq);
+		return query.getResultList();
 	}
 	
 	public List<BLSample3VO> findByCrystalNameCode(final Integer crystalId, final String name, final String code)

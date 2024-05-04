@@ -23,31 +23,25 @@ import ispyb.common.util.StringUtils;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
-import ispyb.server.mx.vos.collections.BeamLineSetup3VO;
-import ispyb.server.mx.vos.collections.DataCollection3VO;
-import ispyb.server.mx.vos.collections.DataCollectionWS3VO;
-import ispyb.server.mx.vos.collections.Detector3VO;
-import ispyb.server.mx.vos.collections.XDSInfo;
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import ispyb.server.mx.vos.collections.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ispyb.server.mx.vos.sample.BLSample3VO;
+import ispyb.server.mx.vos.sample.Crystal3VO;
+import ispyb.server.mx.vos.sample.Protein3VO;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -372,21 +366,39 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	public DataCollectionWS3VO findForWSDataCollectionFromImageDirectoryAndImagePrefixAndNumber(final String imageDirectory, final String imagePrefix,
 			final Integer dataCollectionNumber) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-		if (imageDirectory != null)
-			crit.add(Restrictions.like("imageDirectory", imageDirectory));
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-		if (imagePrefix != null)
-			crit.add(Restrictions.like("imagePrefix", imagePrefix));
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		if (dataCollectionNumber != null)
-			crit.add(Restrictions.eq("dataCollectionNumber", dataCollectionNumber));
+// Create the conditions (predicates) based on provided inputs
+		List<Predicate> predicates = new ArrayList<>();
 
-		crit.addOrder(Order.desc("startTime"));
+		if (imageDirectory != null) {
+			predicates.add(cb.like(dataCollectionRoot.get("imageDirectory"), imageDirectory));
+		}
 
-		List<DataCollection3VO> foundEntities = crit.list();
+		if (imagePrefix != null) {
+			predicates.add(cb.like(dataCollectionRoot.get("imagePrefix"), imagePrefix));
+		}
+
+		if (dataCollectionNumber != null) {
+			predicates.add(cb.equal(dataCollectionRoot.get("dataCollectionNumber"), dataCollectionNumber));
+		}
+
+// Apply all collected predicates into the where clause of the query
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+// Order by startTime in descending order
+		cq.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
+
+// Ensure DISTINCT results
+		cq.distinct(true);
+
+// Execute the query and collect results
+		List<DataCollection3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
+
+// Transform to DataCollectionWS3VO if necessary
 		DataCollectionWS3VO[] vos = getWSDataCollectionVOs(foundEntities);
 		if (vos == null || vos.length == 0)
 			return null;
@@ -467,38 +479,54 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	public List<DataCollection3VO> findFiltered(final String imageDirectory, final String imagePrefix, final Integer dataCollectionNumber,
 			final Integer sessionId, final Byte printableForReport, final Integer dataCollectionGroupId) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
-		Criteria subCritgroup = crit.createCriteria("dataCollectionGroupVO");
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																	// RESULTS !
+// Joining with DataCollectionGroupVO
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO", JoinType.INNER);
+
+// Adding conditions
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (sessionId != null) {
-			Criteria subCritSession = subCritgroup.createCriteria("sessionVO");
-			subCritSession.add(Restrictions.eq("sessionId", sessionId));
+			// Further joining through DataCollectionGroupVO to SessionVO
+			Join<DataCollectionGroup3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO", JoinType.INNER);
+			predicates.add(cb.equal(sessionJoin.get("sessionId"), sessionId));
 		}
 
 		if (dataCollectionGroupId != null) {
-			subCritgroup.add(Restrictions.eq("dataCollectionGroupId", dataCollectionGroupId));
+			predicates.add(cb.equal(groupJoin.get("dataCollectionGroupId"), dataCollectionGroupId));
 		}
 
-		if (imageDirectory != null)
-			crit.add(Restrictions.like("imageDirectory", imageDirectory));
+		if (imageDirectory != null) {
+			predicates.add(cb.like(dataCollectionRoot.get("imageDirectory"), imageDirectory));
+		}
 
-		if (imagePrefix != null)
-			crit.add(Restrictions.like("imagePrefix", imagePrefix));
+		if (imagePrefix != null) {
+			predicates.add(cb.like(dataCollectionRoot.get("imagePrefix"), imagePrefix));
+		}
 
-		if (dataCollectionNumber != null)
-			crit.add(Restrictions.eq("dataCollectionNumber", dataCollectionNumber));
+		if (dataCollectionNumber != null) {
+			predicates.add(cb.equal(dataCollectionRoot.get("dataCollectionNumber"), dataCollectionNumber));
+		}
 
 		if (printableForReport != null) {
-			crit.add(Restrictions.eq("printableForReport", printableForReport));
+			predicates.add(cb.equal(dataCollectionRoot.get("printableForReport"), printableForReport));
 		}
 
-		crit.addOrder(Order.desc("startTime"));
-		List<DataCollection3VO> foundEntities = crit.list();
+// Apply the conditions to the Criteria Query
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+// Order by startTime in descending order
+		cq.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
+
+// Make sure the results are distinct
+		cq.distinct(true);
+
+// Execute the query
+		List<DataCollection3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 
@@ -522,112 +550,82 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 			final Date experimentDateStart, final Date experimentDateEnd, final Integer minNumberOfImages, final Integer maxNumberOfImages,
 			final String imagePrefix, final Byte onlyPrintableForReport, final Integer maxRecords) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																	// RESULTS !
-		Criteria subCritgroup = crit.createCriteria("dataCollectionGroupVO");
-		Criteria subCritSample = null;
+// Join structures
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO", JoinType.INNER);
+		Join<DataCollectionGroup3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO", JoinType.INNER);
+		Join<Session3VO, Proposal3VO> proposalJoin = sessionJoin.join("proposalVO", JoinType.LEFT);
 
-		Criteria subCritSession = subCritgroup.createCriteria("sessionVO");
+// Sample and protein criteria are conditional
+		Join<DataCollectionGroup3VO, BLSample3VO> sampleJoin = null;
+		Join<BLSample3VO, Crystal3VO> crystalJoin = null;
+		Join<Crystal3VO, Protein3VO> proteinJoin = null;
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (proposalId != null) {
-			Criteria subsubCritProposal = subCritSession.createCriteria("proposalVO");
-			subsubCritProposal.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
-		if (sampleName != null) {
-			if (!StringUtils.isEmpty(sampleName)) {
-				subCritSample = subCritgroup.createCriteria("blSampleVO");
-				String Na;
-				Na = sampleName.replace('*', '%');
-				subCritSample.add(Restrictions.like("name", Na));
-			}
+		if (sampleName != null && !sampleName.isEmpty()) {
+			sampleJoin = groupJoin.join("blSampleVO", JoinType.INNER);
+			predicates.add(cb.like(sampleJoin.get("name"), sampleName.replace('*', '%')));
 		}
 
-		if (proteinAcronym != null) {
-			if (!StringUtils.isEmpty(proteinAcronym)) {
-				if (subCritSample == null)
-					subCritSample = subCritgroup.createCriteria("blSampleVO");
-				Criteria subsubCritCrystal = subCritSample.createCriteria("crystalVO");
-				Criteria subsubsubCritProtein = subsubCritCrystal.createCriteria("proteinVO");
-				String a;
-				a = proteinAcronym.replace('*', '%');
-				subsubsubCritProtein.add(Restrictions.like("acronym", a));
-			}
+		if (proteinAcronym != null && !proteinAcronym.isEmpty()) {
+			if (sampleJoin == null) sampleJoin = groupJoin.join("blSampleVO", JoinType.INNER);
+			crystalJoin = sampleJoin.join("crystalVO", JoinType.INNER);
+			proteinJoin = crystalJoin.join("proteinVO", JoinType.INNER);
+			predicates.add(cb.like(proteinJoin.get("acronym"), proteinAcronym.replace('*', '%')));
 		}
 
-		if (beamlineName != null) {
-			if (!StringUtils.isEmpty(beamlineName)) {
-				String n;
-				n = beamlineName.replace('*', '%');
-				subCritSession.add(Restrictions.like("beamlineName", n));
-			}
+		if (beamlineName != null && !beamlineName.isEmpty()) {
+			predicates.add(cb.like(sessionJoin.get("beamlineName"), beamlineName.replace('*', '%')));
 		}
 
 		if (experimentDateStart != null) {
-			if (Constants.DATABASE_IS_ORACLE()) {
-				// Number of days between 01.01.1970 and creationDateStart =
-				// msecs divided by the number of msecs per
-				// day
-				String days = String.valueOf(experimentDateStart.getTime() / (24 * 60 * 60 * 1000));
-				crit.add(Restrictions.sqlRestriction("startTime >= to_date('19700101', 'yyyymmdd') + " + days));
-				// query +=
-				// " AND o.startTime >= to_date('19700101', 'yyyymmdd') + " +
-				// days;
-			} else if (Constants.DATABASE_IS_MYSQL())
-				// query += " AND o.startTime >= '" + experimentDateStart + "'";
-				crit.add(Restrictions.ge("startTime", experimentDateStart));
-			else
-				LOG.error("Database type not set.");
+			predicates.add(cb.greaterThanOrEqualTo(sessionJoin.<Date>get("startTime"), experimentDateStart));
 		}
 
 		if (experimentDateEnd != null) {
-			if (Constants.DATABASE_IS_ORACLE()) {
-				// Number of days between 01.01.1970 and creationDateEnd = msecs
-				// divided by the number of msecs per day
-				String days = String.valueOf(experimentDateEnd.getTime() / (24 * 60 * 60 * 1000));
-				// query +=
-				// " AND o.startTime <= to_date('19700101', 'yyyymmdd') + " +
-				// days;
-				crit.add(Restrictions.sqlRestriction("startTime <= to_date('19700101', 'yyyymmdd') + " + days));
-			} else if (Constants.DATABASE_IS_MYSQL())
-				// query += " AND o.startTime <= '" + experimentDateEnd + "'";
-				crit.add(Restrictions.le("startTime", experimentDateEnd));
-			else
-				LOG.error("Database type not set.");
+			predicates.add(cb.lessThanOrEqualTo(sessionJoin.<Date>get("startTime"), experimentDateEnd));
 		}
 
 		if (minNumberOfImages != null) {
-			crit.add(Restrictions.ge("numberOfImages", minNumberOfImages));
+			predicates.add(cb.ge(dataCollectionRoot.<Integer>get("numberOfImages"), minNumberOfImages));
 		}
 
 		if (maxNumberOfImages != null) {
-			crit.add(Restrictions.le("numberOfImages", maxNumberOfImages));
+			predicates.add(cb.le(dataCollectionRoot.<Integer>get("numberOfImages"), maxNumberOfImages));
 		}
 
-		if (imagePrefix != null) {
-			if (!StringUtils.isEmpty(imagePrefix)) {
-				String p;
-				p = imagePrefix.replace('*', '%');
-				crit.add(Restrictions.ilike("imagePrefix", p));
-			}
+		if (imagePrefix != null && !imagePrefix.isEmpty()) {
+			predicates.add(cb.like(dataCollectionRoot.get("imagePrefix"), imagePrefix.replace('*', '%')));
 		}
 
 		if (onlyPrintableForReport != null) {
-			crit.add(Restrictions.eq("printableForReport", onlyPrintableForReport));
+			predicates.add(cb.equal(dataCollectionRoot.get("printableForReport"), onlyPrintableForReport));
 		}
 
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
+
+// Applying DISTINCT
+		cq.distinct(true);
+
+		TypedQuery<DataCollection3VO> query = em.createQuery(cq);
 		if (maxRecords != null) {
-			crit.setMaxResults(maxRecords);
+			query.setMaxResults(maxRecords);
 		}
 
-		crit.addOrder(Order.desc("startTime"));
-
-		List<DataCollection3VO> foundEntities = crit.list();
+		List<DataCollection3VO> foundEntities = query.getResultList();
 		return foundEntities;
+
 	}
 
 	/**
@@ -640,38 +638,51 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findByProtein(String proteinAcronym, final Byte printableForReport, final Integer proposalId) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
-		Criteria subCritgroup = crit.createCriteria("dataCollectionGroupVO");
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																	// RESULTS !
+// Joining related entities
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO", JoinType.LEFT);
+		Join<DataCollectionGroup3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO", JoinType.LEFT);
+		Join<Session3VO, Proposal3VO> proposalJoin = sessionJoin.join("proposalVO", JoinType.LEFT);
 
+// Conditionally joining sample and protein based on proteinAcronym presence
+		Join<DataCollectionGroup3VO, BLSample3VO> sampleJoin = null;
+		Join<BLSample3VO, Crystal3VO> crystalJoin = null;
+		Join<Crystal3VO, Protein3VO> proteinJoin = null;
+
+		List<Predicate> predicates = new ArrayList<>();
+
+// Adding conditions
 		if (proposalId != null) {
-			Criteria subCritSession = subCritgroup.createCriteria("sessionVO");
-			Criteria subsubCritProposal = subCritSession.createCriteria("proposalVO");
-			subsubCritProposal.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
-		if (proteinAcronym != null) {
-			Criteria subCritSample = subCritgroup.createCriteria("blSampleVO");
-			Criteria subsubCritCrystal = subCritSample.createCriteria("crystalVO");
-			Criteria subsubsubCritProtein = subsubCritCrystal.createCriteria("proteinVO");
-
-			if (!StringUtils.isEmpty(proteinAcronym))
-				proteinAcronym = proteinAcronym.replace('*', '%');
-			subsubsubCritProtein.add(Restrictions.like("acronym", proteinAcronym));
+		if (proteinAcronym != null && !proteinAcronym.isEmpty()) {
+			proteinAcronym = proteinAcronym.replace('*', '%');  // Handling wildcard character
+			sampleJoin = groupJoin.join("blSampleVO", JoinType.LEFT);
+			crystalJoin = sampleJoin.join("crystalVO", JoinType.LEFT);
+			proteinJoin = crystalJoin.join("proteinVO", JoinType.LEFT);
+			predicates.add(cb.like(proteinJoin.get("acronym"), proteinAcronym));
 		}
 
 		if (printableForReport != null) {
-			crit.add(Restrictions.eq("printableForReport", printableForReport));
+			predicates.add(cb.equal(dataCollectionRoot.get("printableForReport"), printableForReport));
 		}
 
-		crit.addOrder(Order.desc("startTime"));
+		cq.select(dataCollectionRoot)
+				.where(cb.and(predicates.toArray(new Predicate[0])))
+				.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
 
-		List<DataCollection3VO> foundEntities = crit.list();
+// Applying DISTINCT to ensure unique results
+		cq.distinct(true);
+
+		List<DataCollection3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 
 	/**
@@ -685,39 +696,48 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	public List<DataCollection3VO> findBySample(final Integer blSampleId, String sampleName, final Byte printableForReport, final Integer proposalId)
 			throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
-		Criteria subCritgroup = crit.createCriteria("dataCollectionGroupVO");
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT
-																	// RESULTS !
-		Criteria subCritSample = subCritgroup.createCriteria("blSampleVO");
+// Joining related entities
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO", JoinType.LEFT);
+		Join<DataCollectionGroup3VO, BLSample3VO> sampleJoin = groupJoin.join("blSampleVO", JoinType.LEFT);
+		Join<BLSample3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO", JoinType.LEFT);
+		Join<Session3VO, Proposal3VO> proposalJoin = sessionJoin.join("proposalVO", JoinType.LEFT);
 
+		List<Predicate> predicates = new ArrayList<>();
+
+// Adding conditions
 		if (proposalId != null) {
-			Criteria subCritSession = subCritgroup.createCriteria("sessionVO");
-			Criteria subsubCritProposal = subCritSession.createCriteria("proposalVO");
-			subsubCritProposal.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
 		if (blSampleId != null) {
-			subCritSample.add(Restrictions.eq("blSampleId", blSampleId));
+			predicates.add(cb.equal(sampleJoin.get("blSampleId"), blSampleId));
 		}
 
-		if (sampleName != null) {
-			if (!StringUtils.isEmpty(sampleName))
-				sampleName = sampleName.replace('*', '%');
-			subCritSample.add(Restrictions.like("name", sampleName));
+		if (sampleName != null && !sampleName.isEmpty()) {
+			sampleName = sampleName.replace('*', '%'); // Handling wildcard character
+			predicates.add(cb.like(sampleJoin.get("name"), sampleName));
 		}
 
 		if (printableForReport != null) {
-			crit.add(Restrictions.eq("printableForReport", printableForReport));
+			predicates.add(cb.equal(dataCollectionRoot.get("printableForReport"), printableForReport));
 		}
 
-		crit.addOrder(Order.desc("startTime"));
+		cq.select(dataCollectionRoot)
+				.where(cb.and(predicates.toArray(new Predicate[0])))
+				.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
 
-		List<DataCollection3VO> foundEntities = crit.list();
+// Applying DISTINCT to ensure unique results
+		cq.distinct(true);
+
+		List<DataCollection3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 
 	public DataCollection3VO loadEager(DataCollection3VO vo) throws Exception {
@@ -852,25 +872,41 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findLastCollect(final Date startDate, final Date endDate, final String[] beamline) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class);
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
+// Optional joins based on the presence of beamline criteria
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = null;
+		Join<DataCollectionGroup3VO, Session3VO> sessionJoin = null;
+
+		List<Predicate> predicates = new ArrayList<>();
+
+// Condition on start time
 		if (startDate != null) {
-			crit.add(Restrictions.ge("startTime", startDate));
+			predicates.add(cb.greaterThanOrEqualTo(dataCollectionRoot.get("startTime"), startDate));
 		}
 
+// Condition on end time
 		if (endDate != null) {
-			crit.add(Restrictions.le("endTime", endDate));
+			predicates.add(cb.lessThanOrEqualTo(dataCollectionRoot.get("endTime"), endDate));
 		}
-		if (beamline != null && beamline.length > 0) {
-			Criteria subCritgroup = crit.createCriteria("dataCollectionGroupVO");
-			Criteria subCritSession = subCritgroup.createCriteria("sessionVO");
-			subCritSession.add(Restrictions.in("beamlineName", beamline));
-		}
-		crit.addOrder(Order.desc("startTime"));
 
-		List<DataCollection3VO> foundEntities = crit.list();
+// Condition on beamline names if provided
+		if (beamline != null && beamline.length > 0) {
+			groupJoin = dataCollectionRoot.join("dataCollectionGroupVO", JoinType.LEFT);
+			sessionJoin = groupJoin.join("sessionVO", JoinType.LEFT);
+			predicates.add(sessionJoin.get("beamlineName").in((Object[]) beamline)); // Cast to Object array for safety with varargs
+		}
+
+// Apply all conditions
+		cq.select(dataCollectionRoot)
+				.where(predicates.toArray(new Predicate[0]))
+				.orderBy(cb.desc(dataCollectionRoot.get("startTime")));
+
+		List<DataCollection3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 
@@ -954,24 +990,47 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findByProposalId(int proposalId) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class).createCriteria("dataCollectionGroupVO").createCriteria("sessionVO")
-				.createCriteria("proposalVO").add(Restrictions.eq("proposalId", proposalId));
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		List<DataCollection3VO> foundEntities = crit.list();
+// Navigating through nested associations
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO");
+		Join<DataCollectionGroup3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO");
+		Join<Session3VO, Proposal3VO> proposalJoin = sessionJoin.join("proposalVO");
+
+// Applying condition on proposalId
+		Predicate condition = cb.equal(proposalJoin.get("proposalId"), proposalId);
+		cq.select(dataCollectionRoot)
+				.where(condition);
+
+		List<DataCollection3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findByProposalId(int proposalId, int dataCollectionId) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(DataCollection3VO.class).add(Restrictions.eq("dataCollectionId", dataCollectionId));
-		crit.createCriteria("dataCollectionGroupVO").createCriteria("sessionVO")
-				.createCriteria("proposalVO").add(Restrictions.eq("proposalId", proposalId));
+		CriteriaQuery<DataCollection3VO> cq = cb.createQuery(DataCollection3VO.class);
+		Root<DataCollection3VO> dataCollectionRoot = cq.from(DataCollection3VO.class);
 
-		List<DataCollection3VO> foundEntities = crit.list();
+// Navigating through nested associations and adding conditions on both DataCollection and Proposal
+		Join<DataCollection3VO, DataCollectionGroup3VO> groupJoin = dataCollectionRoot.join("dataCollectionGroupVO");
+		Join<DataCollectionGroup3VO, Session3VO> sessionJoin = groupJoin.join("sessionVO");
+		Join<Session3VO, Proposal3VO> proposalJoin = sessionJoin.join("proposalVO");
+
+// Conditions
+		Predicate dataCollectionCondition = cb.equal(dataCollectionRoot.get("dataCollectionId"), dataCollectionId);
+		Predicate proposalCondition = cb.equal(proposalJoin.get("proposalId"), proposalId);
+
+		cq.select(dataCollectionRoot)
+				.where(cb.and(dataCollectionCondition, proposalCondition));
+
+		List<DataCollection3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

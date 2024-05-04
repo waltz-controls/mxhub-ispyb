@@ -32,9 +32,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.server.biosaxs.services.sql.SqlTableMapper;
 import ispyb.server.common.exceptions.AccessDeniedException;

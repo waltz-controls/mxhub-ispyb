@@ -18,6 +18,7 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.screening;
 
+import ispyb.server.mx.vos.collections.DataCollection3VO;
 import ispyb.server.mx.vos.screening.Screening3VO;
 
 import java.util.ArrayList;
@@ -31,11 +32,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -202,22 +200,27 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	
 	@SuppressWarnings("unchecked")
 	public List<Screening3VO> findFiltered(final Integer dataCollectionId) throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Screening3VO.class);
-		Criteria subCritDc = crit.createCriteria("dataCollectionVO");
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaQuery<Screening3VO> cq = cb.createQuery(Screening3VO.class);
+		Root<Screening3VO> screeningRoot = cq.from(Screening3VO.class);
 
+// Join to dataCollectionVO
+		Join<Screening3VO, DataCollection3VO> dataCollectionJoin = screeningRoot.join("dataCollectionVO", JoinType.INNER);
+
+// Applying condition if dataCollectionId is not null
 		if (dataCollectionId != null) {
-			subCritDc.add(Restrictions.eq("dataCollectionId", dataCollectionId));
+			cq.where(cb.equal(dataCollectionJoin.get("dataCollectionId"), dataCollectionId));
 		}
-		
 
-		crit.addOrder(Order.desc("screeningId"));
+		cq.orderBy(cb.desc(screeningRoot.get("screeningId")));
 
-		List<Screening3VO> foundEntities = crit.list();
+// Ensure DISTINCT results
+		cq.distinct(true);
+
+// Execute the query
+		List<Screening3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 	

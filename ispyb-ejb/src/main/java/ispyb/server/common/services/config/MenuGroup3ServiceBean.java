@@ -29,10 +29,10 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.config.MenuGroup3VO;
@@ -232,16 +232,21 @@ public class MenuGroup3ServiceBean implements MenuGroup3Service,
 		
 		entityManager = entitymanagerFactory.createEntityManager();
 		try {
-			Session session = (Session) entityManager.getDelegate();
-			Criteria crit = session.createCriteria(MenuGroup3VO.class);
+			CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
-			crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+			CriteriaQuery<MenuGroup3VO> cq = cb.createQuery(MenuGroup3VO.class);
+			Root<MenuGroup3VO> menuGroupRoot = cq.from(MenuGroup3VO.class);
 
+// Applying a distinct result transformation to avoid duplicates
+			cq.distinct(true);
+
+// Adding conditions
 			if (name != null) {
-				crit.add(Restrictions.ilike("name", name));
+				cq.where(cb.like(cb.lower(menuGroupRoot.get("name")), "%" + name.toLowerCase() + "%"));
 			}
 
-			List<MenuGroup3VO> foundEntities = crit.list();
+// Execute query
+			List<MenuGroup3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 			List<MenuGroup3VO> vos = getMenuGroup3VOs(foundEntities);
 			return vos;
 		} finally {
