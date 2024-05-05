@@ -28,7 +28,7 @@
 		<version.jboss.spec.javaee.7.0>1.0.0.Final</version.jboss.spec.javaee.7.0>
 
 		<!-- other plugin versions -->
-		<version.compiler.plugin>3.1</version.compiler.plugin>
+		<version.compiler.plugin>3.8.1</version.compiler.plugin>
 		<version.ear.plugin>2.6</version.ear.plugin>
 		<version.ejb.plugin>2.3</version.ejb.plugin>
 		<version.war.plugin>2.5</version.war.plugin>
@@ -39,8 +39,8 @@
 		<openjpa.version>4.0.0</openjpa.version>
 
 		<!-- maven-compiler-plugin -->
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
 	</properties>
 
 	<repositories>
@@ -283,6 +283,7 @@
 	</dependencyManagement>
 
 	<build>
+		<pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -304,7 +305,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Compiler plugin enforces Java 1.6 compatibility and activates annotation processors -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.compiler.plugin}</version>
@@ -313,19 +313,8 @@
 					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
-			<!-- The WildFly plugin deploys your ear to a local JBoss AS container -->
-			<!-- Due to Maven's lack of intelligence with EARs we need to configure 
-				the wildfly maven plugin to skip deployment for all modules. We then enable 
-				it specifically in the ear module. -->
-			<plugin>
-				<groupId>org.wildfly.plugins</groupId>
-				<artifactId>wildfly-maven-plugin</artifactId>
-				<version>${version.wildfly.maven.plugin}</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
 		</plugins>
+		</pluginManagement>
 	</build>
 
 </project>
