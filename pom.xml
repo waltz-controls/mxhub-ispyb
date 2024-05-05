@@ -36,6 +36,7 @@
 		<resteasy.version>6.2.3.Final</resteasy.version>
 		<jakartaee.version>10.0.0</jakartaee.version>
 		<jakarta.api.version>3.1.0</jakarta.api.version>
+		<openjpa.version>4.0.0</openjpa.version>
 
 		<!-- maven-compiler-plugin -->
 		<maven.compiler.target>1.7</maven.compiler.target>
@@ -79,7 +80,11 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.19</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.openjpa</groupId>
+			<artifactId>openjpa</artifactId>
+			<version>${openjpa.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
