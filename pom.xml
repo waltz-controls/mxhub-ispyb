@@ -39,7 +39,7 @@
 		<openjpa.version>4.0.0</openjpa.version>
 
 		<!-- maven-compiler-plugin -->
-		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.source>21</maven.compiler.source>
 	</properties>
 
 	<repositories>

@@ -17,16 +17,32 @@ WORKDIR /src
 RUN mvn clean package -DskipTests -q --no-transfer-progress
 
 # Stage 2: Setting up the TomEE server
-FROM tomee:10-jre17-ubuntu
+# Start with a base image containing Java runtime 21
+FROM eclipse-temurin:21-jre
+
+# Install necessary packages for downloading and managing Tomcat
+RUN apt-get update && apt-get install -y wget tar
+
+# Define environment variables for Tomcat version and installation directory
+ENV TOMCAT_VERSION 10.0.0-M1
+ENV CATALINA_HOME /usr/local/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+
+# Download and install Tomcat
+RUN wget https://downloads.apache.org/tomee/tomee-10.0.0-M1/apache-tomee-$TOMCAT_VERSION-webprofile.tar.gz -O /tmp/tomcat.tar.gz \
+    && tar -xvf /tmp/tomcat.tar.gz -C /usr/local \
+    && mv /usr/local/apache-tomee-webprofile-$TOMCAT_VERSION $CATALINA_HOME \
+    && rm /tmp/tomcat.tar.gz \
+    && chmod +x $CATALINA_HOME/bin/catalina.sh
 
 # Copy the WAR file from the builder stage to the TomEE webapps directory
-COPY --from=builder /src/ispyb-ear/target/ispyb.ear /usr/local/tomee/webapps/
+COPY --from=builder /src/ispyb-ear/target/ispyb.ear $CATALINA_HOME/webapps/
 
 # Copy tomee.xml configuration file
-COPY configuration/tomee.xml /usr/local/tomee/conf/
+COPY configuration/tomee.xml $CATALINA_HOME/conf/
 
 # Copy jdbc driver configuration file
-COPY configuration/mariadb/mariadb-java-client-3.3.3.jar /usr/local/tomee/lib/
+COPY configuration/mariadb/mariadb-java-client-3.3.3.jar $CATALINA_HOME/lib/
 
 # Expose the port TomEE is running on
 EXPOSE 8080
