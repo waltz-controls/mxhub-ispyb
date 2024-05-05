@@ -39,8 +39,7 @@
 		<openjpa.version>4.0.0</openjpa.version>
 
 		<!-- maven-compiler-plugin -->
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.source>17</maven.compiler.source>
 	</properties>
 
 	<repositories>
@@ -309,8 +308,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.compiler.plugin}</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<release>${maven.compiler.source}</release>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -155,6 +155,12 @@ Build your project and deploy the resulting EAR file to TomEE.
 
 Start or restart TomEE to pick up the new configurations.
 
+## Using docker
+
+For CI/CD use .docker/Dockerfile as it uses multistaged build: `docker build . -f .docker/Dockerfile`
+
+For local development/testing use Dockerfile: `docker build .` [Optionaly provide name/tag etc]
+
 ## Troubleshooting
 
 - Connection Issues: Ensure the database URL, username, and password are correct in tomee.xml.

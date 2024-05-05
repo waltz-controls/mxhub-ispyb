@@ -1,16 +1,18 @@
-FROM jboss/wildfly:17.0.1.Final
+FROM tomee:10-jre17-ubuntu
 
-# Copies the standalone.xml from the configuration directory into the WildFly configuration directory
-COPY configuration/standalone.xml /opt/jboss/wildfly/standalone/configuration/
+# Copy the WAR file from the builder stage to the TomEE webapps directory
+COPY ispyb-ear/target/ispyb.ear /usr/local/tomee/webapps/
 
-# Copies the MySQL module files from the local directory to the WildFly modules directory
-COPY configuration/mysql /opt/jboss/wildfly/modules/system/layers/base/com/mysql
+# Copy tomee.xml configuration file
+COPY configuration/tomee.xml /usr/local/tomee/conf/
 
-# Copies the EAR file from the target directory to the WildFly deployments directory
-COPY ispyb-ear/target/ispyb.ear /opt/jboss/wildfly/standalone/deployments/
+# Copy jdbc driver configuration file
+COPY configuration/mariadb/mariadb-java-client-3.3.3.jar /usr/local/tomee/lib/
 
-# Expose the port WildFly will run on
+# Expose the port TomEE is running on
 EXPOSE 8080
 
-# Set the default command for the container (starts WildFly)
-ENTRYPOINT ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=*"
+
+# Start TomEE server
+CMD ["catalina.sh", "run"]
