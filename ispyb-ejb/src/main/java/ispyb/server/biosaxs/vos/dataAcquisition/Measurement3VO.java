@@ -27,16 +27,7 @@ import ispyb.server.biosaxs.vos.datacollection.Run3VO;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
@@ -47,6 +38,7 @@ import com.google.gson.annotations.Expose;
  */
 @Entity
 @Table(name = "Measurement")
+@Access(AccessType.FIELD)
 public class Measurement3VO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
