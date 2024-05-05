@@ -48,6 +48,15 @@
    [INFO] ispyb-bcr ......................................... SUCCESS [2.217s]
    [INFO] ispyb-bcr-ear ..................................... SUCCESS [1.806s]
    ```
+# Database
+
+For development purposes and quick start up use bootstrap script in ispyb-database:
+
+```
+$> cd ispyb-database/scripts
+$> ./bootstrap_db.sh
+```
+This will create all required users and tables in MariaDb. See the scripts file for more details.
 
 ## Database creation and update
 

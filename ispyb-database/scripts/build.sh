@@ -26,23 +26,23 @@ then
 fi
 
 echo "Dropping + creating build database"
-mysql --defaults-file=.my.cnf --host=localhost --port=3306  -e "DROP DATABASE IF EXISTS $DB; CREATE DATABASE $DB; SET GLOBAL log_bin_trust_function_creators=ON;"
+mysql --defaults-file=.my.cnf --host=127.0.0.1 --port=3306  -e "DROP DATABASE IF EXISTS $DB; CREATE DATABASE $DB; SET GLOBAL log_bin_trust_function_creators=ON;"
 
 if [[ $? -eq 0 ]]
 then
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../schema/1_tables.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../schema/2_lookups.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../schema/3_data.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../schema/1_tables.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../schema/2_lookups.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../schema/3_data.sql
   if [ -z "${NO_USERPORTAL_DATA}" ]
   then
-    mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../schema/4_data_user_portal.sql
+    mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../schema/4_data_user_portal.sql
     echo "Importing User Portal Data"
   fi
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../schema/5_routines.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../grants/ispyb_acquisition.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../grants/ispyb_processing.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../grants/ispyb_web.sql
-  mysql --defaults-file=.my.cnf  --host=localhost --port=3306 -D $DB < ../grants/ispyb_import.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../schema/5_routines.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../grants/ispyb_acquisition.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../grants/ispyb_processing.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../grants/ispyb_web.sql
+  mysql --defaults-file=.my.cnf  --host=127.0.0.1 --port=3306 -D $DB < ../grants/ispyb_import.sql
 
   arr=$(${dir}/missed_updates.sh)
 
@@ -60,7 +60,7 @@ then
         echo "  Looking for: UPDATE SchemaStatus SET schemaStatus = 'DONE' WHERE scriptName = '${sql_file}';"        
         exit 1
       fi
-      mysql --defaults-file=.my.cnf --host=localhost --port=3306 -D ${DB} < "schema/updates/${sql_file}"
+      mysql --defaults-file=.my.cnf --host=127.0.0.1 --port=3306 -D ${DB} < "schema/updates/${sql_file}"
     done
   else
     echo "No new schema/updates/*.sql files."
