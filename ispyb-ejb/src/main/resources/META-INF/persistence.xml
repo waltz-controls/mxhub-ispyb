@@ -8,9 +8,9 @@
 	<persistence-unit name="ispyb_config" transaction-type="JTA">
 		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ispyb_build"/>
-			<property name="javax.persistence.jdbc.user" value="pxuser"/>
-			<property name="javax.persistence.jdbc.password" value="pxuser"/>
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ispyb_build"/>
+			<property name="jakarta.persistence.jdbc.user" value="pxuser"/>
+			<property name="jakarta.persistence.jdbc.password" value="pxuser"/>
 			<property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
 		</properties>
 	</persistence-unit>
@@ -18,9 +18,9 @@
 	<persistence-unit name="ispyb_db" transaction-type="JTA">
 		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ispyb_build"/>
-			<property name="javax.persistence.jdbc.user" value="pxuser"/>
-			<property name="javax.persistence.jdbc.password" value="pxuser"/>
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ispyb_build"/>
+			<property name="jakarta.persistence.jdbc.user" value="pxuser"/>
+			<property name="jakarta.persistence.jdbc.password" value="pxuser"/>
 			<property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
 		</properties>
 	</persistence-unit>
