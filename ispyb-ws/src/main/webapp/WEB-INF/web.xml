@@ -7,10 +7,6 @@
 
 	<display-name>ISPyB</display-name>
 	<description>ISPyB Web Application</description>
-<!-- 	<context-param> -->
-<!-- 		<param-name>resteasy.scan</param-name> -->
-<!-- 		<param-value>true</param-value> -->
-<!-- 	</context-param> -->
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>ispybWS</web-resource-name>

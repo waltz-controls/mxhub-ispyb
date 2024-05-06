@@ -20,7 +20,8 @@ RUN wget https://downloads.apache.org/tomee/tomee-10.0.0-M1/apache-tomee-$TOMCAT
 COPY ispyb-ear/target/ispyb.ear $CATALINA_HOME/webapps/
 
 # Copy tomee.xml configuration file to the Tomcat conf directory
-COPY configuration/tomee.xml $CATALINA_HOME/conf/
+COPY configuration/tomee/tomee.xml $CATALINA_HOME/conf/
+COPY configuration/tomee/server.xml $CATALINA_HOME/conf/
 
 # Copy JDBC driver to the Tomcat lib directory
 COPY configuration/mariadb/mariadb-java-client-3.3.3.jar $CATALINA_HOME/lib/

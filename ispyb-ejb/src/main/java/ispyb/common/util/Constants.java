@@ -31,6 +31,7 @@ import java.util.Properties;
 public final class Constants {
 
 	public static final String ISPYB_PROPERTIES="ispyb.properties";
+	public static final String CLASSPATH_ISPYB_PROPERTIES="classpath://ISPyB.properties";
 
 	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
 

@@ -52,6 +52,18 @@
 
 ## Database creation and update
 
+### Prerequisites
+
+MariaDB docker container for local development:
+
+`docker pull mariadb:11.3-jammy`
+
+`docker run --rm -p 3306:3306 -e  MARIADB_ROOT_PASSWORD=root --name mariadb mariadb:11.3-jammy`
+
+`mysql` client: `sudo apt install mariadb-client`
+
+### Create tables and schemas
+
 Run the following creation scripts from the `ispyb-ejb` module (note
 that this requires the `pxadmin` database user to exist and have full
 permissions):
@@ -110,17 +122,17 @@ Workbench][mysql-workbench] (a free tool from MySQL).
 [schema-file]: https://github.com/ispyb/ISPyB/blob/master/documentation/database/ISPyB_DataModel.mwb
 [mysql-workbench]: https://www.mysql.com/products/workbench/
 
-# Project Setup Guide with TomEE (10.x)
+## Project Setup Guide with TomEE (10.x)
 
 This README provides instructions on how to set up the database connection for your project using Apache TomEE.
 
-## Prerequisites
+### Prerequisites
 
 - Apache TomEE (configured to run your project)
 - MariaDB or MySQL installed and running
 - JDBC driver for MariaDB/MySQL placed in the `lib` directory of TomEE
 
-## TomEE Configuration
+### TomEE Configuration
 
 1. **Datasource Configuration in `tomee.xml`**:
    - Navigate to the `conf` directory of your TomEE installation.
@@ -135,7 +147,7 @@ This README provides instructions on how to set up the database connection for y
      </Resource>
      ```
 
-## Persistence Configuration
+### Persistence Configuration
 
 Ensure that your `persistence.xml` file is set up to use the JTA data source. Here is an example snippet:
 
@@ -149,19 +161,19 @@ Ensure that your `persistence.xml` file is set up to use the JTA data source. He
 </persistence-unit>
 ```
 
-## Deployment
+### Deployment
 
 Build your project and deploy the resulting EAR file to TomEE.
 
 Start or restart TomEE to pick up the new configurations.
 
-## Using docker
+### Using docker
 
 For CI/CD use .docker/Dockerfile as it uses multistaged build: `docker build . -f .docker/Dockerfile`
 
 For local development/testing use Dockerfile: `docker build .` [Optionaly provide name/tag etc]
 
-## Troubleshooting
+### Troubleshooting
 
 - Connection Issues: Ensure the database URL, username, and password are correct in tomee.xml.
 - JDBC Driver: Verify that the JDBC driver for MariaDB/MySQL is correctly placed in the lib folder of your TomEE installation.
