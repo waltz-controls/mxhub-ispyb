@@ -48,7 +48,7 @@ COPY configuration/mariadb/mariadb-java-client-3.3.3.jar $CATALINA_HOME/lib/
 # Expose the port TomEE is running on
 EXPOSE 8080
 
-ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=*"
+ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=* -Dispyb.properties=file:///etc/ispyb/ispyb.properties"
 
 # Start TomEE server
 CMD ["catalina.sh", "run"]
