@@ -150,7 +150,7 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String formattedStart = dt1.format(startDate);
 		String formattedEnd = dt1.format(endDate);
 		String formattedImages = datacollectionImages;
-		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+		String proposalList = String.join(", ", datacollectionTestProposals);
 
 		String queryString = DATACOLLECTIONSTATS_QUERY;
 
@@ -170,7 +170,7 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		String formattedStart = dt1.format(startDate);
 		String formattedEnd = dt1.format(endDate);
 		String formattedImages = datacollectionImages;
-		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+		String proposalList = String.join(", ", datacollectionTestProposals);
 
 		String queryString = DATACOLLECTIONSTATS_QUERY
 				.concat(" and beamLineName = :BEAMLINENAME ");
@@ -191,7 +191,7 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
 		String formattedStart = dt1.format(startDate);
 		String formattedEnd = dt1.format(endDate);
-		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+		String proposalList = String.join(", ", datacollectionTestProposals);
 
 		String queryString = EXPERIMENTSTATS_QUERY;
 
@@ -209,7 +209,7 @@ public class Stats3ServiceBean extends WsServiceBean implements Stats3Service,
 		SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
 		String formattedStart = dt1.format(startDate);
 		String formattedEnd = dt1.format(endDate);
-		String proposalList = Arrays.toString(datacollectionTestProposals).replace("[", "").replace("]", "");
+		String proposalList = String.join(", ", datacollectionTestProposals);
 
 		String queryString = EXPERIMENTSTATS_QUERY + " and beamLineName = :BEAMLINENAME";
 
