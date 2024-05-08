@@ -124,10 +124,10 @@ public class CrimsWebService {
 			HashMap<String, List<String>> listProteinAcronyms = new HashMap<String, List<String>>();
 			
 			for (Proposal3VO proposal3vo : proposals) {
-				List<Proposal3VO> filled = getProposal3Service().findByCodeAndNumber(proposal3vo.getCode(), proposal3vo.getNumber(), false, true, false);
+				List<Proposal3VO> filled = getProposal3Service().findByCodeAndNumber(proposal3vo.getProposalCode(), proposal3vo.getProposalNumber(), false, true, false);
 				if (filled.size() > 0){
 					for (Proposal3VO proposal3vo2 : filled) {
-						listProteinAcronyms.put(proposal3vo2.getCode() + proposal3vo2.getNumber(), this.getProteinAcronymByProposal(proposal3vo2));
+						listProteinAcronyms.put(proposal3vo2.getProposalCode() + proposal3vo2.getProposalNumber(), this.getProteinAcronymByProposal(proposal3vo2));
 					}
 				}
 			}

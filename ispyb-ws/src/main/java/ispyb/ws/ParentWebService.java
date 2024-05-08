@@ -34,7 +34,6 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,7 +43,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.NamingException;
-import jakarta.ws.rs.Path;
+
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 
@@ -122,7 +121,7 @@ public  class ParentWebService {
 	/** Folder where the pdb and all the other apriori information files will be uploaded **/
 	protected String getTargetFolder(int proposalId) throws Exception {
 		Proposal3VO proposal = this.getProposal3Service().findProposalById(proposalId);
-		String proposalName = proposal.getCode().toLowerCase() + proposal.getNumber();
+		String proposalName = proposal.getProposalCode().toLowerCase() + proposal.getProposalNumber();
 		return  this.getFolderForUploads() +  proposalName;
 	}
 	

@@ -437,7 +437,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	@SuppressWarnings("unchecked")
 	private List<Proposal3VO> findProposalByCodeAndNumber(String loginName) {
-		String query = "SELECT proposal FROM Proposal3VO proposal WHERE concat(proposalCode, proposalNumber)=:loginName";
+		String query = "SELECT proposal FROM Proposal3VO proposal WHERE concat(proposal.proposalCode, proposal.proposalNumber)=:loginName";
 		Query EJBQuery = this.entityManager.createQuery(query);
 		EJBQuery.setParameter("loginName", loginName);
 		return EJBQuery.getResultList();
@@ -445,7 +445,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	@SuppressWarnings("unchecked")
 	private List<Proposal3VO> findProposalByPerson(String loginName) {
-		String queryPerson = "SELECT person FROM Person3VO person WHERE login=:loginName";
+		String queryPerson = "SELECT person FROM Person3VO person WHERE person.login=:loginName";
 		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson);
 		EJBQueryPerson.setParameter("loginName", loginName);
 		@SuppressWarnings("unchecked")
@@ -524,8 +524,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	
 	private List findProposalByProposalId(Integer proposalId){
-		Query query = this.entityManager.createNativeQuery("select %s from Proposal where proposalId= :proposalId", SqlTableMapper.getProposalTable())
-				.setParameter("proposalId", proposalId);
+		Query query = this.entityManager.createNativeQuery(String.format("select %s from Proposal where proposalId= %d", SqlTableMapper.getProposalTable(), proposalId));
 		return query.getResultList();
 	}
 	

@@ -35,7 +35,6 @@ import ispyb.server.common.vos.shipping.Shipping3VO;
 import ispyb.server.mx.vos.collections.Session3VO;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -263,8 +262,8 @@ public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLoca
 			try {
 				Proposal3VO proposals = proposalService.findByPk(proposalId);
 				dewarAPI.setProposalTitle(proposals.getTitle());
-				dewarAPI.setProposalCode(proposals.getCode());
-				dewarAPI.setProposalNumber(proposals.getNumber());
+				dewarAPI.setProposalCode(proposals.getProposalCode());
+				dewarAPI.setProposalNumber(proposals.getProposalNumber());
 
 			} catch (Exception e) {
 				LOG.debug("Dewar Tracking (fetchDewar): cannot find proposal info for barcode '" + dewarBarCode + "'");

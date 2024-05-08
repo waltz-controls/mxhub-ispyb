@@ -16,7 +16,6 @@ import ispyb.server.common.vos.shipping.Shipping3VO;
 import ispyb.server.mx.services.ws.rest.dewar.DewarRestWsService;
 import ispyb.server.mx.vos.collections.Session3VO;
 import ispyb.ws.rest.RestWebService;
-import ispyb.server.common.vos.proposals.ProposalWS3VO;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
@@ -445,8 +444,8 @@ public class DewarRestWebService extends RestWebService {
 		fieldNamesAndValues.put("TF_shipmentName", shipping.getShippingName());
 		fieldNamesAndValues.put("TF_parcelsNumber",
 				Integer.toString(shipping.getDewarVOs().size()));
-		fieldNamesAndValues.put("TF_proposalNumber", proposal.getCode() + "-"
-				+ proposal.getNumber());
+		fieldNamesAndValues.put("TF_proposalNumber", proposal.getProposalCode() + "-"
+				+ proposal.getProposalNumber());
 
 		// Session values (only if they exist)
 		if (session != null) {

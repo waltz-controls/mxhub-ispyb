@@ -184,7 +184,7 @@ public class DBTools {
 			Proposal3Service proposalService = (Proposal3Service) ejb3ServiceLocator
 					.getLocalService(Proposal3Service.class);
 			Proposal3VO selectedProposal = proposalService.findByPk(proposalId);
-			proposalName = selectedProposal.getCode() + selectedProposal.getNumber();
+			proposalName = selectedProposal.getProposalCode() + selectedProposal.getProposalNumber();
 		} catch (Exception e) {
 			proposalName = "<Unknown proposalId '" + proposalId + "'>";
 		}

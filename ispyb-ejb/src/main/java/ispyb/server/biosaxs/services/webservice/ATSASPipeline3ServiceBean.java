@@ -80,7 +80,6 @@ import jakarta.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Stateless
@@ -146,8 +145,8 @@ public class ATSASPipeline3ServiceBean implements ATSASPipeline3Service, DesySam
 
 		Integer sessionId = null;
 
-		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getCode(),
-				proposal.getNumber(), Constants.getSAXSBeamline());
+		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getProposalCode(),
+				proposal.getProposalNumber(), Constants.getSAXSBeamline());
 
 		if (sessionTab == null || sessionTab.length == 0) {
 			// No session found we have to create one to attach the experiment data to it

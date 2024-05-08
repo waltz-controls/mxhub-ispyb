@@ -19,7 +19,6 @@
 package ispyb.ws.soap.saxs;
 
 import java.lang.reflect.Type;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,6 @@ import jakarta.jws.WebResult;
 import jakarta.jws.WebService;
 import jakarta.jws.soap.SOAPBinding;
 import jakarta.jws.soap.SOAPBinding.Style;
-import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
@@ -48,7 +46,6 @@ import ispyb.server.biosaxs.services.core.ExperimentScope;
 import ispyb.server.biosaxs.services.core.analysis.primaryDataProcessing.PrimaryDataProcessing3Service;
 import ispyb.server.biosaxs.services.core.experiment.Experiment3Service;
 import ispyb.server.biosaxs.services.core.measurement.Measurement3Service;
-import ispyb.server.biosaxs.services.core.proposal.SaxsProposal3Service;
 import ispyb.server.biosaxs.services.webservice.ATSASPipeline3Service;
 import ispyb.server.biosaxs.vos.assembly.Macromolecule3VO;
 import ispyb.server.biosaxs.vos.assembly.Structure3VO;
@@ -1106,8 +1103,8 @@ public class GenericSampleChangerBiosaxsWebService {
 			for (Proposal3VO proposal3vo : proposals) {
 				HashMap<String, String> entry = new HashMap<String, String>();
 				entry.put("title", proposal3vo.getTitle());
-				entry.put("code", proposal3vo.getCode());
-				entry.put("number", proposal3vo.getNumber());
+				entry.put("code", proposal3vo.getProposalCode());
+				entry.put("number", proposal3vo.getProposalNumber());
 				entry.put("type", proposal3vo.getType());
 				entry.put("proposalId", proposal3vo.getProposalId().toString());
 				result.add(entry);

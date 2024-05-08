@@ -172,7 +172,7 @@ public class UpdateFromSMIS {
 			switch (Constants.getSite()) {
 			case DESY:
 				SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
-				pk = wsDESY.getProposalPK(myProposal.getCode(), Long.parseLong(myProposal.getNumber()));
+				pk = wsDESY.getProposalPK(myProposal.getProposalCode(), Long.parseLong(myProposal.getProposalNumber()));
 				break;
 			default:
 				break;
@@ -1081,8 +1081,8 @@ public class UpdateFromSMIS {
 		}
 
 		Proposal3VO propv = new Proposal3VO();
-		propv.setCode(proposalCode);
-		propv.setNumber(proposalNumber);
+		propv.setProposalCode(proposalCode);
+		propv.setProposalNumber(proposalNumber);
 		propv.setTitle(mainProp.getProposalTitle());
 		propv.setPersonVO(persv);
 

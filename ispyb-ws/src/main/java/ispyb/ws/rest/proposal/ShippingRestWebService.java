@@ -50,7 +50,7 @@ public class ShippingRestWebService extends MXRestWebService {
 
 			int proposalId = this.getProposalId(proposal);
 			Proposal3VO proposal3VO = this.getProposal3Service().findByPk(proposalId);
-			ProposalParticipantInfoLightVO[] scientists = ScientistsFromSMIS.findScientistsForProposalByNameAndFirstName(StringUtils.getUoCode(proposal3VO.getCode()), Long.parseLong(proposal3VO.getNumber()), null, null);
+			ProposalParticipantInfoLightVO[] scientists = ScientistsFromSMIS.findScientistsForProposalByNameAndFirstName(StringUtils.getUoCode(proposal3VO.getProposalCode()), Long.parseLong(proposal3VO.getProposalNumber()), null, null);
 			this.logFinish(methodName, id, logger);
 			return sendResponse(scientists);
 		} catch (Exception e) {

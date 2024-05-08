@@ -606,8 +606,8 @@ public class BiosaxsServices {
 
 		Integer sessionId = null;
 
-		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getCode(),
-				proposal.getNumber(), Constants.getSAXSBeamline());
+		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getProposalCode(),
+				proposal.getProposalNumber(), Constants.getSAXSBeamline());
 
 		if (sessionTab == null || sessionTab.length == 0) {
 			// No session found we have to create one to attach the experiment data to it

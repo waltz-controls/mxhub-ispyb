@@ -25,7 +25,6 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -68,10 +67,10 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 	protected String title;
 
 	@Column(name = "proposalCode")
-	protected String code;
+	protected String proposalCode;
 
 	@Column(name = "proposalNumber")
-	protected String number;
+	protected String proposalNumber;
 
 	@Column(name = "proposalType")
 	protected String type;
@@ -106,15 +105,15 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 	}
 	
 	public Proposal3VO(Integer proposalId, Person3VO personVO, String title,
-			String code, String number, String type,
-			Set<Session3VO> sessionVOs, Set<Protein3VO> proteinVOs,
-			Set<Shipping3VO> shippingVOs, String externalId) {
+					   String proposalCode, String proposalNumber, String type,
+					   Set<Session3VO> sessionVOs, Set<Protein3VO> proteinVOs,
+					   Set<Shipping3VO> shippingVOs, String externalId) {
 		super();
 		this.proposalId = proposalId;
 		this.personVO = personVO;
 		this.title = title;
-		this.code = code;
-		this.number = number;
+		this.proposalCode = proposalCode;
+		this.proposalNumber = proposalNumber;
 		this.type = type;
 		this.sessionVOs = sessionVOs;
 		this.proteinVOs = proteinVOs;
@@ -128,8 +127,8 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 		this.proposalId = vo.getProposalId();
 		this.personVO = vo.getPersonVO();
 		this.title = vo.getTitle();
-		this.code = vo.getCode();
-		this.number = vo.getNumber();
+		this.proposalCode = vo.getProposalCode();
+		this.proposalNumber = vo.getProposalNumber();
 		this.type = vo.getType();
 		this.sessionVOs = vo.getSessionVOs();
 		this.proteinVOs = vo.getProteinVOs();
@@ -142,8 +141,8 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 		this.proposalId = vo.getProposalId();
 		this.personVO = null;
 		this.title = vo.getTitle();
-		this.code = vo.getCode();
-		this.number = vo.getNumber();
+		this.proposalCode = vo.getProposalCode();
+		this.proposalNumber = vo.getProposalNumber();
 		this.type = vo.getType();
 		this.sessionVOs =  null;
 		this.proteinVOs =  null;
@@ -199,20 +198,20 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 		this.title = title;
 	}
 
-	public String getCode() {
-		return code;
+	public String getProposalCode() {
+		return proposalCode;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setProposalCode(String code) {
+		this.proposalCode = code;
 	}
 
-	public String getNumber() {
-		return number;
+	public String getProposalNumber() {
+		return proposalNumber;
 	}
 
-	public void setNumber(String number) {
-		this.number = number;
+	public void setProposalNumber(String number) {
+		this.proposalNumber = number;
 	}
 
 	public String getType() {
@@ -292,7 +291,7 @@ public class Proposal3VO extends ISPyBValueObject implements Cloneable {
 	}
 	
 	public String getProposalAccount(){
-		return (this.code+this.number).toLowerCase();
+		return (this.proposalCode +this.proposalNumber).toLowerCase();
 	}
 
 	public Date getTimeStamp() {

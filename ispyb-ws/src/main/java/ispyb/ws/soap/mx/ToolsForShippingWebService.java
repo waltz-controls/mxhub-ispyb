@@ -40,9 +40,6 @@ import com.google.gson.GsonBuilder;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
-import ispyb.server.biosaxs.services.core.ExperimentScope;
-import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
-import ispyb.server.biosaxs.vos.utils.serializer.ExperimentExclusionStrategy;
 import ispyb.server.common.services.proposals.Laboratory3Service;
 import ispyb.server.common.services.proposals.Person3Service;
 import ispyb.server.common.services.proposals.Proposal3Service;
@@ -350,9 +347,9 @@ public class ToolsForShippingWebService {
 				boolean stopSearch = Boolean.FALSE;
 				for (ProposalWS3VO proposal : proposalValues) {
 					//check if there is a proposal with a current session if not in house or industrial
-					LOG.debug("findProposalByLoginAndBeamline: Check proposal with code:" +proposal.getCode());
-					if (!(proposal.getCode().startsWith(Constants.PROPOSAL_CODE_MXIHR) || proposal.getCode().startsWith(Constants.PROPOSAL_CODE_FX))){
-						SessionWS3VO[] sessions = sessionService.findForWSByProposalCodeAndNumber(proposal.getCode(), proposal.getNumber(), beamline);
+					LOG.debug("findProposalByLoginAndBeamline: Check proposal with code:" +proposal.getProposalCode());
+					if (!(proposal.getProposalCode().startsWith(Constants.PROPOSAL_CODE_MXIHR) || proposal.getProposalCode().startsWith(Constants.PROPOSAL_CODE_FX))){
+						SessionWS3VO[] sessions = sessionService.findForWSByProposalCodeAndNumber(proposal.getProposalCode(), proposal.getProposalNumber(), beamline);
 						if (!stopSearch) {
 							if (sessions != null && sessions.length == 1) {
 								// Only an active session
@@ -361,16 +358,16 @@ public class ToolsForShippingWebService {
 							} else if ((sessions != null && sessions.length == 0) || sessions == null) {
 								//No active session
 								proposalValue = proposal;
-								LOG.debug("findProposalByLoginAndBeamline: The user " +login +" has no active session for the proposal " +proposal.getCode() + "-" +proposal.getNumber());
+								LOG.debug("findProposalByLoginAndBeamline: The user " +login +" has no active session for the proposal " +proposal.getProposalCode() + "-" +proposal.getProposalNumber());
 							}
 						}
 					} else {
-						LOG.debug("findProposalByLoginAndBeamline: proposal with code " +proposal.getCode() +" is a in house research / industrial");
+						LOG.debug("findProposalByLoginAndBeamline: proposal with code " +proposal.getProposalCode() +" is a in house research / industrial");
 						proposalValue = proposal;
 					}
 				}
 				if (proposalValue != null){
-					LOG.debug("findProposalByLoginAndBeamline: return the proposal for the current session... " + proposalValue.getCode() + "-" +proposalValue.getNumber());
+					LOG.debug("findProposalByLoginAndBeamline: return the proposal for the current session... " + proposalValue.getProposalCode() + "-" +proposalValue.getProposalNumber());
 				}
 			} else {
 				LOG.debug("findProposalByLoginAndBeamline: no proposals found");
@@ -406,8 +403,8 @@ public class ToolsForShippingWebService {
 			for (Proposal3VO proposal3vo : proposals) {
 				HashMap<String, String> entry = new HashMap<String, String>();
 				entry.put("title", proposal3vo.getTitle());
-				entry.put("code", proposal3vo.getCode());
-				entry.put("number", proposal3vo.getNumber());
+				entry.put("code", proposal3vo.getProposalCode());
+				entry.put("number", proposal3vo.getProposalNumber());
 				entry.put("type", proposal3vo.getType());
 				entry.put("proposalId", proposal3vo.getProposalId().toString());
 				entry.put("timeStamp", dateFormat.format(proposal3vo.getTimeStamp()).toString());
