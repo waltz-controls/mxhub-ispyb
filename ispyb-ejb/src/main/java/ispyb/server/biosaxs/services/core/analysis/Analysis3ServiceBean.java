@@ -108,7 +108,7 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListByExperimentId(
 			Integer proposalId, Integer experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByExperimentId(proposalId, experimentId);
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId) + " AND e.experimentId = :experimentId ";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery)
 				.setParameter("proposalId", proposalId)
 				.setParameter("experimentId", experimentId);

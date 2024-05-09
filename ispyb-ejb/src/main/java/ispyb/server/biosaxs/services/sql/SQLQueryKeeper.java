@@ -21,15 +21,7 @@ package ispyb.server.biosaxs.services.sql;
 
 public class SQLQueryKeeper {
 
-	
-	
-	public static String getExperimentListByExperimentId(Integer proposalId,
-			Integer experimentId) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getExperimentListByProposalId(proposalId));
-		sb.append(" and e.experimentId = :experimentId ");
-		return sb.toString();
-	}
-		
+
 	public static String getDataCollectionByProposal() {
 		return "select "
 				+ SqlTableMapper.getProposalTable() + ","  
