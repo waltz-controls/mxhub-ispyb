@@ -76,10 +76,7 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId, String experimentType) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
-		sb.append(" and e.experimentType = :experimentType ");
-		String mySQLQuery = sb.toString();
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId) + " AND e.experimentType = :experimentType ";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
 				.setParameter("proposalId", proposalId)
 				.setParameter("experimentType", experimentType);
@@ -92,10 +89,7 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListBySessionId(
 			Integer proposalId, Integer sessionId) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
-		sb.append(" and e.sessionId = :sessionId ");
-		String mySQLQuery = sb.toString();
+		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId) + " AND e.sessionId = :sessionId ";
 
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
 				.setParameter("proposalId", proposalId)
