@@ -186,7 +186,7 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 	@Override
 	public List<StockSolution3VO> findStockSolutionsByBoxId(String dewarId) {
 		String query = SQLQueryKeeper.getStockSolutionsByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, StockSolution3VO.class);
 		return EJBQuery.getResultList();
 
 	}

@@ -157,7 +157,7 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	@SuppressWarnings("unchecked")
 	public List<LabContact3VO> findAll() throws Exception {
 		
-		List<LabContact3VO> foundEntities = this.entityManager.createQuery(FIND_ALL()).getResultList();
+		List<LabContact3VO> foundEntities = this.entityManager.createQuery(FIND_ALL(), LabContact3VO.class).getResultList();
 		return foundEntities;
 	}
 

@@ -48,7 +48,8 @@ public class Structure3ServiceBean implements Structure3Service, Structure3Servi
 	@Override
 	public List<Structure3VO> getStructuresByCrystalId(Integer crystalId) throws Exception {
 		String query = "SELECT structure3VO FROM Structure3VO structure3VO where structure3VO.crystalId = :crystalId" ;
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("crystalId", crystalId);
+		Query EJBQuery = this.entityManager.createQuery(query, Structure3VO.class)
+				.setParameter("crystalId", crystalId);
 		return (List<Structure3VO>) EJBQuery.getResultList();	
 	}
 	
@@ -57,7 +58,7 @@ public class Structure3ServiceBean implements Structure3Service, Structure3Servi
 	@Override
 	public List<Structure3VO> getLigandsByGroupName(Integer proposalId, String groupName) throws Exception {
 		String query = "SELECT structure3VO FROM Structure3VO structure3VO where structure3VO.proposalId = :proposalId and structure3VO.groupName = :groupName" ;
-		Query EJBQuery = this.entityManager.createQuery(query)
+		Query EJBQuery = this.entityManager.createQuery(query, Structure3VO.class)
 				.setParameter("proposalId", proposalId)
 				.setParameter("groupName", groupName);
 		return (List<Structure3VO>) EJBQuery.getResultList();	
@@ -68,7 +69,8 @@ public class Structure3ServiceBean implements Structure3Service, Structure3Servi
 	@Override
 	public List<Structure3VO> getStructuresByProposalId(Integer proposalId) throws Exception {
 		String query = "SELECT structure3VO FROM Structure3VO structure3VO where structure3VO.proposalId = :proposalId" ;
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("proposalId", proposalId);
+		Query EJBQuery = this.entityManager.createQuery(query, Structure3VO.class)
+				.setParameter("proposalId", proposalId);
 		return (List<Structure3VO>) EJBQuery.getResultList();	
 	}
 	

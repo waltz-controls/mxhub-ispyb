@@ -71,7 +71,7 @@ public class Sampleplate3ServiceBean implements Sampleplate3Service, Sampleplate
 	@Override
 	public List<Sampleplate3VO> getSamplePlatesByBoxId(String dewarId) {
 		String query = "SELECT plate FROM Sampleplate3VO plate where plate.boxId = " + dewarId;// SQLQueryKeeper.getSamplePlatesByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, Sampleplate3VO.class);
 		List<Sampleplate3VO> samplePlates = EJBQuery.getResultList();
 		return samplePlates;
 	}

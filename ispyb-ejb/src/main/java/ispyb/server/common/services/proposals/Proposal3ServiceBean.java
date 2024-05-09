@@ -245,8 +245,8 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@WebMethod
 	public List<Proposal3VO> findByLoginName(final String loginName) throws Exception {
 
-		String queryPerson = "SELECT person FROM Person3VO person WHERE login=:loginName";
-		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson);
+		String queryPerson = "SELECT person FROM Person3VO person WHERE person.login=:loginName";
+		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson, Proposal3VO.class);
 		EJBQueryPerson.setParameter("loginName", loginName);
 		List<Person3VO> persons = EJBQueryPerson.getResultList();
 		List<Proposal3VO> proposals = new ArrayList<Proposal3VO>();
@@ -438,7 +438,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@SuppressWarnings("unchecked")
 	private List<Proposal3VO> findProposalByCodeAndNumber(String loginName) {
 		String query = "SELECT proposal FROM Proposal3VO proposal WHERE concat(proposal.proposalCode, proposal.proposalNumber)=:loginName";
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, Proposal3VO.class);
 		EJBQuery.setParameter("loginName", loginName);
 		return EJBQuery.getResultList();
 	}
@@ -446,7 +446,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@SuppressWarnings("unchecked")
 	private List<Proposal3VO> findProposalByPerson(String loginName) {
 		String queryPerson = "SELECT person FROM Person3VO person WHERE person.login=:loginName";
-		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson);
+		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson, Proposal3VO.class);
 		EJBQueryPerson.setParameter("loginName", loginName);
 		@SuppressWarnings("unchecked")
 		List<Person3VO> persons = EJBQueryPerson.getResultList();
@@ -479,7 +479,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@Override
 	public List<Proposal3VO> findAllProposals() {
 		String query = "SELECT proposal FROM Proposal3VO proposal";
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, Proposal3VO.class);
 		return EJBQuery.getResultList();
 	}
 	

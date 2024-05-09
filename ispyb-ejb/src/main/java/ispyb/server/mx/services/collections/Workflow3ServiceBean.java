@@ -235,7 +235,7 @@ public class Workflow3ServiceBean implements Workflow3Service,
 	public List<Workflow3VO> findAllByStatus(final String status) throws Exception{
 		try {
 			String query = FIND_BY_STATUS();
-			List<Workflow3VO> ret = this.entityManager.createQuery(query)
+			List<Workflow3VO> ret = this.entityManager.createQuery(query, Workflow3VO.class)
 					.setParameter("status", status).getResultList();
 			return ret;
 		} catch (NoResultException e) {
@@ -247,8 +247,9 @@ public class Workflow3ServiceBean implements Workflow3Service,
 	public List<InputParameterWorkflow> findInputParametersByWorkflowId(final int workflowId) throws Exception{
 		try {
 			String query = FIND_INPUT_BY_WORKFLOW_ID();
-			List<Workflow3VO> ret = this.entityManager.createQuery(query).setParameter("workflowId", workflowId).getResultList();
-			List foundEntities = ret;
+			List<Workflow3VO> ret = this.entityManager.createQuery(query, Workflow3VO.class)
+					.setParameter("workflowId", workflowId).getResultList();
+			List foundEntities = ret;//TODO type safety
 			return foundEntities;
 		} catch (NoResultException e) {
 			return null;

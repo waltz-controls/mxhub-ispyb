@@ -87,7 +87,7 @@ public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction
 	@SuppressWarnings("unchecked")
 	public List<RobotAction3VO> findBySession(Integer sessionId) throws Exception {	
 		try {
-			List<RobotAction3VO> listVOs = this.entityManager.createQuery(FIND_BY_SESSION())
+			List<RobotAction3VO> listVOs = this.entityManager.createQuery(FIND_BY_SESSION(), RobotAction3VO.class)
 			.setParameter("sessionId", sessionId).getResultList();
 			return listVOs;
 		} catch (NoResultException e) {

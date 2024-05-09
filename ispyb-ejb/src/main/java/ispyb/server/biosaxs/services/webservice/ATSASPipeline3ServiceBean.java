@@ -407,18 +407,6 @@ public class ATSASPipeline3ServiceBean implements ATSASPipeline3Service, DesySam
 			
 		}
 }
-//	private void removeFrameListById(int frameListId) {
-//		Framelist3VO frameList = this.entityManager.find(Framelist3VO.class, frameListId);
-//		/** Looking for FrameToListObjects **/
-//		
-//		String query = "select f from Frametolist3VO f where f.frameListId=:frameListId";
-//		Query EJBQuery = this.entityManager.createQuery(query).setParameter("frameListId", frameListId);
-//		List<Frametolist3VO> frameToListList =  (List<Frametolist3VO>)EJBQuery.getResultList();
-//		for (Frametolist3VO frametolist3vo : frameToListList) {
-//			System.out.println("Found " + frametolist3vo.getFrameToListId());
-//		}
-//		
-//	}
 
 	/**
 	 * True if a datacollection contains all the measurementIds otherwise false

@@ -36,7 +36,7 @@ public class Specimen3ServiceBean implements Specimen3Service, Specimen3ServiceL
 	@Override
 	public Specimen3VO findSpecimenById(int specimenId) {
 		String query = SQLQueryKeeper.getSpecimenById(specimenId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, Specimen3VO.class);
 		Specimen3VO Specimen3VO = (Specimen3VO) EJBQuery.getSingleResult();	
 		return Specimen3VO;
 	}
