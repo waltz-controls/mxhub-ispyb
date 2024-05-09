@@ -45,20 +45,6 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 
 	private final static Logger LOG = Logger.getLogger(LabContact3ServiceBean.class);
 
-	private final static String HAS_SHIPPING = "SELECT COUNT(*) FROM Shipping "
-			+ "WHERE sendingLabContactId = :labContactId OR returnLabContactId = :labContactId";
-
-	// Generic HQL request to find instances of LabContact3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from LabContact3VO vo where vo.labContactId = :pk";
-	}
-
-	// Generic HQL request to find all instances of LabContact3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from LabContact3VO vo ";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -141,7 +127,7 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (LabContact3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
+			return (LabContact3VO) entityManager.createQuery("SELECT LabContact3VO FROM LabContact3VO vo WHERE vo.labContactId = :pk").setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -156,8 +142,9 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public List<LabContact3VO> findAll() throws Exception {
-		
-		List<LabContact3VO> foundEntities = this.entityManager.createQuery(FIND_ALL(), LabContact3VO.class).getResultList();
+        String query = "SELECT LabContact3VO FROM LabContact3VO vo ";
+		List<LabContact3VO> foundEntities = this.entityManager.createQuery(query, LabContact3VO.class)
+				.getResultList();
 		return foundEntities;
 	}
 
@@ -286,10 +273,12 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	
 	public Integer hasShipping(final Integer labContactId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(HAS_SHIPPING).setParameter("labContactId", labContactId);
+		String sqlQuery = "SELECT COUNT(shipping) FROM Shipping3VO shipping WHERE shipping.sendingLabContactVO.labContactId = :labContactId OR shipping.returnLabContactVO.labContactId = :labContactId";
+		Query query = entityManager.createQuery(sqlQuery)
+				.setParameter("labContactId", labContactId);
 		try{
 			BigInteger res = (BigInteger) query.getSingleResult();
-			return new Integer(res.intValue());
+			return res.intValue();
 		}catch(NoResultException e){
 			System.out.println("ERROR in hasShipping - NoResultException: "+labContactId);
 			e.printStackTrace();

@@ -44,21 +44,24 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	private EntityManager entityManager;
 
 
-	private List<Map<String, Object>> getAll(String mySQLQuery) {
+	@Deprecated
+	@Override
+	public List<Map<String,Object>> getAllByMacromolecule(int macromoleculeId, int poposalId) {
+		String mySQLQuery = SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId, poposalId);
 		Query query = this.entityManager.createQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
-	
-	@Override
-	public List<Map<String,Object>> getAllByMacromolecule(int macromoleculeId, int poposalId) {
-		return this.getAll(SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId, poposalId));
-	}
-	
+
+	@Deprecated
 	@Override
 	public List<Map<String,Object>> getAllByMacromolecule(int macromoleculeId, int bufferId, int poposalId) {
-		return this.getAll(SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId, bufferId, poposalId));
+		String mySQLQuery = SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId, bufferId, poposalId);
+		Query query = this.entityManager.createQuery(mySQLQuery);
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
+		return 	aliasToValueMapList;
 	}
 	
 	@Override
@@ -73,7 +76,10 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public List<Map<String,Object>> getExperimentListByProposalId(int proposalId, String experimentType) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListByProposalId(proposalId, experimentType);
+		StringBuilder sb = new StringBuilder(
+				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
+		sb.append(" and e.experimentType = :experimentType ");
+		String mySQLQuery = sb.toString();
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
 				.setParameter("proposalId", proposalId)
 				.setParameter("experimentType", experimentType);
@@ -86,7 +92,10 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	@Override
 	public List<Map<String, Object>> getExperimentListBySessionId(
 			Integer proposalId, Integer sessionId) {
-		String mySQLQuery = SQLQueryKeeper.getExperimentListBySessionId(proposalId, sessionId);
+		StringBuilder sb = new StringBuilder(
+				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
+		sb.append(" and e.sessionId = :sessionId ");
+		String mySQLQuery = sb.toString();
 
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
 				.setParameter("proposalId", proposalId)
@@ -158,12 +167,15 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
-	
-	
-	
+
+
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAllAnalysisInformation() {
-		return this.getAll(SQLQueryKeeper.getAnalysisQuery());
+		Query query = this.entityManager.createQuery(SQLQueryKeeper.getAnalysisQuery());
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
+		return 	aliasToValueMapList;
 	}
 
 	@Override

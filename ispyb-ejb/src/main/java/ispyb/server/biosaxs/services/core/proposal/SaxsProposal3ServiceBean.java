@@ -32,7 +32,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.assembly.Assembly3VO;
 import ispyb.server.biosaxs.vos.assembly.AssemblyHasMacromolecule3VO;
 import ispyb.server.biosaxs.vos.assembly.Macromolecule3VO;
@@ -185,8 +184,9 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StockSolution3VO> findStockSolutionsByBoxId(String dewarId) {
-		String query = SQLQueryKeeper.getStockSolutionsByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query, StockSolution3VO.class);
+		String query = "SELECT st FROM StockSolution3VO st WHERE st.boxId = :dewarId";
+		Query EJBQuery = this.entityManager.createQuery(query, StockSolution3VO.class)
+				.setParameter("dewarId", dewarId);
 		return EJBQuery.getResultList();
 
 	}

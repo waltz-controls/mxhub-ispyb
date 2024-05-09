@@ -46,21 +46,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 
 	private final static Logger LOG = Logger.getLogger(Laboratory3ServiceBean.class);
 
-	private static String SELECT_LABORATORY = "SELECT l.laboratoryId, l.laboratoryUUID, l.name, l.address, "
-			+ "l.city, l.country, l.url, l.organization, l.laboratoryExtPk  ";
-
-	private static String FIND_BY_PROPOSAL_CODE_NUMBER = SELECT_LABORATORY
-			+ " FROM Laboratory l, Person p, Proposal pro "
-			+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND pro.proposalCode like :code AND pro.proposalNumber = :number ";
-
 	// Generic HQL request to find instances of Laboratory3 by pk
-	private static final String FIND_BY_PK() {
-		return "from Laboratory3VO vo  where vo.laboratoryId = :pk";
-	}
-
-	private static final String FIND_BY_LABORATORY_EXT_PK() {
-		return "from Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -129,7 +115,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	public Laboratory3VO findByPk(final Integer pk) throws Exception {
 		try {
-			return (Laboratory3VO) entityManager.createQuery(FIND_BY_PK())
+			return (Laboratory3VO) entityManager.createQuery("SELECT Laboratory3VO FROM Laboratory3VO vo  where vo.laboratoryId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -143,8 +129,10 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public Laboratory3VO findByLaboratoryExtPk(final Integer laboExtPk) {
-		List<Laboratory3VO> listVOs =  this.entityManager.createQuery(FIND_BY_LABORATORY_EXT_PK())
-					.setParameter("labExtPk", laboExtPk).getResultList();
+		String query = "SELECT Laboratory3VO FROM Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
+		List<Laboratory3VO> listVOs =  this.entityManager.createQuery(query, Laboratory3VO.class)
+				.setParameter("labExtPk", laboExtPk)
+				.getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
 			
@@ -152,12 +140,17 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 		
 	}
 
+	//TODO test
 	@SuppressWarnings("unchecked")
 	public Laboratory3VO findLaboratoryByProposalCodeAndNumber(String code, String number) {
 		
-		String query = FIND_BY_PROPOSAL_CODE_NUMBER;
-		List<Laboratory3VO> listVOs = this.entityManager.createNativeQuery(query, "laboratoryNativeQuery")
-				.setParameter("code", code).setParameter("number", number).getResultList();
+		String query = "SELECT l.laboratoryId, l.laboratoryUUID, l.name, l.address, "
+				+ "l.city, l.country, l.url, l.organization, l.laboratoryExtPk  "
+				+ " FROM Laboratory l, Person p, Proposal pro "
+				+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
+				.replace(":code", "'" + code + "'")
+				.replace(":number", "'" + number + "'");
+		List<Laboratory3VO> listVOs = this.entityManager.createNativeQuery(query, Laboratory3VO.class).getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
 		

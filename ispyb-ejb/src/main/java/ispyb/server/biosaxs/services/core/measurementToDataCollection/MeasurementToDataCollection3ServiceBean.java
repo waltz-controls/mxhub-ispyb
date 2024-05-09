@@ -22,7 +22,6 @@ package ispyb.server.biosaxs.services.core.measurementToDataCollection;
 
 import java.util.List;
 
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.datacollection.MeasurementTodataCollection3VO;
 import ispyb.server.biosaxs.vos.datacollection.SaxsDataCollection3VO;
 
@@ -82,7 +81,11 @@ public class MeasurementToDataCollection3ServiceBean implements MeasurementToDat
 	@Override
 	public List<MeasurementTodataCollection3VO> findByMeasurementId(int measurementId) {
 		try {
-			String querySQL = SQLQueryKeeper.getMeasurementToDataCollectionByMeasurementId(measurementId);
+            StringBuilder sb = new StringBuilder(
+                    "SELECT DISTINCT(measurementToDataCollection) FROM MeasurementTodataCollection3VO measurementToDataCollection ");
+            sb.append(" WHERE measurementToDataCollection.measurementId = "
+                    + measurementId);
+            String querySQL = sb.toString();
 			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class);
 			return query.getResultList();
 		} catch (RuntimeException re) {
@@ -106,7 +109,11 @@ public class MeasurementToDataCollection3ServiceBean implements MeasurementToDat
 	@Override
 	public List<MeasurementTodataCollection3VO> findMeasurementToDataCollectionByDataCollectionId(Integer dataCollectionId) {
 		try {
-			String querySQL = SQLQueryKeeper.findMeasurementToDataCollectionByDataCollectionId(dataCollectionId);
+			StringBuilder sb = new StringBuilder(
+					"SELECT DISTINCT(measurementToDataCollection) FROM MeasurementTodataCollection3VO measurementToDataCollection ");
+			sb.append(" WHERE measurementToDataCollection.dataCollectionId = "
+					+ dataCollectionId);
+			String querySQL = sb.toString();
 			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class);
 			return query.getResultList();
 		} catch (RuntimeException re) {

@@ -65,7 +65,7 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	
 	@Override
 	public ModelList3VO getModelListById(int modelListId) {
-		String query = "SELECT modelList FROM ModelList3VO modelList where modelList.modelListId = :modelListId" ;
+		String query = "SELECT modelList FROM ModelList3VO modelList WHERE modelList.modelListId = :modelListId" ;
 		Query EJBQuery = this.entityManager.createQuery(query, ModelList3VO.class)
 				.setParameter("modelListId", modelListId);
 		return (ModelList3VO) EJBQuery.getSingleResult();	
@@ -100,7 +100,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	
 	@Override
 	public List<Map<String, Object>> getAnalysisInformation(int limit) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysis(limit);
+		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
+		sb.append("  order by exp.experimentId DESC limit " + limit);
+		String mySQLQuery = sb.toString();
 		Query query = this.entityManager.createNativeQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
@@ -184,9 +186,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<Subtraction3VO> getSubtractionsByMeasurementList(ArrayList<Integer> measurementIdList) {
 		String query = "SELECT DISTINCT(subtraction) FROM Subtraction3VO subtraction, SaxsDataCollection3VO da, MeasurementTodataCollection3VO me  " +
-				" WHERE da.dataCollectionId = me.dataCollectionId and " +
-				" subtraction.dataCollectionId = da.dataCollectionId and " +
-				" me.measurementId in :measurementIdList" ;
+				" WHERE da.dataCollectionId = me.dataCollectionId AND " +
+				" subtraction.dataCollectionId = da.dataCollectionId AND " +
+				" me.measurementId IN :measurementIdList" ;
 		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class)
 				.setParameter("measurementIdList", measurementIdList);
 		return (List<Subtraction3VO>)EJBQuery.getResultList();
@@ -259,7 +261,7 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<AbInitioModel3VO> getAbinitioModelsByExperimentId(int experimentId) {
 		String query = SQLQueryKeeper.getAbinitioModelQuery();
-		query = query + " and dc.experimentId = " + experimentId;	
+		query = query + " AND dc.experimentId = " + experimentId;
 		
 		LOG.info(query);
 		Query EJBQuery = this.entityManager.createQuery(query, AbInitioModel3VO.class);
@@ -279,8 +281,9 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<Subtraction3VO> getAbinitioModelsBySubtractionId(int subtractionId) {
 		String query = SQLQueryKeeper.getAbinitioModelQuery();
-		query = query + " WHERE subtraction.subtractionId = " + subtractionId;	
-		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class);
+		query = query + " WHERE subtraction.subtractionId = :subtractionId";
+		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class)
+				.setParameter("subtractionId", subtractionId);
 		return (List<Subtraction3VO>)EJBQuery.getResultList();
 	}
 	
@@ -288,15 +291,17 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public AbInitioModel3VO getAbinitioModelsById(int abinitioModelId) {
 		String query = SQLQueryKeeper.getSingleAbinitioModelQuery();
-		query = query + " and abInitioModel3VO.abInitioModelId= " + abinitioModelId;	
-		Query EJBQuery = this.entityManager.createQuery(query, AbInitioModel3VO.class);
+		query = query + " AND abInitioModel3VO.abInitioModelId= :abinitioModelId";
+		Query EJBQuery = this.entityManager.createQuery(query, AbInitioModel3VO.class)
+				.setParameter("abinitioModelId", abinitioModelId);
 		return (AbInitioModel3VO)EJBQuery.getSingleResult();
 	}
 
 	@Override
 	public Model3VO getModelById(int modelId) {
-		String query = SQLQueryKeeper.getModelQuery(modelId);
-		Query EJBQuery = this.entityManager.createQuery(query, Model3VO.class);
+		String query = "SELECT model FROM Model3VO model WHERE model.modelId = :modelId";
+		Query EJBQuery = this.entityManager.createQuery(query, Model3VO.class)
+				.setParameter("modelId", modelId);
 		return (Model3VO)EJBQuery.getSingleResult();
 	}
 

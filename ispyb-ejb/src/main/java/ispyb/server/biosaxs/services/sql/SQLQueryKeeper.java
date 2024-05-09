@@ -62,6 +62,7 @@ public class SQLQueryKeeper {
 				+ "LEFT JOIN SamplePlate on SamplePlate.samplePlateId = SamplePlatePosition.samplePlateId ";
 	}
 
+	@Deprecated
 	public static String getAnalysisByMacromoleculeId(int macromoleculeId,
 			int proposalId) {
 		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
@@ -70,6 +71,7 @@ public class SQLQueryKeeper {
 		return sb.toString();
 	}
 
+	@Deprecated
 	public static String getAnalysisByMacromoleculeId(int macromoleculeId,
 			int bufferId, int proposalId) {
 		StringBuilder sb = new StringBuilder(
@@ -79,18 +81,21 @@ public class SQLQueryKeeper {
 		return sb.toString();
 	}
 
+	@Deprecated
 	public static String getAnalysisByProposalId(int proposalId) {
 		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
 		sb.append(" and p.proposalId = " + proposalId);
 		return sb.toString();
 	}
 
+	@Deprecated
 	public static String getAnalysisByExperimentId(int experimentId) {
 		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
 		sb.append(" and exp.experimentId = " + experimentId);
 		return sb.toString();
 	}
 
+	@Deprecated
 	public static String getAnalysisCalibrationByProposalId(int proposalId) {
 		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
 		sb.append("  and exp.experimentType = 'CALIBRATION' and p.proposalId = "
@@ -128,140 +133,44 @@ public class SQLQueryKeeper {
 				+ " LEFT JOIN FETCH modelToList.model3VO ";
 	}
 
-	private static String getMeasurementToDataCollection() {
-		return "SELECT DISTINCT(measurementToDataCollection) FROM MeasurementTodataCollection3VO measurementToDataCollection ";
-	}
-
-	public static String getMeasurementToDataCollectionByMeasurementId(
-			int measurementId) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getMeasurementToDataCollection());
-		sb.append(" WHERE measurementToDataCollection.measurementId = "
-				+ measurementId);
-		return sb.toString();
-	}
-
-	/**
-	 * @param dataCollectionId
-	 * @return
-	 */
-	public static String findMeasurementToDataCollectionByDataCollectionId(
-			Integer dataCollectionId) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getMeasurementToDataCollection());
-		sb.append(" WHERE measurementToDataCollection.dataCollectionId = "
-				+ dataCollectionId);
-		return sb.toString();
-	}
-
-	public static String getFrame3VOByFilePath(String filepath) {
-		return "SELECT frame FROM Frame3VO frame where frame.filePath = '"
-				+ filepath + "'";
-	}
-
-	public static String getMeasurementById(int measurementId) {
-		return "SELECT measurement FROM Measurement3VO measurement where measurement.measurementId = "
-				+ measurementId;
-	}
-
-	public static String getSpecimenById(int specimenId) {
-		return "SELECT specimen FROM Specimen3VO specimen where specimen.specimenId = "
-				+ specimenId;
-	}
-
-	public static String getExperimentListByProposalId(int proposalId,
-			String experimentType) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
-		sb.append(" and e.experimentType = :experimentType ");
-		return sb.toString();
-	}
-
-	public static String getExperimentListBySessionId(Integer proposalId,
-			Integer sessionId) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getExperimentListByProposalId(proposalId));
-		sb.append(" and e.sessionId = :sessionId ");
-		return sb.toString();
-	}
-
-	public static String getAnalysis(int limit) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append("  order by exp.experimentId DESC limit " + limit);
-		return sb.toString();
-	}
-
-	public static String getModelQuery(int modelId) {
-		return "SELECT model FROM Model3VO model where model.modelId = "
-				+ modelId;
-	}
-
-	// public static String getSamplePlatesByBoxId(String dewarId) {
-	// return "SELECT plate FROM Sampleplate3VO plate where plate.boxId = " +
-	// dewarId ;
-	// }
-
-	// public static String getSamplePlatesByProposalId(int proposalId) {
-	// return
-	// "SELECT DISTINCT(plate) FROM Sampleplate3VO plate LEFT JOIN Experiment3VO exp where plate.experimentId = exp.experimentId and exp.proposalId ="
-	// + proposalId;
-	// }
-
-	public static String getStockSolutionsByBoxId(String dewarId) {
-		return "SELECT st FROM StockSolution3VO st where st.boxId = " + dewarId;
-	}
-
-	public static String getMergesByIdsList() {
-		StringBuilder ejbQLQuery = new StringBuilder();
-		ejbQLQuery.append("SELECT DISTINCT(Merge) FROM Merge3VO Merge ");
-		ejbQLQuery.append("LEFT JOIN FETCH Merge.framelist3VO frameList ");
-		ejbQLQuery
-				.append("LEFT JOIN FETCH frameList.frametolist3VOs frametolist3VOs ");
-		ejbQLQuery.append("LEFT JOIN FETCH frametolist3VOs.frame3VO ");
-		ejbQLQuery.append("where Merge.mergeId IN :mergeIdList");
-		return ejbQLQuery.toString();
-	}
-
-	private static String SELECT_EXPERIMENTS = ""
-			+ "select *, "
-			+ " ( "
-			+ "  select count(*) "
-			+ " from  Specimen s "
-			+ " where s.experimentId = e.experimentId "
-			+ ") as specimenCount, "
-			+ "( "
-			+ "  select count(*) "
-			+ "  from  Measurement m, Specimen s "
-			+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId "
-			+ ") as measurementCount, "
-			+ "( "
-			+ "  select count(*) "
-			+ "  from  Measurement m, Specimen s "
-			+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId and m.runId is not null "
-			+ ") as measurementDoneCount, "
-			+ "( "
-			+ "  select count(*) "
-			+ "  from  SaxsDataCollection sdc "
-			+ "  where sdc.experimentId = e.experimentId "
-			+ ") as dataCollectionCount, "
-			+ "( "
-			+ "  select count(*) "
-			+ "  from  SaxsDataCollection sdc, Subtraction sub "
-			+ "  where sdc.experimentId = e.experimentId and sub.dataCollectionId = sdc.dataCollectionId "
-			+ ") as dataCollectionDoneCount, "
-			+ "( "
-			+ "  select count(*) "
-			+ "  from  Measurement m, Specimen s, Merge me "
-			+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId and me.measurementId = m.measurementId "
-			+ ") as measurementAveragedCount, "
-			+ "(  "
-			+ "	    select group_concat(distinct(acronym) separator ', ')  "
-			+ "	    from Macromolecule ma, Specimen sp, Experiment exp "
-			+ "	    where ma.macromoleculeId = sp.macromoleculeId and sp.experimentId = e.experimentId "
-			+ "	) as macromolecules ";
-
 	public static String getExperimentListByProposalId(int proposalId) {
-		return SELECT_EXPERIMENTS
+		return ""
+				+ "select *, "
+				+ " ( "
+				+ "  select count(*) "
+				+ " from  Specimen s "
+				+ " where s.experimentId = e.experimentId "
+				+ ") as specimenCount, "
+				+ "( "
+				+ "  select count(*) "
+				+ "  from  Measurement m, Specimen s "
+				+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId "
+				+ ") as measurementCount, "
+				+ "( "
+				+ "  select count(*) "
+				+ "  from  Measurement m, Specimen s "
+				+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId and m.runId is not null "
+				+ ") as measurementDoneCount, "
+				+ "( "
+				+ "  select count(*) "
+				+ "  from  SaxsDataCollection sdc "
+				+ "  where sdc.experimentId = e.experimentId "
+				+ ") as dataCollectionCount, "
+				+ "( "
+				+ "  select count(*) "
+				+ "  from  SaxsDataCollection sdc, Subtraction sub "
+				+ "  where sdc.experimentId = e.experimentId and sub.dataCollectionId = sdc.dataCollectionId "
+				+ ") as dataCollectionDoneCount, "
+				+ "( "
+				+ "  select count(*) "
+				+ "  from  Measurement m, Specimen s, Merge me "
+				+ "  where s.experimentId = e.experimentId and m.specimenId = s.specimenId and me.measurementId = m.measurementId "
+				+ ") as measurementAveragedCount, "
+				+ "(  "
+				+ "	    select group_concat(distinct(acronym) separator ', ')  "
+				+ "	    from Macromolecule ma, Specimen sp, Experiment exp "
+				+ "	    where ma.macromoleculeId = sp.macromoleculeId and sp.experimentId = e.experimentId "
+				+ "	) as macromolecules "
 				+ " from Experiment e where e.proposalId = :proposalId ";
 	}
 
@@ -363,12 +272,6 @@ public class SQLQueryKeeper {
 		// "				 LEFT JOIN FitStructureToExperimentalData on FitStructureToExperimentalData.subtractionId = Subtraction.subtractionId and FitStructureToExperimentalData.fitStructureToExperimentalDataId in (select max(f2.fitStructureToExperimentalDataId) from FitStructureToExperimentalData f2  where f2.subtractionId = Subtraction.subtractionId)  ";
 	}
 
-	private static String getAnalysisCompactQuery() {
-		return SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause();
-
-	}
-
 	public static String getAnalysisCompactQueryByMacromoleculeId() {
 		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
 				+ SQLQueryKeeper.getFromClause());
@@ -387,7 +290,9 @@ public class SQLQueryKeeper {
 	}
 
 	public static String getAnalysisCompactQueryByProposalId(Integer limit) {
-		StringBuilder sb = new StringBuilder(getAnalysisCompactQuery());
+
+		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause());
 		sb.append(" where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
 		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
 		sb.append(" limit " + limit + "\r\n");
@@ -396,7 +301,9 @@ public class SQLQueryKeeper {
 
 	public static String getAnalysisCompactQueryByProposalId(Integer start,
 			Integer limit) {
-		StringBuilder sb = new StringBuilder(getAnalysisCompactQuery());
+
+		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause());
 		sb.append(" where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
 		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
 		sb.append(" limit " + start + "," + limit + "\r\n");
@@ -404,7 +311,9 @@ public class SQLQueryKeeper {
 	}
 
 	public static String getAnalysisCompactQueryBySubtractionId() {
-		StringBuilder sb = new StringBuilder(getAnalysisCompactQuery());
+
+		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause());
 		sb.append(" where Subtraction.subtractionId = :subtractionId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n");
 		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
 		return sb.toString();
@@ -412,7 +321,9 @@ public class SQLQueryKeeper {
 	}
 
 	public static String getAnalysisCompactQueryByExperimentId() {
-		StringBuilder sb = new StringBuilder(getAnalysisCompactQuery());
+
+		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause());
 		sb.append(" where exp.experimentId = :experimentId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n");
 		sb.append(" order by exp.experimentId ASC, Measurement.priorityLevelId ASC\r\n");
 		return sb.toString();
@@ -935,8 +846,31 @@ public class SQLQueryKeeper {
 	}
 	
 	public static String getSessionByCodeAndNumber() {
-		return "select " + 
-				SqlTableMapper.getBLSessionTable() + "," +
+		return "select " +
+				"BLSession.sessionId as BLSession_sessionId,\r\n"
+						+ "BLSession.expSessionPk as BLSession_expSessionPk,\r\n"
+						+ "BLSession.beamLineSetupId as BLSession_beamLineSetupId,\r\n"
+						+ "BLSession.proposalId as BLSession_proposalId,\r\n"
+						+ "BLSession.projectCode as BLSession_projectCode,\r\n"
+						+ "BLSession.startDate as BLSession_startDate,\r\n"
+						+ "BLSession.endDate as BLSession_endDate,\r\n"
+						+ "BLSession.beamLineName as BLSession_beamLineName,\r\n"
+						+ "BLSession.scheduled as BLSession_scheduled,\r\n"
+						+ "BLSession.nbShifts as BLSession_nbShifts,\r\n"
+						+ "BLSession.comments as BLSession_comments,\r\n"
+						+ "BLSession.beamLineOperator as BLSession_beamLineOperator,\r\n"
+						+ "BLSession.visit_number as BLSession_visit_number,\r\n"
+						+ "BLSession.bltimeStamp as BLSession_bltimeStamp,\r\n"
+						+ "BLSession.usedFlag as BLSession_usedFlag,\r\n"
+						+ "BLSession.sessionTitle as BLSession_sessionTitle,\r\n"
+						+ "BLSession.structureDeterminations as BLSession_structureDeterminations,\r\n"
+						+ "BLSession.dewarTransport as BLSession_dewarTransport,\r\n"
+						+ "BLSession.databackupFrance as BLSession_databackupFrance,\r\n"
+						+ "BLSession.databackupEurope as BLSession_databackupEurope,\r\n"
+						+ "BLSession.operatorSiteNumber as BLSession_operatorSiteNumber,\r\n"
+						+ "BLSession.lastUpdate as BLSession_lastUpdate,\r\n"
+						+ "BLSession.nbReimbDewars as BLSession_nbReimbDewars,\r\n"
+						+ "BLSession.protectedData as BLSession_protectedData" + "," +
 				SqlTableMapper.getProposalTable()
 				+ " from BLSession, Proposal where Proposal.proposalId = BLSession.proposalId and Proposal.proposalCode= :proposalCode  and Proposal.proposalNumber= :proposalNumber";
 	}

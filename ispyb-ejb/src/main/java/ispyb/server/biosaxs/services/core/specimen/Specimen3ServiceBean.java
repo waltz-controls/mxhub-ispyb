@@ -19,7 +19,6 @@
 
 package ispyb.server.biosaxs.services.core.specimen;
 
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
 
 import jakarta.ejb.Stateless;
@@ -35,8 +34,9 @@ public class Specimen3ServiceBean implements Specimen3Service, Specimen3ServiceL
 
 	@Override
 	public Specimen3VO findSpecimenById(int specimenId) {
-		String query = SQLQueryKeeper.getSpecimenById(specimenId);
-		Query EJBQuery = this.entityManager.createQuery(query, Specimen3VO.class);
+        String query = "SELECT specimen FROM Specimen3VO specimen where specimen.specimenId = :specimenId";
+		Query EJBQuery = this.entityManager.createQuery(query, Specimen3VO.class)
+				.setParameter("specimenId", specimenId);
 		Specimen3VO Specimen3VO = (Specimen3VO) EJBQuery.getSingleResult();	
 		return Specimen3VO;
 	}

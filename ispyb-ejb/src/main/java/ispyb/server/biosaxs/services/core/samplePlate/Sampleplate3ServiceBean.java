@@ -70,8 +70,9 @@ public class Sampleplate3ServiceBean implements Sampleplate3Service, Sampleplate
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Sampleplate3VO> getSamplePlatesByBoxId(String dewarId) {
-		String query = "SELECT plate FROM Sampleplate3VO plate where plate.boxId = " + dewarId;// SQLQueryKeeper.getSamplePlatesByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query, Sampleplate3VO.class);
+		String query = "SELECT plate FROM Sampleplate3VO plate where plate.boxId = :dewarId";
+		Query EJBQuery = this.entityManager.createQuery(query, Sampleplate3VO.class)
+				.setParameter("dewarId", dewarId);
 		List<Sampleplate3VO> samplePlates = EJBQuery.getResultList();
 		return samplePlates;
 	}

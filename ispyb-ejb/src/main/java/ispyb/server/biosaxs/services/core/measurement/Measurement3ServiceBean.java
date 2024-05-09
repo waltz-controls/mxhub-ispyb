@@ -22,7 +22,6 @@ package ispyb.server.biosaxs.services.core.measurement;
 
 
 import ispyb.server.biosaxs.services.core.measurementToDataCollection.MeasurementToDataCollection3Service;
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.assembly.Macromolecule3VO;
 import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.biosaxs.vos.dataAcquisition.Measurement3VO;
@@ -64,8 +63,9 @@ public class Measurement3ServiceBean implements Measurement3Service, Measurement
 	private MeasurementToDataCollection3Service measurementToDataCollection3Service;
 
 	public Specimen3VO findSpecimenById(int specimenId) {
-		String query = SQLQueryKeeper.getSpecimenById(specimenId);
-		Query EJBQuery = this.entityManager.createQuery(query, Specimen3VO.class);
+        String query = "SELECT specimen FROM Specimen3VO specimen where specimen.specimenId = :specimenId";
+		Query EJBQuery = this.entityManager.createQuery(query, Specimen3VO.class)
+				.setParameter("specimenId", specimenId);
 		Specimen3VO Specimen3VO = (Specimen3VO) EJBQuery.getSingleResult();	
 		return Specimen3VO;
 	}
@@ -384,8 +384,9 @@ public class Measurement3ServiceBean implements Measurement3Service, Measurement
 	}
 
 	private Macromolecule3VO findMacromoleculeBySpecimenId(int specimenId){
-		String query = "SELECT specimen FROM Specimen3VO specimen LEFT JOIN specimen.macromolecule3VO where specimen.specimenId = " + specimenId;
-		Query EJBQuery = this.entityManager.createQuery(query, Macromolecule3VO.class);
+		String query = "SELECT specimen FROM Specimen3VO specimen LEFT JOIN specimen.macromolecule3VO where specimen.specimenId = :specimenId";
+		Query EJBQuery = this.entityManager.createQuery(query, Macromolecule3VO.class)
+				.setParameter("specimenId", specimenId);
 		Specimen3VO specimen3VO = (Specimen3VO) EJBQuery.getSingleResult();	
 		return specimen3VO.getMacromolecule3VO();
 	}
