@@ -29,7 +29,7 @@
     </Resource>
     <Resource id="ispyb_config" type="DataSource">
         JdbcDriver org.mariadb.jdbc.Driver
-        JdbcUrl jdbc:mariadb://mariadb:3306/pydb
+        JdbcUrl jdbc:mariadb://mariadb:3306/pyconfig
         UserName pxadmin
         Password pxadmin
         JtaManaged true
