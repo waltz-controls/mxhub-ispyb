@@ -22,16 +22,16 @@
     <!-- <Deployments dir="apps" /> -->
     <Resource id="ispyb" type="DataSource">
         JdbcDriver org.mariadb.jdbc.Driver
-        JdbcUrl jdbc:mariadb://mariadb:3306/ispyb_build
-        UserName pxuser
-        Password pxuser
+        JdbcUrl jdbc:mariadb://mariadb:3306/pydb
+        UserName pxadmin
+        Password pxadmin
         JtaManaged true
     </Resource>
     <Resource id="ispyb_config" type="DataSource">
         JdbcDriver org.mariadb.jdbc.Driver
-        JdbcUrl jdbc:mariadb://mariadb:3306/ispyb_build
-        UserName pxuser
-        Password pxuser
+        JdbcUrl jdbc:mariadb://mariadb:3306/pydb
+        UserName pxadmin
+        Password pxadmin
         JtaManaged true
     </Resource>
 </tomee>
