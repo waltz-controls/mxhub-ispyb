@@ -19,6 +19,9 @@ RUN wget https://downloads.apache.org/tomee/tomee-10.0.0-M1/apache-tomee-$TOMCAT
 # Copy the EAR file from the builder stage to the Tomcat webapps directory
 COPY ispyb-ear/target/ispyb.ear $CATALINA_HOME/webapps/
 
+# Copy the pdf resource required for parcel label
+COPY ispyb-ejb/pdf/ParcelLabelsTemplate-WithWorldCourierCL.pdf /etc/ispyb/pdf/
+
 # Copy tomee.xml configuration file to the Tomcat conf directory
 COPY configuration/tomee/tomee.xml $CATALINA_HOME/conf/
 COPY configuration/tomee/server.xml $CATALINA_HOME/conf/
