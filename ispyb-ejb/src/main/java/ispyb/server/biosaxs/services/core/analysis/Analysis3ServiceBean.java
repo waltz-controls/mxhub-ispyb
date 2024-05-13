@@ -143,7 +143,7 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public BigInteger getCountCompactAnalysisByExperimentId(Integer proposalId) {
-		String mySQLQuery = SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId(proposalId);
+		String mySQLQuery = SQLQueryKeeper.getCountAnalysisCompactQueryByProposalId();
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, BigInteger.class)
 				.setParameter("proposalId", proposalId);
 		return 	(BigInteger) query.getResultList()
@@ -185,16 +185,15 @@ public class Analysis3ServiceBean implements Analysis3Service, Analysis3ServiceL
 	
 	@Override
 	public SaxsDataCollection3VO getDataCollection(int dataCollectionId) {
-		StringBuilder ejbQLQuery = new StringBuilder();
-		ejbQLQuery.append("SELECT DISTINCT(datacollection) FROM SaxsDataCollection3VO  datacollection ");
-		ejbQLQuery.append(" LEFT JOIN FETCH datacollection.measurementtodatacollection3VOs measurementtodatacollection3VOs ");
-		ejbQLQuery.append(" LEFT JOIN FETCH datacollection.substraction3VOs substraction3VOs ");
-		ejbQLQuery.append(" LEFT JOIN FETCH substraction3VOs.sampleOneDimensionalFiles sampleOneDimensionalFiles ");
-		ejbQLQuery.append(" LEFT JOIN FETCH sampleOneDimensionalFiles.frametolist3VOs sampleFrametolist3VOs ");
-		ejbQLQuery.append(" LEFT JOIN FETCH substraction3VOs.bufferOneDimensionalFiles bufferOneDimensionalFiles ");
-		ejbQLQuery.append(" LEFT JOIN FETCH bufferOneDimensionalFiles.frametolist3VOs bufferFrametolist3VOs ");
-		ejbQLQuery.append(" WHERE datacollection.dataCollectionId = :dataCollectionId");
-		TypedQuery<SaxsDataCollection3VO> query = entityManager.createQuery(ejbQLQuery.toString(), SaxsDataCollection3VO.class).setParameter("dataCollectionId", dataCollectionId);
+		String ejbQLQuery = "SELECT DISTINCT(datacollection) FROM SaxsDataCollection3VO  datacollection " +
+				" LEFT JOIN FETCH datacollection.measurementtodatacollection3VOs measurementtodatacollection3VOs " +
+				" LEFT JOIN FETCH datacollection.substraction3VOs substraction3VOs " +
+				" LEFT JOIN FETCH substraction3VOs.sampleOneDimensionalFiles sampleOneDimensionalFiles " +
+				" LEFT JOIN FETCH sampleOneDimensionalFiles.frametolist3VOs sampleFrametolist3VOs " +
+				" LEFT JOIN FETCH substraction3VOs.bufferOneDimensionalFiles bufferOneDimensionalFiles " +
+				" LEFT JOIN FETCH bufferOneDimensionalFiles.frametolist3VOs bufferFrametolist3VOs " +
+				" WHERE datacollection.dataCollectionId = :dataCollectionId";
+		TypedQuery<SaxsDataCollection3VO> query = entityManager.createQuery(ejbQLQuery, SaxsDataCollection3VO.class).setParameter("dataCollectionId", dataCollectionId);
 		return query.getSingleResult();
 	}
 	

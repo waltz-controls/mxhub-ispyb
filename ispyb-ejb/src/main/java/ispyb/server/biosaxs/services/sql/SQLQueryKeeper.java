@@ -57,42 +57,34 @@ public class SQLQueryKeeper {
 	@Deprecated
 	public static String getAnalysisByMacromoleculeId(int macromoleculeId,
 			int proposalId) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append(" and s.macromoleculeId = " + macromoleculeId);
-		sb.append(" and p.proposalId = " + proposalId);
-		return sb.toString();
+		String sb = SQLQueryKeeper.getAnalysisQuery() + " and s.macromoleculeId = " + macromoleculeId +
+				" and p.proposalId = " + proposalId;
+		return sb;
 	}
 
 	@Deprecated
 	public static String getAnalysisByMacromoleculeId(int macromoleculeId,
 			int bufferId, int proposalId) {
-		StringBuilder sb = new StringBuilder(
-				SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId,
-						proposalId));
-		sb.append(" and bu.bufferId = " + bufferId);
-		return sb.toString();
+		String sb = SQLQueryKeeper.getAnalysisByMacromoleculeId(macromoleculeId,
+				proposalId) + " and bu.bufferId = " + bufferId;
+		return sb;
 	}
 
 	@Deprecated
 	public static String getAnalysisByProposalId(int proposalId) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append(" and p.proposalId = " + proposalId);
-		return sb.toString();
+		return SQLQueryKeeper.getAnalysisQuery() + " and p.proposalId = " + proposalId;
 	}
 
 	@Deprecated
 	public static String getAnalysisByExperimentId(int experimentId) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append(" and exp.experimentId = " + experimentId);
-		return sb.toString();
+		return SQLQueryKeeper.getAnalysisQuery() + " and exp.experimentId = " + experimentId;
 	}
 
 	@Deprecated
 	public static String getAnalysisCalibrationByProposalId(int proposalId) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append("  and exp.experimentType = 'CALIBRATION' and p.proposalId = "
-				+ proposalId);
-		return sb.toString();
+		String sb = SQLQueryKeeper.getAnalysisQuery() + "  and exp.experimentType = 'CALIBRATION' and p.proposalId = "
+				+ proposalId;
+		return sb;
 	}
 
 	
@@ -265,60 +257,53 @@ public class SQLQueryKeeper {
 	}
 
 	public static String getAnalysisCompactQueryByMacromoleculeId() {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where SaxsDataCollection.dataCollectionId in (select dc.dataCollectionId from SaxsDataCollection dc, MeasurementToDataCollection mtd, Measurement m, Specimen s where m.specimenId = s.specimenId and mtd.measurementId = m.measurementId and dc.dataCollectionId = mtd.dataCollectionId and s.macromoleculeId = :macromoleculeId ) and exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
-		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
-		return sb.toString();
+		String sb = SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause() + " where SaxsDataCollection.dataCollectionId in (select dc.dataCollectionId from SaxsDataCollection dc, MeasurementToDataCollection mtd, Measurement m, Specimen s where m.specimenId = s.specimenId and mtd.measurementId = m.measurementId and dc.dataCollectionId = mtd.dataCollectionId and s.macromoleculeId = :macromoleculeId ) and exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n" +
+				" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n";
+		return sb;
 	}
 
-	public static String getCountAnalysisCompactQueryByProposalId(
-			Integer proposalId) {
-		StringBuilder sb = new StringBuilder("Select Count(*) "
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
-		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
-		return sb.toString();
+	public static String getCountAnalysisCompactQueryByProposalId() {
+		String sb = "Select Count(*) "
+				+ SQLQueryKeeper.getFromClause() + " where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n" +
+				" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n";
+		return sb;
 	}
 
 	public static String getAnalysisCompactQueryByProposalId(Integer limit) {
 
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
-		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
-		sb.append(" limit " + limit + "\r\n");
-		return sb.toString();
+		String sb = SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause() + " where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n" +
+				" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n" +
+				" limit " + limit + "\r\n";
+		return sb;
 	}
 
 	public static String getAnalysisCompactQueryByProposalId(Integer start,
 			Integer limit) {
 
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n");
-		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
-		sb.append(" limit " + start + "," + limit + "\r\n");
-		return sb.toString();
+		String sb = SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause() + " where exp.proposalId = :proposalId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId and exp.experimentType != \"TEMPLATE\" \r\n" +
+				" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n" +
+				" limit " + start + "," + limit + "\r\n";
+		return sb;
 	}
 
 	public static String getAnalysisCompactQueryBySubtractionId() {
 
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where Subtraction.subtractionId = :subtractionId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n");
-		sb.append(" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n");
-		return sb.toString();
+		String sb = SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause() + " where Subtraction.subtractionId = :subtractionId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n" +
+				" order by exp.experimentId DESC, Measurement.priorityLevelId DESC, Merge.mergeId DESC\r\n";
+		return sb;
 
 	}
 
 	public static String getAnalysisCompactQueryByExperimentId() {
 
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getSelectClause()
-				+ SQLQueryKeeper.getFromClause());
-		sb.append(" where exp.experimentId = :experimentId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n");
-		sb.append(" order by exp.experimentId ASC, Measurement.priorityLevelId ASC\r\n");
-		return sb.toString();
+		String sb = SQLQueryKeeper.getSelectClause()
+				+ SQLQueryKeeper.getFromClause() + " where exp.experimentId = :experimentId and  SaxsDataCollection.dataCollectionId = MeasurementToDataCollection.dataCollectionId \r\n" +
+				" order by exp.experimentId ASC, Measurement.priorityLevelId ASC\r\n";
+		return sb;
 
 	}
 

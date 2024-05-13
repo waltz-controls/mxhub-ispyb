@@ -99,22 +99,21 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 	
 	@Override
 	public List<Experiment3VO> findByProposalId(int proposalId, ExperimentScope scope) {
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-		ejbQLQuery.append("WHERE experiment.proposalId = :proposalId");
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class).setParameter("proposalId", proposalId);
+		String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope) + "WHERE experiment.proposalId = :proposalId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class).setParameter("proposalId", proposalId);
 		return query.getResultList();
 	}
 
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope, Integer proposalId) {
 		try {
-			StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-			ejbQLQuery.append("WHERE experiment.experimentId = :experimentId ");
+			String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope) +
+					"WHERE experiment.experimentId = :experimentId ";
 			// if coming from manager account, proposalId can be null
 			if (proposalId != null)  {
-				ejbQLQuery.append(" and experiment.proposalId = :proposalId");
+				ejbQLQuery += " AND experiment.proposalId = :proposalId";
 			}
-			TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
+			TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class);
 			query.setParameter("experimentId", experimentId);
 			if (proposalId != null) {
 				query.setParameter("proposalId", proposalId);
@@ -134,7 +133,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		return vo;
 	}
 	
-	public static StringBuilder getQueryByScope(ExperimentScope scope){
+	public static String getQueryByScope(ExperimentScope scope){
 		StringBuilder ejbQLQuery = new StringBuilder();
 		ejbQLQuery.append("SELECT DISTINCT(experiment) FROM Experiment3VO experiment ");
 		
@@ -168,15 +167,15 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		default:
 			break;
 		}
-		return ejbQLQuery;
+		return ejbQLQuery.toString();
 	}
 	
 	
 	@Override
 	public Experiment3VO findByMeasurementId(int measurementId){
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(ExperimentScope.MEDIUM);
-		ejbQLQuery.append(" wHERE specimens.measurementId = " + measurementId);
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
+		String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(ExperimentScope.MEDIUM) + " WHERE specimens.measurementId = :measurementId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+				.setParameter("measurementId", measurementId);
 		return query.getSingleResult();
 	}
 	
@@ -194,10 +193,9 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope) {
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-		ejbQLQuery.append("WHERE experiment.experimentId = :experimentId");
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
-		query.setParameter("experimentId", experimentId);
+		String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope) + "WHERE experiment.experimentId = :experimentId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+				.setParameter("experimentId", experimentId);
 		List<Experiment3VO> results = query.getResultList();
 		if (results.isEmpty()) {
 		    return null; // handle no-results case

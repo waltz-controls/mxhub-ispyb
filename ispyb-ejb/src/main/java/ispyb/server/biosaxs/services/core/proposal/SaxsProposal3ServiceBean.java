@@ -99,12 +99,11 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 */
 	@Override
 	public List<Additive3VO> findAdditivesByBufferId(int bufferId) {
-		StringBuilder ejbQLQuery = new StringBuilder("SELECT DISTINCT(additive) FROM Additive3VO additive ");
-		ejbQLQuery.append("LEFT JOIN FETCH additive.bufferhasadditive3VOs b ");
-		ejbQLQuery.append("LEFT JOIN FETCH b.buffer3VO ");
-		ejbQLQuery.append("WHERE b.buffer3VO.bufferId = :bufferId ");
-		TypedQuery<Additive3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Additive3VO.class).setParameter("bufferId",
-				bufferId);
+		String ejbQLQuery = "SELECT DISTINCT(additive) FROM Additive3VO additive " + "LEFT JOIN FETCH additive.bufferhasadditive3VOs b " +
+				"LEFT JOIN FETCH b.buffer3VO " +
+				"WHERE b.buffer3VO.bufferId = :bufferId ";
+		TypedQuery<Additive3VO> query = entityManager.createQuery(ejbQLQuery, Additive3VO.class)
+				.setParameter("bufferId", bufferId);
 		return query.getResultList();
 	}
 	@Override
@@ -154,12 +153,11 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 
 	@Override
 	public List<Assembly3VO> findAssembliesByProposalId(Integer proposalId) {
-		StringBuilder ejbQLQuery = new StringBuilder("SELECT DISTINCT(assembly) FROM Assembly3VO assembly ");
-		ejbQLQuery.append("LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs m ");
-		ejbQLQuery.append("LEFT JOIN FETCH m.macromolecule3VO ");
-		ejbQLQuery.append("WHERE m.macromolecule3VO.proposalId = :proposalId ");
-		TypedQuery<Assembly3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Assembly3VO.class).setParameter("proposalId",
-				proposalId);
+		String ejbQLQuery = "SELECT DISTINCT(assembly) FROM Assembly3VO assembly " + "LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs m " +
+				"LEFT JOIN FETCH m.macromolecule3VO " +
+				"WHERE m.macromolecule3VO.proposalId = :proposalId ";
+		TypedQuery<Assembly3VO> query = entityManager.createQuery(ejbQLQuery, Assembly3VO.class)
+				.setParameter("proposalId", proposalId);
 		return query.getResultList();
 	}
 

@@ -97,12 +97,10 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 		return 	aliasToValueMapList;
 	}
 	
-	
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAnalysisInformation(int limit) {
-		StringBuilder sb = new StringBuilder(SQLQueryKeeper.getAnalysisQuery());
-		sb.append("  order by exp.experimentId DESC limit " + limit);
-		String mySQLQuery = sb.toString();
+		String mySQLQuery = SQLQueryKeeper.getAnalysisQuery() + "  ORDER BY exp.experimentId DESC limit " + limit;
 		Query query = this.entityManager.createNativeQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
 		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
