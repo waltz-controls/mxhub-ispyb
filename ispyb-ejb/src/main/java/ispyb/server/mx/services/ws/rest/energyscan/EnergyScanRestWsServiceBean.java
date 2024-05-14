@@ -35,16 +35,13 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 	private EntityManager entityManager;
 
 
-	private String BySessionId = "SELECT * FROM v_energyScan WHERE sessionId = :sessionId and BLSession_proposalId=:proposalId";
-	private String ById = "SELECT * FROM v_energyScan WHERE energyScanId = :energyScanId and BLSession_proposalId=:proposalId";
-	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
-		String sqlQuery = BySessionId;
+		String sqlQuery = "SELECT * FROM v_energyScan WHERE sessionId = ?1 AND BLSession_proposalId=?2";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("proposalId", proposalId)
-				.setParameter("sessionId", sessionId);
+				.setParameter(2, proposalId)
+				.setParameter(1, sessionId);
 
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
@@ -52,10 +49,10 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int energyScanId) {
-		String sqlQuery = ById;
+		String sqlQuery = "SELECT * FROM v_energyScan WHERE energyScanId = ?1 and BLSession_proposalId=?2";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("proposalId", proposalId)
-				.setParameter("energyScanId", energyScanId);
+				.setParameter(2, proposalId)
+				.setParameter(1, energyScanId);
 		
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
