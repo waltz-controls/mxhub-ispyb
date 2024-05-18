@@ -72,7 +72,7 @@ public class ProposalRestWebService extends MXRestWebService{
 			ArrayList<HashMap<String, List<?>>> multiple = new ArrayList<HashMap<String, List<?>>>();				
 			HashMap<String, List<?>> results = new HashMap<String, List<?>>();
 			
-			if (proposal == null || proposal.isEmpty()) {					
+			if (proposal == null || proposal.equals("null") || proposal.isEmpty()) {
 				List<Map<String, Object>> proposals = this.getProposalsFromToken(token);
 				results.put("proposal", proposals);
 				
@@ -192,6 +192,7 @@ public class ProposalRestWebService extends MXRestWebService{
 	@GET
 	@Path("{token}/proposal/{proposal}/update")
 	@Produces({ "application/json" })
+	/* Update info about new proposals from DOOR*/
 	public Response updateProposal(@PathParam("token") String token, @PathParam("proposal") String proposal)
 			throws Exception {
 		

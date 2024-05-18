@@ -68,7 +68,7 @@ public class SessionRestWebService extends RestWebService {
 			List<Map<String, Object>> sessions = new ArrayList<Map<String,Object>>();
 			for (Map<String, Object> proposal : proposals) {			
 				logger.info("Getting sessions from proposal " + proposal.get("Proposal_proposalId"));
-				sessions.addAll(getSessionService().getSessionViewByProposalId((int) proposal.get("Proposal_proposalId")));
+				sessions.addAll(getSessionService().getSessionViewByProposalId(((Long)proposal.get("Proposal_proposalId")).intValue()));
 			}
 			this.logFinish(methodName, id, logger);
 			return this.sendResponse(sessions);

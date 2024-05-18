@@ -147,14 +147,18 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 		String query = "SELECT l.laboratoryId, l.laboratoryUUID, l.name, l.address, "
 				+ "l.city, l.country, l.url, l.organization, l.laboratoryExtPk  "
 				+ " FROM Laboratory l, Person p, Proposal pro "
-				+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
-				.replace(":code", "'" + code + "'")
-				.replace(":number", "'" + number + "'");
-		List<Laboratory3VO> listVOs = this.entityManager.createNativeQuery(query, Laboratory3VO.class).getResultList();
-		if (listVOs == null || listVOs.isEmpty())
+				+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND "
+				+ "pro.proposalCode like ?1 "
+				+ "AND pro.proposalNumber = ?2 ";
+
+		try {
+			return (Laboratory3VO) this.entityManager.createNativeQuery(query, Laboratory3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.getSingleResult();
+		} catch (NoResultException noResultException){
 			return null;
-		
-		return (Laboratory3VO) listVOs.toArray()[0];
+		}
 	}
 
 	@SuppressWarnings("unchecked")

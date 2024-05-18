@@ -21,28 +21,6 @@ package ispyb.server.biosaxs.services.sql;
 
 public class SQLQueryKeeper {
 
-
-	public static String getDataCollectionByProposal() {
-		return "select "
-				+ SqlTableMapper.getProposalTable() + ","  
-				+ SqlTableMapper.getCrystalTable() + ","  
-				+ SqlTableMapper.getProteinTable() + "," 
-				+ SqlTableMapper.getImageTable() + "," 
-				+ SqlTableMapper.getBLSampleTable() 
-				+ " from Proposal "
-				+ " LEFT JOIN Protein on Proposal.proposalId = Protein.proposalId\r\n "
-				+ " LEFT JOIN Crystal on Protein.proteinId = Crystal.proteinId\r\n"
-				+ " LEFT JOIN BLSample on Crystal.crystalId = BLSample.crystalId\r\n"
-				+ " LEFT JOIN DataCollectionGroup on BLSample.blSampleId = DataCollectionGroup.blSampleId\r\n"
-				+ " LEFT JOIN DataCollection on DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId\r\n"
-				+ " LEFT JOIN Image on Image.dataCollectionId = DataCollection.dataCollectionGroupId\r\n"
-				+ " where proposalNumber = :proposalNumber and proposalCode=:proposalCode";
-
-	}
-
-
-	
-	
 	public static String getExperimentDescription() {
 		return "SELECT Buffer.acronym as buffer, Macromolecule.acronym as macromolecule, Specimen.*, Measurement.*, SamplePlatePosition.*, SamplePlate.*  FROM \r\n"
 				+ "Experiment experiment\r\n"
@@ -821,37 +799,4 @@ public class SQLQueryKeeper {
 				+ " and exp.experimentType != 'TEMPLATE' ";
 
 	}
-	
-	public static String getSessionByCodeAndNumber() {
-		return "select " +
-				"BLSession.sessionId as BLSession_sessionId,\r\n"
-						+ "BLSession.expSessionPk as BLSession_expSessionPk,\r\n"
-						+ "BLSession.beamLineSetupId as BLSession_beamLineSetupId,\r\n"
-						+ "BLSession.proposalId as BLSession_proposalId,\r\n"
-						+ "BLSession.projectCode as BLSession_projectCode,\r\n"
-						+ "BLSession.startDate as BLSession_startDate,\r\n"
-						+ "BLSession.endDate as BLSession_endDate,\r\n"
-						+ "BLSession.beamLineName as BLSession_beamLineName,\r\n"
-						+ "BLSession.scheduled as BLSession_scheduled,\r\n"
-						+ "BLSession.nbShifts as BLSession_nbShifts,\r\n"
-						+ "BLSession.comments as BLSession_comments,\r\n"
-						+ "BLSession.beamLineOperator as BLSession_beamLineOperator,\r\n"
-						+ "BLSession.visit_number as BLSession_visit_number,\r\n"
-						+ "BLSession.bltimeStamp as BLSession_bltimeStamp,\r\n"
-						+ "BLSession.usedFlag as BLSession_usedFlag,\r\n"
-						+ "BLSession.sessionTitle as BLSession_sessionTitle,\r\n"
-						+ "BLSession.structureDeterminations as BLSession_structureDeterminations,\r\n"
-						+ "BLSession.dewarTransport as BLSession_dewarTransport,\r\n"
-						+ "BLSession.databackupFrance as BLSession_databackupFrance,\r\n"
-						+ "BLSession.databackupEurope as BLSession_databackupEurope,\r\n"
-						+ "BLSession.operatorSiteNumber as BLSession_operatorSiteNumber,\r\n"
-						+ "BLSession.lastUpdate as BLSession_lastUpdate,\r\n"
-						+ "BLSession.nbReimbDewars as BLSession_nbReimbDewars,\r\n"
-						+ "BLSession.protectedData as BLSession_protectedData" + "," +
-				SqlTableMapper.getProposalTable()
-				+ " from BLSession, Proposal where Proposal.proposalId = BLSession.proposalId and Proposal.proposalCode= :proposalCode  and Proposal.proposalNumber= :proposalNumber";
-	}
-
-	
-
 }

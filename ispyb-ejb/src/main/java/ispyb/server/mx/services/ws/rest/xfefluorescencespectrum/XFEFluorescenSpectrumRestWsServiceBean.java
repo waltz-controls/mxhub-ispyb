@@ -38,25 +38,22 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 	private EntityManager entityManager;
 
 
-	private String BySessionId = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE sessionId = :sessionId and BLSession_proposalId=:proposalId";
-	private String ById = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE xfeFluorescenceSpectrumId = :xfeFluorescenceSpectrumId and BLSession_proposalId=:proposalId";
-	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
-		String sqlQuery = BySessionId;
+		String sqlQuery = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE sessionId = ?1 and BLSession_proposalId=?2";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("proposalId", proposalId)
-				.setParameter("sessionId", sessionId);
+				.setParameter(2, proposalId)
+				.setParameter(1, sessionId);
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int xfeFluorescenceSpectrumId) {
-		String sqlQuery = ById;
+		String sqlQuery = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE xfeFluorescenceSpectrumId = ?1 and BLSession_proposalId=?2";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("proposalId", proposalId)
-				.setParameter("xfeFluorescenceSpectrumId", xfeFluorescenceSpectrumId);
+				.setParameter(2, proposalId)
+				.setParameter(1, xfeFluorescenceSpectrumId);
 		
 
         return (List<Map<String, Object>>) ((Query) query).getResultList();

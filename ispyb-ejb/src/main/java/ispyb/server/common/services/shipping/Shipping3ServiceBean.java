@@ -44,7 +44,6 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.poi.hssf.record.formula.AreaPtg;
 
 /**
  * <p>
@@ -58,100 +57,60 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 
 	// Generic HQL request to find instances of Shipping3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchDewars) {
-		return "from Shipping3VO vo " + (fetchDewars ? "left join fetch vo.dewarVOs " : "")
-				+ "where vo.shippingId = :pk";
-
-	}
 
 	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchSessions) {
+		String pk = null;
 		if (fetchDewars){
-			return "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " + (fetchSessions ? " LEFT JOIN FETCH dewars.sessionVO " : "")
+			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " + (fetchSessions ? " LEFT JOIN FETCH dewars.sessionVO " : "")
 					+ " WHERE vo.shippingId = :pk";
+		} else {
+			pk = "from Shipping3VO vo where vo.shippingId = :pk";
 		}
-		return FIND_BY_PK(fetchDewars);
+		return pk;
 	}
 		
 	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchContainers, boolean fetchSamples) {
+		String pk = null;
 		if (fetchDewars){
-			return "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " 
+			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
 					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
 					+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs " : "")
 					+ " WHERE vo.shippingId = :pk";
+		} else {
+			pk = "from Shipping3VO vo where vo.shippingId = :pk";
 		}
-		return FIND_BY_PK(false);
+		return pk;
 	}
 	
 	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchContainers, boolean fetchSamples, boolean fetchSubSamples) {
+		String pk = null;
 		if (fetchDewars){
-			return "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " 
+			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
 					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
 					//+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs sa " : "")
 					+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs " : "")
 					+ (fetchSubSamples ? " LEFT JOIN FETCH sa.blSubSampleVOs " : "")
 					+ " WHERE vo.shippingId = :pk";
+		} else {
+			pk = "from Shipping3VO vo where vo.shippingId = :pk";
 		}
-		return FIND_BY_PK(fetchDewars);
+		return pk;
 	}
 		
 	private static final String FIND_BY_PROPOSAL_ID(boolean fetchDewars, boolean fetchContainers, boolean feacthSamples) {
+		String pk = null;
 		if (fetchDewars){
-			return "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " 
+			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
 					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
 					+ (feacthSamples ? " LEFT JOIN FETCH co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs LEFT JOIN FETCH sa.blSubSampleVOs " : " ")
 					+  " LEFT JOIN FETCH vo.sessions se "
 					+  " LEFT JOIN FETCH se.proposalVO proposal "
 					+ " WHERE proposal.proposalId = :proposalId";
+		} else {
+			pk = "from Shipping3VO vo where vo.shippingId = :pk";
 		}
-		return FIND_BY_PK(fetchDewars);
+		return pk;
 	}
-		
-	private static final String FIND_BY_SHIPPING_ID() {
-		return "select  " +
-				SqlTableMapper.getShippingTable() + ", (select count(*) from BLSample where BLSample.containerId = Container.containerId) as sampleCount, " +
-				SqlTableMapper.getContainerTable() + " , (select count(*) from StockSolution where Dewar.dewarId = StockSolution.boxId) as stockSolutionCount, " +
-				SqlTableMapper.getDewarTable()  +
-				" from Shipping \r\n"
-				+ " left join Dewar on Dewar.shippingId = Shipping.shippingId \r\n"
-				+ " left join Container on Dewar.dewarId = Container.dewarId \r\n"
-				+ " where Shipping.shippingId = :shippingId";
-	}
-		
-	private static final String FIND_BY_PROPOSAL_ID() {
-		return "select  " +
-				SqlTableMapper.getShippingTable() + ", (select count(*) from BLSample where BLSample.containerId = Container.containerId) as sampleCount, " +
-				SqlTableMapper.getContainerTable() + " , (select count(*) from StockSolution where Dewar.dewarId = StockSolution.boxId) as stockSolutionCount, " +
-				SqlTableMapper.getDewarTable()  +
-				" from Shipping \r\n"
-				+ " left join Dewar on Dewar.shippingId = Shipping.shippingId \r\n"
-				+ " left join Container on Dewar.dewarId = Container.dewarId \r\n"
-				+ " where Shipping.proposalId = :proposalId";
-	}
-		
-
-		// Generic HQL request to find all instances of Shipping3
-		// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from Shipping3VO vo ";
-	}
-
-	private final static String UPDATE_PROPOSALID_STATEMENT = " update Shipping  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	private final static String COUNT_SHIPPING_INFO = "SELECT COUNT(DISTINCT(histo.dewarTransportHistoryId)) eventsNumber, "
-			+ " count(DISTINCT(bls.blSampleId)) samplesNumber "
-			+ "FROM Shipping s  "
-			+ " LEFT JOIN Dewar d ON (d.shippingId=s.shippingId) "
-			+ "  LEFT JOIN Container c ON c.dewarId = d.dewarId "
-			+ "	 LEFT JOIN BLSample bls ON bls.containerId = c.containerId "
-			+ "  LEFT JOIN DewarTransportHistory histo ON (histo.dewarId = d.dewarId) "
-			+
-			// TODO use the Constants -- problem while deploying app.
-			// "AND (histo.dewarStatus='"+ Constants.SHIPPING_STATUS_AT_ESRF + "' " +
-			// " OR histo.dewarStatus='" + Constants.SHIPPING_STATUS_SENT_TO_USER + "')" +
-			"AND (histo.dewarStatus='atESRF' "
-			+ "OR histo.dewarStatus='sent to User') "
-			+ "WHERE s.shippingId = :shippingId GROUP BY s.shippingId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -242,7 +201,9 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars)).setParameter("pk", pk)
+
+			return (Shipping3VO) entityManager.createQuery("from Shipping3VO vo " + (withDewars ? "left join fetch vo.dewarVOs " : "")
+							+ "where vo.shippingId = ?1").setParameter(1, pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -298,9 +259,16 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		String mySQLQuery = FIND_BY_SHIPPING_ID();
+		String mySQLQuery = "select  " +
+				SqlTableMapper.getShippingTable() + ", (select count(*) from BLSample where BLSample.containerId = Container.containerId) as sampleCount, " +
+				SqlTableMapper.getContainerTable() + " , (select count(*) from StockSolution where Dewar.dewarId = StockSolution.boxId) as stockSolutionCount, " +
+				SqlTableMapper.getDewarTable() +
+				" from Shipping \r\n"
+				+ " left join Dewar on Dewar.shippingId = Shipping.shippingId \r\n"
+				+ " left join Container on Dewar.dewarId = Container.dewarId \r\n"
+				+ " where Shipping.shippingId = ?1";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
-				.setParameter("shippingId", shippingId);
+				.setParameter(1, shippingId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
@@ -313,9 +281,16 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		String mySQLQuery = FIND_BY_PROPOSAL_ID();
+		String mySQLQuery = "select  " +
+				SqlTableMapper.getShippingTable() + ", (select count(*) from BLSample where BLSample.containerId = Container.containerId) as sampleCount, " +
+				SqlTableMapper.getContainerTable() + " , (select count(*) from StockSolution where Dewar.dewarId = StockSolution.boxId) as stockSolutionCount, " +
+				SqlTableMapper.getDewarTable() +
+				" from Shipping \r\n"
+				+ " left join Dewar on Dewar.shippingId = Shipping.shippingId \r\n"
+				+ " left join Container on Dewar.dewarId = Container.dewarId \r\n"
+				+ " where Shipping.proposalId = ?1";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
@@ -323,14 +298,15 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	// TODO remove following method if not adequate
 	/**
 	 * Find all Shipping3s and set linked value objects if necessary
-	 * 
+	 * 		// Generic HQL request to find all instances of Shipping3
+	 * 		// TODO choose between left/inner join
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Shipping3VO> findAll() throws Exception {
-	
-		List<Shipping3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<Shipping3VO> foundEntities = entityManager.createQuery("from Shipping3VO vo ").getResultList();
 		return foundEntities;
 	}
 	
@@ -621,8 +597,9 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	public Integer updateProposalId(final Integer newProposalId, final Integer oldProposalId) throws Exception {
 		
 		int nbUpdated = 0;
-		Query query = entityManager.createNativeQuery(UPDATE_PROPOSALID_STATEMENT)
-				.setParameter("newProposalId", newProposalId).setParameter("oldProposalId", oldProposalId);
+		Query query = entityManager.createNativeQuery(" update Shipping  set proposalId = ?1 "
+				+ " WHERE proposalId = ?2")
+				.setParameter(1, newProposalId).setParameter(2, oldProposalId);// 2 old value to be replaced
 		nbUpdated = query.executeUpdate();
 
 		return new Integer(nbUpdated);
@@ -682,7 +659,20 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	}
 
 	public Integer[] countShippingInfo(final Integer shippingId) throws Exception {
-		Query query = entityManager.createNativeQuery(COUNT_SHIPPING_INFO).setParameter("shippingId", shippingId);
+		Query query = entityManager.createNativeQuery("SELECT COUNT(DISTINCT(histo.dewarTransportHistoryId)) eventsNumber, "
+				+ " count(DISTINCT(bls.blSampleId)) samplesNumber "
+				+ "FROM Shipping s  "
+				+ " LEFT JOIN Dewar d ON (d.shippingId=s.shippingId) "
+				+ "  LEFT JOIN Container c ON c.dewarId = d.dewarId "
+				+ "	 LEFT JOIN BLSample bls ON bls.containerId = c.containerId "
+				+ "  LEFT JOIN DewarTransportHistory histo ON (histo.dewarId = d.dewarId) "
+				+
+				// TODO use the Constants -- problem while deploying app.
+				// "AND (histo.dewarStatus='"+ Constants.SHIPPING_STATUS_AT_ESRF + "' " +
+				// " OR histo.dewarStatus='" + Constants.SHIPPING_STATUS_SENT_TO_USER + "')" +
+				"AND (histo.dewarStatus='atESRF' "
+				+ "OR histo.dewarStatus='sent to User') "
+				+ "WHERE s.shippingId = ?1 GROUP BY s.shippingId ").setParameter(1, shippingId);
 		List orders = query.getResultList();
 		int nb = orders.size();
 		Integer nbSamples = 0;
@@ -714,7 +704,9 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 			if (withSession){
 				return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withSession)).setParameter("pk", pk).getSingleResult();
 			}
-			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars)).setParameter("pk", pk).getSingleResult();
+
+			return (Shipping3VO) entityManager.createQuery("from Shipping3VO vo " + (withDewars ? "left join fetch vo.dewarVOs " : "")
+					+ "where vo.shippingId = ?1").setParameter(1, pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}

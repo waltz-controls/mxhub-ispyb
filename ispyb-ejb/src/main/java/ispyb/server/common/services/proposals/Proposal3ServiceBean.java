@@ -193,7 +193,8 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 			query = entityManager.createQuery("SELECT vo from Proposal3VO vo" + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
 							+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
 							+ " where vo.proposalCode LIKE :code AND vo.proposalNumber = :number ")
-					.setParameter("code", code).setParameter("number", number);
+					.setParameter("code", code)
+					.setParameter("number", number);
 
 		List<Proposal3VO> foundEntities = query.getResultList();
 		List<Proposal3VO> vos;

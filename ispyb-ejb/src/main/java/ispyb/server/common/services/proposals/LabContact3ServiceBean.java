@@ -127,7 +127,9 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (LabContact3VO) entityManager.createQuery("SELECT LabContact3VO FROM LabContact3VO vo WHERE vo.labContactId = :pk").setParameter("pk", pk).getSingleResult();
+			return entityManager.createQuery("SELECT LabContact3VO FROM LabContact3VO vo WHERE vo.labContactId = :pk", LabContact3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -302,7 +304,7 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 		//TODO test proposalId
 // Create a typed query using JPQL (Java Persistence Query Language)
 		TypedQuery<LabContact3VO> query = em.createQuery(
-						"SELECT DISTINCT lc FROM LabContact3VO lc WHERE lc.proposalId = :proposalId", LabContact3VO.class)
+						"SELECT DISTINCT lc FROM LabContact3VO lc WHERE lc.proposalVO.proposalId = :proposalId", LabContact3VO.class)
 				.setParameter("proposalId", proposalId);
 
 // Execute the query and collect the results

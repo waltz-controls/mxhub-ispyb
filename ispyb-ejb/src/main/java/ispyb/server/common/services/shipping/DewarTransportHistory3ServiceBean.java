@@ -45,17 +45,6 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 		DewarTransportHistory3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarTransportHistory3ServiceBean.class);
-	// Generic HQL request to find instances of DewarTransportHistory3 by pk
-	private static final String FIND_BY_PK(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarTransportHistory3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.dewarTransportHistory = :pk";
-	}
-
-	// Generic HQL request to find all instances of DewarTransportHistory3
-	private static final String FIND_ALL(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarTransportHistory3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -123,7 +112,7 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 
 	/**
 	 * Finds a Scientist entity by its primary key and set linked value objects if necessary
-	 * 
+	 * 	// Generic HQL request to find instances of DewarTransportHistory3 by pk
 	 * @param pk
 	 *            the primary key
 	 * @param withLink1
@@ -136,7 +125,8 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 		checkCreateChangeRemoveAccess();
 		// TODO Edit this business code
 		try{
-			return (DewarTransportHistory3VO) entityManager.createQuery(FIND_BY_PK(withLink1, withLink2))
+			return (DewarTransportHistory3VO) entityManager.createQuery("from DewarTransportHistory3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+							+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.dewarTransportHistory = :pk")
 				.setParameter("pk", pk).getSingleResult();
 		}catch(NoResultException e){
 			return null;
@@ -146,14 +136,15 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 	// TODO remove following method if not adequate
 	/**
 	 * Find all DewarTransportHistory3s and set linked value objects if necessary
-	 * 
+	 * 	// Generic HQL request to find all instances of DewarTransportHistory3
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<DewarTransportHistory3VO> findAll(final boolean withLink1, final boolean withLink2) throws Exception {
 
-		List<DewarTransportHistory3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1, withLink2)).getResultList();
+		List<DewarTransportHistory3VO> foundEntities = entityManager.createQuery("select vo from DewarTransportHistory3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+				+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "")).getResultList();
 		return foundEntities;
 	}
 	

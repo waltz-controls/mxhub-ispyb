@@ -43,18 +43,6 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 
 	private final static Logger LOG = Logger.getLogger(AdminActivity3ServiceBean.class);
 
-	// Generic HQL request to find instances of AdminActivity3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from AdminActivity3VO vo " + "where vo.adminActivityId = :pk";
-	}
-
-	// Generic HQL request to find all instances of AdminActivity3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from AdminActivity3VO vo ";
-	}
-
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -115,7 +103,8 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 
 	/**
 	 * Finds a Scientist entity by its primary key and set linked value objects if necessary
-	 * 
+	 * // Generic HQL request to find instances of AdminActivity3 by pk
+	 * 	// TODO choose between left/inner join
 	 * @param pk
 	 *            the primary key
 	 * @param withLink1
@@ -125,8 +114,9 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	public AdminActivity3VO findByPk(final Integer pk, final boolean withLink1, final boolean withLink2) throws Exception {
 		checkCreateChangeRemoveAccess();
 		try {
-			return (AdminActivity3VO) entityManager.createQuery(FIND_BY_PK())
-					.setParameter("pk", pk).getSingleResult();
+			return (AdminActivity3VO) entityManager.createQuery("from AdminActivity3VO vo " + "where vo.adminActivityId = :pk ")
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -147,14 +137,17 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	// TODO remove following method if not adequate
 	/**
 	 * Find all AdminActivity3s and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find all instances of AdminActivity3
+	 * 	// TODO choose between left/inner join
+	 *
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AdminActivity3VO> findAll() throws Exception {
-		
-		List<AdminActivity3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery("from AdminActivity3VO vo ").getResultList();
 		return foundEntities;
 	}
 

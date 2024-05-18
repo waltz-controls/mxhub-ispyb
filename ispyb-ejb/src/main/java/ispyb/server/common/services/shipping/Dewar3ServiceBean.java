@@ -54,33 +54,9 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 
 	public static final String LOCATION_EMPTY = "EMPTY"; // to encode URL parameters values
 
-	// Generic HQL request to find instances of Dewar3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchContainers, boolean fetchDewarTransportHitory) {
-		return "from Dewar3VO vo " + (fetchContainers ? "left join fetch vo.containerVOs " : "")
-				+ (fetchDewarTransportHitory ? "left join fetch vo.dewarTransportHistoryVOs " : "")
-				+ "where vo.dewarId = :pk";
-	}
-	
-	private static final String FIND_BY_PK(boolean fetchContainers, boolean fetchDewarTransportHitory, boolean fetchSample) {
-		return "from Dewar3VO vo " + (fetchContainers ? "left join fetch vo.containerVOs co" : "")
-				+ (fetchDewarTransportHitory ? "left join fetch vo.dewarTransportHistoryVOs " : "")
-				+ (fetchSample ? "left join fetch co.sampleVOs " : "")
-				+ "where vo.dewarId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Dewar3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchContainers, boolean fetchDewarTransportHitory) {
-		return "from Dewar3VO vo " + (fetchContainers ? "left join fetch vo.containerVOs " : "")
-				+ (fetchDewarTransportHitory ? "left join fetch vo.dewarTransportHistoryVOs " : "");
-	}
-	
-	private final static String COUNT_DEWAR_SAMPLE = "SELECT " + " count(DISTINCT(bls.blSampleId)) samplesNumber "
-			+ "FROM Shipping s  " + " LEFT JOIN Dewar d ON (d.shippingId=s.shippingId) "
-			+ "  LEFT JOIN Container c ON c.dewarId = d.dewarId "
-			+ "	 LEFT JOIN BLSample bls ON bls.containerId = c.containerId "
-			+ "WHERE s.shippingId = d.shippingId AND d.dewarId = :dewarId GROUP BY d.dewarId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -159,11 +135,18 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 	 * @param withLink2
 	 * @return the Dewar3 value object
 	 */
+
+	// Generic HQL request to find instances of Dewar3 by pk
+	// TODO choose between left/inner join
 	public Dewar3VO findByPk(final Integer pk, final boolean withContainers, final boolean withDewarTransportHistory) throws Exception {
 		
 		checkCreateChangeRemoveAccess();
 		try {
-			return (Dewar3VO) entityManager.createQuery(FIND_BY_PK(withContainers, withDewarTransportHistory)).setParameter("pk", pk).getSingleResult();
+			return entityManager.createQuery("select vo from Dewar3VO vo " + (withContainers ? "left join fetch vo.containerVOs " : "")
+					+ (withDewarTransportHistory ? "left join fetch vo.dewarTransportHistoryVOs " : "")
+					+ "where vo.dewarId = :pk", Dewar3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -174,8 +157,12 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 		
 		checkCreateChangeRemoveAccess();
 		try {
-			return (Dewar3VO) entityManager.createQuery(FIND_BY_PK(withContainers, withDewarTransportHistory, withSamples))
-					.setParameter("pk", pk).getSingleResult();
+			return entityManager.createQuery("from Dewar3VO vo " + (withContainers ? "left join fetch vo.containerVOs co" : "")
+							+ (withDewarTransportHistory ? "left join fetch vo.dewarTransportHistoryVOs " : "")
+							+ (withSamples ? "left join fetch co.sampleVOs " : "")
+							+ "where vo.dewarId = :pk", Dewar3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -189,8 +176,10 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Dewar3VO> findAll(final boolean withContainers, final boolean withDewarTransportHistory) throws Exception {
-		
-		List<Dewar3VO> foundEntities = entityManager.createQuery(FIND_ALL(withContainers, withDewarTransportHistory)).getResultList();
+
+		List<Dewar3VO> foundEntities = entityManager.createQuery("from Dewar3VO vo " + (withContainers ? "left join fetch vo.containerVOs " : "")
+				+ (withDewarTransportHistory ? "left join fetch vo.dewarTransportHistoryVOs " : ""))
+				.getResultList();
 		return foundEntities;
 	}
 
@@ -531,11 +520,16 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 	}
 
 	public Integer countDewarSamples(final Integer dewarId) throws Exception {
-		Query query = entityManager.createNativeQuery(COUNT_DEWAR_SAMPLE).setParameter("dewarId", dewarId);
+		Query query = entityManager.createNativeQuery("SELECT " + " count(DISTINCT(bls.blSampleId)) samplesNumber "
+				+ "FROM Shipping s  " + " LEFT JOIN Dewar d ON (d.shippingId=s.shippingId) "
+				+ "  LEFT JOIN Container c ON c.dewarId = d.dewarId "
+				+ "	 LEFT JOIN BLSample bls ON bls.containerId = c.containerId "
+				+ "WHERE s.shippingId = d.shippingId AND d.dewarId = ?1 GROUP BY d.dewarId ")
+				.setParameter(1, dewarId);
 		try{
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		}catch(NoResultException e){
 			System.out.println("ERROR in countDewarSamples - NoResultException: "+dewarId);
 			e.printStackTrace();

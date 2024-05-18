@@ -71,7 +71,8 @@ public class PropertyLoginModule {
     boolean userExists = (existingCredential != null);
     Credential c = userExists ? existingCredential : NONEXISTENT_USER_CREDENTIAL;
     boolean passwordEquals = constantTimeEquals(c.getPasswordHash(), hash(password));
-    if (userExists && passwordEquals) return c.getRoles();
+    if (userExists && passwordEquals)
+      return c.getRoles();
     throw new ISPyBException("Unauthorized");
   }
 

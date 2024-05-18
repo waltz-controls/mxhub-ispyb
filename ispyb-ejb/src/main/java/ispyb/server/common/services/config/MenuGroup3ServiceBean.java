@@ -47,18 +47,6 @@ public class MenuGroup3ServiceBean implements MenuGroup3Service,
 		MenuGroup3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(MenuGroup3ServiceBean.class);
-	
-	// Generic HQL request to find instances of MenuGroup3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from MenuGroup3VO vo "  + "where vo.menuGroupId = :pk";
-	}
-
-	// Generic HQL request to find all instances of MenuGroup3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from MenuGroup3VO vo " ;
-	}
 
 	@PersistenceContext(unitName = "ispyb_config")
 	private EntityManager entityManager;
@@ -121,14 +109,18 @@ public class MenuGroup3ServiceBean implements MenuGroup3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 * @return the MenuGroup3 value object
+	 *
+	 * 	// Generic HQL request to find instances of MenuGroup3 by pk
+	 * 	// TODO choose between left/inner join
 	 */
 	public MenuGroup3VO findByPk(final Integer pk) throws Exception {
 	
 		checkCreateChangeRemoveAccess();
 		try {
 			entityManager = entitymanagerFactory.createEntityManager();
-			return (MenuGroup3VO) entityManager.createQuery(FIND_BY_PK())
-					.setParameter("pk", pk).getSingleResult();
+			return (MenuGroup3VO) entityManager.createQuery("select vo from MenuGroup3VO vo " + "where vo.menuGroupId = :pk")
+					.setParameter("pk", pk)
+					.getSingleResult();
 		}catch(NoResultException e){
 			return null;
 		} finally {
@@ -153,13 +145,16 @@ public class MenuGroup3ServiceBean implements MenuGroup3Service,
 	 * Find all MenuGroup3s and set linked value objects if necessary
 	 * @param withLink1
 	 * @param withLink2
+	 *
+	 * 	// Generic HQL request to find all instances of MenuGroup3
+	 * 	// TODO choose between left/inner join
 	 */
 	@SuppressWarnings("unchecked")
 	public List<MenuGroup3VO> findAll(final boolean detachLight) throws Exception {
 		
 		try {
 			entityManager = entitymanagerFactory.createEntityManager();
-			Collection<MenuGroup3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+			Collection<MenuGroup3VO> foundEntities = entityManager.createQuery("select vo from MenuGroup3VO vo ").getResultList();
 			List<MenuGroup3VO> vos;
 			if (detachLight)
 				vos = getLightMenuGroup3VOs(foundEntities);

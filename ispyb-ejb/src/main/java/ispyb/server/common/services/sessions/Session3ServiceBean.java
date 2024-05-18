@@ -27,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,86 +69,7 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
 public class Session3ServiceBean implements Session3Service, Session3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Session3ServiceBean.class);
-	
-	// Generic HQL request to find instances of Session3 by pk
-	private static final String FIND_BY_PK(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) {
-		return "from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
-				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "") + "where vo.sessionId = :pk";
-	}
 
-	// Generic HQL request to find all instances of Session3
-	private static final String FIND_ALL(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) {
-		return "from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
-				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "");
-	}
-
-	private final static String SET_USED_SESSION_STATEMENT = " UPDATE BLSession SET usedFlag = 1 WHERE BLSession.proposalId = :proposalId"
-			+ " and (BLSession.usedFlag is null OR BLSession.usedFlag = 0) "
-			+ " and (BLSession.sessionId IN (select c.sessionId from DataCollectionGroup c) "
-			+ " or BLSession.sessionId IN (select e.sessionId from EnergyScan e) "
-			+ " or BLSession.sessionId IN (select x.sessionId from XFEFluorescenceSpectrum x)) ";// 1
-
-	private final static String HAS_SESSION_DATACOLLECTIONGROUP = "SELECT COUNT(*) FROM DataCollectionGroup WHERE sessionId = :sessionId ";
-
-	private static final String FIND_BY_SHIPPING_ID = "select * from BLSession, ShippingHasSession "
-			+ " where BLSession.sessionId =  ShippingHasSession.sessionId " + " and ShippingHasSession.shippingId = :shippingId ";
-
-	// Be careful, when JBoss starts, the property file is not loaded, and it tries to initialize the class and fails.
-	// private static String FIND_BY_PROPOSAL_CODE_NUMBER = getProposalCodeNumberQuery();
-
-	// private static String FIND_BY_PROPOSAL_CODE_NUMBER_OLD = getProposalCodeNumberOldQuery();
-
-	private final static String UPDATE_PROPOSALID_STATEMENT = " update BLSession  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	private static final String FIND_BY_AUTOPROCSCALING_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps "
-			+ " where s.sessionId = g.sessionId and  " + " g.dataCollectionGroupId = c.dataCollectionGroupId and "
-			+ " c.dataCollectionId = api.dataCollectionId and " + " api.autoProcIntegrationId = apshi.autoProcIntegrationId and "
-			+ " apshi.autoProcScalingId = aps.autoProcScalingId and " + " aps.autoProcScalingId = :autoProcScalingId ";
-	
-	private static final String FIND_BY_AUTOPROCPROGRAMATTACHMENT_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram, AutoProcProgramAttachment autoProcProgramAttachment"
-			+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
-			+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = autoProcProgramAttachment.autoProcProgramId "
-			+ " and autoProcProgramAttachment.autoProcProgramAttachmentId = :autoProcProgramAttachmentId ";
-	
-	
-	private static final String FIND_BY_AUTOPROCPROGRAM_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram "
-			+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
-			+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = :autoProcProgramId ";
-	
-
-	private static String getProposalCodeNumberQuery() {
-		String query = "select * " + " FROM BLSession ses, Proposal pro "
-				+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
-				+ "AND ses.beamLineName like :beamLineName " + "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " "
-				+ "AND DATE(ses.startDate) <= DATE(" + Constants.MYSQL_ORACLE_CURRENT_DATE + ")  ORDER BY startDate DESC ";
-
-		return query;
-	}
-
-	private static String getProposalCodeNumberOldQuery() {
-		String query = "select * "
-				+ " FROM BLSession ses, Proposal pro "
-				+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
-				+ "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + "  AND ses.startDate <= "
-				+ Constants.MYSQL_ORACLE_CURRENT_DATE + "  ORDER BY sessionId DESC ";
-
-		return query;
-	}
-
-	private final static String NB_OF_COLLECTS = "SELECT count(*) FROM DataCollection, DataCollectionGroup "
-			+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
-			+ " and DataCollection.numberOfImages >4 and DataCollectionGroup.sessionId  = :sessionId ";
-
-	private final static String NB_OF_TESTS = "SELECT count(*) FROM DataCollection, DataCollectionGroup "
-			+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
-			+ " and DataCollection.numberOfImages <=4 and DataCollectionGroup.sessionId  = :sessionId ";
-	
 	//private final String[] beamlinesToProtect = { "ID29", "ID23-1", "ID23-2", "ID30A-1", "ID30A-2","ID30A-3", "ID30B" };
 	private final String[] beamlinesToProtect = ESRFBeamlineEnum.getBeamlineNamesToBeProtected();
 	
@@ -228,8 +148,11 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Session3VO findByPk(Integer pk, boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) throws AccessDeniedException,Exception {
 		try {
-			Session3VO vo = (Session3VO) entityManager.createQuery(FIND_BY_PK(fetchDataCollectionGroup, fetchEnergyScan, fetchXFESpectrum))
-					.setParameter("pk", pk).getSingleResult();
+			Session3VO vo = (Session3VO) entityManager.createQuery("from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+							+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+							+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "") + "where vo.sessionId = :pk")
+					.setParameter("pk", pk)
+					.getSingleResult();
 			checkChangeRemoveAccess(vo);
 			return vo;
 		} catch (NoResultException e) {
@@ -253,25 +176,32 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findAll(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum)
 			throws Exception {
-		return entityManager.createQuery(FIND_ALL(fetchDataCollectionGroup, fetchEnergyScan, fetchXFESpectrum)).getResultList();
+		return entityManager.createQuery("select vo from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : ""))
+				.getResultList();
 	}
 
 	public Integer updateUsedSessionsFlag(Integer proposalId) throws Exception {
 
-			int nbUpdated = 0;
-			Query query = entityManager.createNativeQuery(SET_USED_SESSION_STATEMENT).setParameter("proposalId", proposalId);
-			nbUpdated = query.executeUpdate();
 
-			return new Integer(nbUpdated);
+			Query query = entityManager.createNativeQuery(" UPDATE BLSession SET usedFlag = 1 WHERE BLSession.proposalId = ?1"
+					+ " and (BLSession.usedFlag is null OR BLSession.usedFlag = 0) "
+					+ " and (BLSession.sessionId IN (select c.sessionId from DataCollectionGroup c) "
+					+ " or BLSession.sessionId IN (select e.sessionId from EnergyScan e) "
+					+ " or BLSession.sessionId IN (select x.sessionId from XFEFluorescenceSpectrum x)) ")
+					.setParameter(1, proposalId);
+			return query.executeUpdate();
 	}
 
 	public Integer hasDataCollectionGroups(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(HAS_SESSION_DATACOLLECTIONGROUP).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM DataCollectionGroup WHERE sessionId = ?1 ")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in hasDataCollectionGroups - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -295,9 +225,11 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findByShippingId(Integer shippingId) {
-		String query = FIND_BY_SHIPPING_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-				.setParameter("shippingId", shippingId).getResultList();
+		String query = "select * from BLSession, ShippingHasSession "
+				+ " where BLSession.sessionId =  ShippingHasSession.sessionId " + " and ShippingHasSession.shippingId = ?1 ";
+		List<Session3VO> col = this.entityManager.createNativeQuery(query, Session3VO.class)
+				.setParameter(1, shippingId)
+				.getResultList();
 		return col;
 	}
 
@@ -393,13 +325,28 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 		String query = null;
 		List<Session3VO> listVOs = null;
 		if (beamLineName == null || beamLineName.equals("")) {
-			query = getProposalCodeNumberOldQuery();
-			listVOs = this.entityManager.createNativeQuery(query, "sessionNativeQuery").setParameter("code", code)
-					.setParameter("number", number).getResultList();
+
+			query = "select * "
+					+ " FROM BLSession ses, Proposal pro "
+					+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like ?1 AND pro.proposalNumber = ?2 "
+					+ "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + "  AND ses.startDate <= "
+					+ Constants.MYSQL_ORACLE_CURRENT_DATE + "  ORDER BY sessionId DESC ";
+
+			listVOs = this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.getResultList();
 		} else {
-			query = getProposalCodeNumberQuery();
-			listVOs = this.entityManager.createNativeQuery(query, "sessionNativeQuery").setParameter("code", code)
-					.setParameter("number", number).setParameter("beamLineName", beamLineName).getResultList();
+			query = "select * " + " FROM BLSession ses, Proposal pro "
+					+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like ?1 AND pro.proposalNumber = ?2 "
+					+ "AND ses.beamLineName like ?3 " + "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " "
+					+ "AND DATE(ses.startDate) <= DATE(" + Constants.MYSQL_ORACLE_CURRENT_DATE + ")  ORDER BY startDate DESC ";
+
+			listVOs = this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.setParameter(3, beamLineName)
+					.getResultList();
 		}
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
@@ -471,11 +418,14 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Integer getNbOfCollects(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_COLLECTS).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT count(*) FROM DataCollection, DataCollectionGroup "
+				+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
+				+ " and DataCollection.numberOfImages >4 and DataCollectionGroup.sessionId  = ?1")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfCollects - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -495,11 +445,14 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Integer getNbOfTests(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_TESTS).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT count(*) FROM DataCollection, DataCollectionGroup "
+				+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
+				+ " and DataCollection.numberOfImages <=4 and DataCollectionGroup.sessionId  = ?1 ")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfTests - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -517,14 +470,18 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 * @param oldProposalId
 	 * @return
 	 * @throws Exception
+	 *
+	 * 	// Be careful, when JBoss starts, the property file is not loaded, and it tries to initialize the class and fails.
+	 * 	// private static String FIND_BY_PROPOSAL_CODE_NUMBER = getProposalCodeNumberQuery();
+	 *
+	 * 	// private static String FIND_BY_PROPOSAL_CODE_NUMBER_OLD = getProposalCodeNumberOldQuery();
 	 */
 	public Integer updateProposalId(Integer newProposalId, Integer oldProposalId) throws Exception {
-			int nbUpdated = 0;
-			Query query = entityManager.createNativeQuery(UPDATE_PROPOSALID_STATEMENT).setParameter("newProposalId", newProposalId)
-					.setParameter("oldProposalId", oldProposalId);
-			nbUpdated = query.executeUpdate();
-
-			return new Integer(nbUpdated);
+			Query query = entityManager.createNativeQuery(" update BLSession  set proposalId = ?1 "
+					+ " WHERE proposalId = ?2")
+					.setParameter(1, newProposalId)
+					.setParameter(2, oldProposalId);
+			return query.executeUpdate();
 	}
 
 	/**
@@ -569,38 +526,51 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	@SuppressWarnings("unchecked")
 	public Session3VO findByAutoProcScalingId(final Integer autoProcScalingId) throws Exception {
-		String query = FIND_BY_AUTOPROCSCALING_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcScalingId", autoProcScalingId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps "
+				+ " where s.sessionId = g.sessionId and  " + " g.dataCollectionGroupId = c.dataCollectionGroupId and "
+				+ " c.dataCollectionId = api.dataCollectionId and " + " api.autoProcIntegrationId = apshi.autoProcIntegrationId and "
+				+ " apshi.autoProcScalingId = aps.autoProcScalingId and " + " aps.autoProcScalingId = ?1 ";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, autoProcScalingId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	public Session3VO findByAutoProcProgramAttachmentId(final Integer autoProcProgramAttachmentId) throws Exception {
-		String query = FIND_BY_AUTOPROCPROGRAMATTACHMENT_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcProgramAttachmentId", autoProcProgramAttachmentId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram, AutoProcProgramAttachment autoProcProgramAttachment"
+				+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
+				+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = autoProcProgramAttachment.autoProcProgramId "
+				+ " and autoProcProgramAttachment.autoProcProgramAttachmentId = ?1";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+						.setParameter(1, autoProcProgramAttachmentId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
 	@Override
 	public Session3VO findByAutoProcProgramId(int autoProcProgramId) {
-		String query = FIND_BY_AUTOPROCPROGRAM_ID;
-		@SuppressWarnings("unchecked")
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcProgramId", autoProcProgramId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram "
+				+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
+				+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = ?1 ";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, autoProcProgramId)
+					.getResultList();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
@@ -926,11 +896,4 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 		if (vo == null) return;
 		autService.checkUserRightToAccessSession(vo);				
 	}
-
-
-
-
-
-
-
 }

@@ -51,22 +51,7 @@ import ispyb.server.mx.vos.sample.Protein3VO;
 public class Container3ServiceBean implements Container3Service, Container3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Container3ServiceBean.class);
-	
-	// Generic HQL request to find instances of Container3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchSamples) {
-		return "from Container3VO vo " 
-			//	+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
-				+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs sa LEFT JOIN FETCH sa.blSubSampleVOs LEFT JOIN FETCH sa.blsampleImageVOs  ": "") //  
-				+ " where vo.containerId = :pk";
-	}
 
-	// Generic HQL request to find all instances of Container3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-			return "from Container3VO vo ";
-	}
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 	
@@ -155,6 +140,9 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 * @param withLink1
 	 * @param withLink2
 	 * @return the Container3 value object
+	 *
+	 * 	// Generic HQL request to find instances of Container3 by pk
+	 * 	// TODO choose between left/inner join
 	 */
 	public Container3VO findByPk(final Integer pk, final boolean fetchSamples) throws Exception {
 
@@ -163,7 +151,11 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (Container3VO) entityManager.createQuery(FIND_BY_PK(fetchSamples)).setParameter("pk", pk)
+			return entityManager.createQuery("select vo Container3VO vo "
+							//	+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
+							+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs sa LEFT JOIN FETCH sa.blSubSampleVOs LEFT JOIN FETCH sa.blsampleImageVOs  " : "") //
+							+ " where vo.containerId = :pk", Container3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -174,14 +166,17 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	// TODO remove following method if not adequate
 	/**
 	 * Find all Container3s and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find all instances of Container3
+	 * 	// TODO choose between left/inner join
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findAll() throws Exception {
-		
-		List<Container3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<Container3VO> foundEntities = entityManager.createQuery("select vo from Container3VO vo ")
+				.getResultList();
 		return foundEntities;
 	}
 
