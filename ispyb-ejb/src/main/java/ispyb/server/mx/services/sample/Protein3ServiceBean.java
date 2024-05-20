@@ -50,19 +50,9 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 
 	// Generic HQL request to find instances of Protein3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchCrystals) {
-		return "from Protein3VO vo " + (fetchCrystals ? " left join fetch vo.crystalVOs " : "")
-				+ " where vo.proteinId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Protein3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchLink1) {
-		return "from Protein3VO vo " + (fetchLink1 ? "left join fetch vo.crystalVOs " : "");
-	}
-
-	private final static String UPDATE_PROPOSALID_STATEMENT = " update Protein  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -82,7 +72,10 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 */
 	public Protein3VO create(final Protein3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -98,7 +91,10 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 */
 	public Protein3VO update(final Protein3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -111,8 +107,11 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		Protein3VO vo = findByPk(pk, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -128,7 +127,10 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 */
 	public void delete(final Protein3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -143,12 +145,19 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 * @return the Protein3 value object
 	 */
 	public Protein3VO findByPk(final Integer pk, final boolean withLink1) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			Query query = entityManager.createQuery(FIND_BY_PK(withLink1)).setParameter("pk", pk);
-			return (Protein3VO) query.getSingleResult();
+			String qlString = "SELECT vo from Protein3VO vo "
+					+ (withLink1 ? " left join fetch vo.crystalVOs " : "")
+					+ " where vo.proteinId = :pk";
+			return entityManager.createQuery(qlString, Protein3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -164,8 +173,9 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	@SuppressWarnings("unchecked")
 	public List<Protein3VO> findAll(final boolean withLink1) throws Exception {
 
-		List<Protein3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1)).getResultList();
-		return foundEntities;
+		String qlString = "SELECT vo from Protein3VO vo "
+				+ (withLink1 ? "left join fetch vo.crystalVOs " : "");
+        return entityManager.createQuery(qlString, Protein3VO.class).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -219,24 +229,8 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	private String getViewTableQuery(){
 		return this.getQueryFromResourceFile("/queries/ProteinServiceBean/getViewTableQuery.sql");
 	}
-	
 
-	/**
-	 * Check if user has access rights to create, change and remove Protein3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-	
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
-	}
 
-	
-	
 	/**
 	 * update the proposalId, returns the nb of rows updated
 	 * 
@@ -246,13 +240,12 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	 * @throws Exception
 	 */
 	public Integer updateProposalId(final Integer newProposalId, final Integer oldProposalId) throws Exception{
-		
-		int nbUpdated = 0;
-		Query query = entityManager.createNativeQuery(UPDATE_PROPOSALID_STATEMENT)
-				.setParameter("newProposalId", newProposalId).setParameter("oldProposalId", oldProposalId);
-		nbUpdated = query.executeUpdate();
 
-		return new Integer(nbUpdated);
+		String sqlString = " update Protein  set proposalId = ?1 WHERE proposalId = ?2";
+		Query query = entityManager.createNativeQuery(sqlString)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
+		return query.executeUpdate();
 	}
 
 	@Override
@@ -299,9 +292,10 @@ public class Protein3ServiceBean extends WsServiceBean implements Protein3Servic
 	
 	@Override
 	public List<Map<String, Object>>  getStatsByProposal(int proposalId) {
-		String mySQLQuery = getViewTableQuery() + " where proposalId = :proposalId";
+		String mySQLQuery = getViewTableQuery()
+				+ " where proposalId = ?1";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
