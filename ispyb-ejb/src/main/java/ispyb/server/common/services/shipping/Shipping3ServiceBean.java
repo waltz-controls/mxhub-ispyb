@@ -140,42 +140,19 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 * @return the Shipping3 value object
 	 */
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars) throws Exception {
-
 		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		try {
-
-			String qlString = "select vo from Shipping3VO vo "
-					+ (withDewars ? "left join fetch vo.dewarVOs " : "")
-					+ "where vo.shippingId = :pk";
-			return entityManager.createQuery(qlString, Shipping3VO.class)
-					.setParameter("pk", pk)
-					.getSingleResult();
-		} catch (NoResultException e) {
-			return null;
-		}
+		return findByPk(pk, withDewars, false, false, false);
 	}
 	
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples) throws Exception {
-
 		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		try {
-			String qlString = "SELECT vo FROM Shipping3VO vo "
-						+ (withDewars ? "LEFT JOIN FETCH vo.dewarVOs LEFT JOIN vo.dewarVOs dewars ": "")
-						+ (withDewars && withcontainers ? "LEFT JOIN FETCH dewars.containerVOs LEFT JOIN dewars.containerVOs co " : "")
-						+ (withDewars && withcontainers && withSamples ? "LEFT JOIN FETCH co.sampleVOs " : "")
-						+ " WHERE vo.shippingId = :pk";
-			return entityManager.createQuery(qlString, Shipping3VO.class)
-					.setParameter("pk", pk)
-					.getSingleResult();
-		} catch (NoResultException e) {
-			return null;
-		}		
+		return findByPk(pk, withDewars, withcontainers, withSamples, false);
 	}
 
 	public String findSerialShippingByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples, final boolean withSubSamples) throws Exception {
