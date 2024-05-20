@@ -135,25 +135,31 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 				break;
 			case MEDIUM:
 				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
+
 				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO LEFT JOIN samples.macromolecule3VO macromolecule ");
 				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.stoichiometry ");
 				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.structure3VOs ");
+
 				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+				ejbQLQuery.append("LEFT JOIN FETCH specimens.merge3VOs ");
+				ejbQLQuery.append("LEFT JOIN FETCH specimens.run3VO ");
+
 				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
 
-				ejbQLQuery.append("LEFT JOIN FETCH specimens.merge3VOs ");
-				ejbQLQuery.append("LEFT JOIN FETCH specimens.run3VO ");
+
 				break;
 
 			case PREPARE_EXPERIMENT:
 				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
 				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO ");
 				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+
 				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
+
 				ejbQLQuery.append("LEFT JOIN FETCH experiment.dataCollections LEFT JOIN experiment.dataCollections dataCollections ");
 				ejbQLQuery.append("LEFT JOIN FETCH dataCollections.measurementtodatacollection3VOs ");
 				break;
