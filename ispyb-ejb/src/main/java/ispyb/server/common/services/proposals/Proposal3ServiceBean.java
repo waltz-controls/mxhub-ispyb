@@ -185,16 +185,22 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 			final boolean fetchProteins, final boolean detachLight) throws Exception {
 
 		Query query;
-		if (number == null)
-			query = entityManager.createQuery("SELECT vo from Proposal3VO vo" + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
-					+ (fetchProteins ? " left join fetch vo.proteinVOs " : "") + " where vo.proposalCode LIKE :code ")
+		if (number == null) {
+			String qlString = "SELECT vo from Proposal3VO vo"
+					+ (fetchSessions ? " left join fetch vo.sessionVOs " : "")
+					+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
+					+ " where vo.proposalCode LIKE :code ";
+			query = entityManager.createQuery(qlString)
 					.setParameter("code", code);
-		else
-			query = entityManager.createQuery("SELECT vo from Proposal3VO vo" + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
-							+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
-							+ " where vo.proposalCode LIKE :code AND vo.proposalNumber = :number ")
+		} else {
+			String qlString = "SELECT vo from Proposal3VO vo"
+					+ (fetchSessions ? " left join fetch vo.sessionVOs " : "")
+					+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
+					+ " where vo.proposalCode LIKE :code AND vo.proposalNumber = :number ";
+			query = entityManager.createQuery(qlString)
 					.setParameter("code", code)
 					.setParameter("number", number);
+		}
 
 		List<Proposal3VO> foundEntities = query.getResultList();
 		List<Proposal3VO> vos;
