@@ -88,7 +88,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	@Override
 	public List<Experiment3VO> findByProposalId(int proposalId, ExperimentScope scope) {
-		String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope)
+		String ejbQLQuery = getQueryByScope(scope)
 				+ "WHERE experiment.proposalId = :proposalId";
 		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
 				.setParameter("proposalId", proposalId);
@@ -98,7 +98,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope, Integer proposalId) {
 		try {
-			String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope) +
+			String ejbQLQuery = getQueryByScope(scope) +
 					"WHERE experiment.experimentId = :experimentId ";
 			// if coming from manager account, proposalId can be null
 			if (proposalId != null)  {
@@ -124,50 +124,46 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		return vo;
 	}
 
-	public static String getQueryByScope(ExperimentScope scope){
-		String ejbQLQuery = "SELECT DISTINCT(experiment) FROM Experiment3VO experiment ";
+	//TODO this method produces invalid query that fails with "Unknown column 't7.id' in 'field list'"
+	private String getQueryByScope(ExperimentScope scope){
+		StringBuilder ejbQLQuery = new StringBuilder();
+		ejbQLQuery.append("SELECT DISTINCT(experiment) FROM Experiment3VO experiment ");
 
 		switch (scope) {
 			case MINIMAL:
 				// No additional joins are appended.
 				break;
 			case MEDIUM:
-				ejbQLQuery += "LEFT JOIN FETCH experiment.samples "
-						+ "LEFT JOIN experiment.samples samples "
-						+ "LEFT JOIN FETCH samples.macromolecule3VO "
-						+ "LEFT JOIN samples.macromolecule3VO macromolecule "
-						+ "LEFT JOIN FETCH macromolecule.stoichiometry "
-						+ "LEFT JOIN macromolecule.stoichiometry st "
-						+ "LEFT JOIN FETCH macromolecule.structure3VOs "
-						+ "LEFT JOIN FETCH samples.measurements "
-						+ "LEFT JOIN samples.measurements specimens "
-						+ "LEFT JOIN FETCH experiment.samplePlate3VOs "
-						+ "LEFT JOIN experiment.samplePlate3VOs samplePlates "
-						+ "LEFT JOIN FETCH samplePlates.plategroup3VO "
-						+ "LEFT JOIN FETCH samplePlates.sampleplateposition3VOs "
-						+ "LEFT JOIN FETCH specimens.merge3VOs "
-						+ "LEFT JOIN FETCH specimens.run3VO ";
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO LEFT JOIN samples.macromolecule3VO macromolecule ");
+				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.stoichiometry ");
+				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.structure3VOs ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH specimens.merge3VOs ");
+				ejbQLQuery.append("LEFT JOIN FETCH specimens.run3VO ");
 				break;
+
 			case PREPARE_EXPERIMENT:
-				ejbQLQuery += "LEFT JOIN FETCH experiment.samples "
-						+ "LEFT JOIN experiment.samples samples "
-						+ "LEFT JOIN FETCH samples.macromolecule3VO "
-						+ "LEFT JOIN FETCH samples.measurements "
-						+ "LEFT JOIN samples.measurements specimens "
-						+ "LEFT JOIN FETCH experiment.samplePlate3VOs "
-						+ "LEFT JOIN experiment.samplePlate3VOs samplePlates "
-						+ "LEFT JOIN FETCH samplePlates.plategroup3VO "
-						+ "LEFT JOIN FETCH samplePlates.sampleplateposition3VOs "
-						+ "LEFT JOIN FETCH experiment.dataCollections "
-						+ "LEFT JOIN experiment.dataCollections dataCollections "
-						+ "LEFT JOIN FETCH dataCollections.measurementtodatacollection3VOs ";
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.dataCollections LEFT JOIN experiment.dataCollections dataCollections ");
+				ejbQLQuery.append("LEFT JOIN FETCH dataCollections.measurementtodatacollection3VOs ");
 				break;
+
 			default:
 				// No additional actions for default case
 				break;
 		}
 
-		return ejbQLQuery;
+		return ejbQLQuery.toString();
 	}
 
 
@@ -194,7 +190,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope) {
-		String ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope)
+		String ejbQLQuery = getQueryByScope(scope)
 				+ "WHERE experiment.experimentId = :experimentId";
 		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
 				.setParameter("experimentId", experimentId);

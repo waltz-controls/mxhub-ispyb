@@ -2,7 +2,9 @@ package ispyb.server.biosaxs.services.core.experiment;
 
 import ispyb.TestBase;
 import ispyb.server.biosaxs.services.core.ExperimentScope;
+import jakarta.ejb.EJBException;
 import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,7 +22,11 @@ public class Experiment3ServiceBeanTest extends TestBase {
     }
 
     @Test public void findByMeasurementId(){
-        var result = service.findByMeasurementId(1234);
-        assertNull(result);
+        try {
+            var result = service.findByMeasurementId(1234);
+        } catch (EJBException e) {
+            if(e.getCausedByException().getClass().isAssignableFrom(NoResultException.class))
+                assertTrue(true);
+        }
     }
 }

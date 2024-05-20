@@ -20,12 +20,9 @@
 package ispyb.server.biosaxs.services.core.analysis.advanced;
 
 
-import ispyb.server.biosaxs.services.core.experiment.Experiment3ServiceBean;
 import ispyb.server.biosaxs.vos.advanced.FitStructureToExperimentalData3VO;
 import ispyb.server.biosaxs.vos.advanced.RigidBodyModeling3VO;
 import ispyb.server.biosaxs.vos.advanced.Superposition3VO;
-import ispyb.server.biosaxs.vos.assembly.Structure3VO;
-import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.mx.vos.collections.InputParameterWorkflow;
 import ispyb.server.mx.vos.collections.Workflow3VO;
 
