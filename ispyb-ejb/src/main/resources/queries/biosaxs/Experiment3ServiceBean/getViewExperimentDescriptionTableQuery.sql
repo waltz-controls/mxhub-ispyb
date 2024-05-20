@@ -1,1 +1,0 @@
-select * from v_saxs_datacollection 
