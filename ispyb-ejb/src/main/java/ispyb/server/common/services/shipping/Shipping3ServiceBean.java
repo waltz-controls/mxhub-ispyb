@@ -28,7 +28,6 @@ import ispyb.server.common.vos.shipping.Dewar3VO;
 import ispyb.server.common.vos.shipping.Shipping3VO;
 
 import java.lang.reflect.Modifier;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,60 +56,6 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 
 	// Generic HQL request to find instances of Shipping3 by pk
 	// TODO choose between left/inner join
-
-	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchSessions) {
-		String pk = null;
-		if (fetchDewars){
-			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars " + (fetchSessions ? " LEFT JOIN FETCH dewars.sessionVO " : "")
-					+ " WHERE vo.shippingId = :pk";
-		} else {
-			pk = "from Shipping3VO vo where vo.shippingId = :pk";
-		}
-		return pk;
-	}
-		
-	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchContainers, boolean fetchSamples) {
-		String pk = null;
-		if (fetchDewars){
-			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
-					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
-					+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs " : "")
-					+ " WHERE vo.shippingId = :pk";
-		} else {
-			pk = "from Shipping3VO vo where vo.shippingId = :pk";
-		}
-		return pk;
-	}
-	
-	private static final String FIND_BY_PK(boolean fetchDewars, boolean fetchContainers, boolean fetchSamples, boolean fetchSubSamples) {
-		String pk = null;
-		if (fetchDewars){
-			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
-					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
-					//+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs sa " : "")
-					+ (fetchSamples ? " LEFT JOIN FETCH co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs " : "")
-					+ (fetchSubSamples ? " LEFT JOIN FETCH sa.blSubSampleVOs " : "")
-					+ " WHERE vo.shippingId = :pk";
-		} else {
-			pk = "from Shipping3VO vo where vo.shippingId = :pk";
-		}
-		return pk;
-	}
-		
-	private static final String FIND_BY_PROPOSAL_ID(boolean fetchDewars, boolean fetchContainers, boolean feacthSamples) {
-		String pk = null;
-		if (fetchDewars){
-			pk = "FROM Shipping3VO vo LEFT JOIN FETCH vo.dewarVOs dewars "
-					+ (fetchContainers ? " LEFT JOIN FETCH dewars.containerVOs co " : "")
-					+ (feacthSamples ? " LEFT JOIN FETCH co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs LEFT JOIN FETCH sa.blSubSampleVOs " : " ")
-					+  " LEFT JOIN FETCH vo.sessions se "
-					+  " LEFT JOIN FETCH se.proposalVO proposal "
-					+ " WHERE proposal.proposalId = :proposalId";
-		} else {
-			pk = "from Shipping3VO vo where vo.shippingId = :pk";
-		}
-		return pk;
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -202,8 +147,11 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// autService.checkUserRightToChangeAdminData();
 		try {
 
-			return (Shipping3VO) entityManager.createQuery("from Shipping3VO vo " + (withDewars ? "left join fetch vo.dewarVOs " : "")
-							+ "where vo.shippingId = ?1").setParameter(1, pk)
+			String qlString = "select vo from Shipping3VO vo "
+					+ (withDewars ? "left join fetch vo.dewarVOs " : "")
+					+ "where vo.shippingId = :pk";
+			return entityManager.createQuery(qlString, Shipping3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -217,7 +165,13 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withcontainers, withSamples)).setParameter("pk", pk)
+			String qlString = "SELECT vo FROM Shipping3VO vo "
+						+ (withDewars ? "LEFT JOIN FETCH vo.dewarVOs LEFT JOIN vo.dewarVOs dewars ": "")
+						+ (withDewars && withcontainers ? "LEFT JOIN FETCH dewars.containerVOs LEFT JOIN dewars.containerVOs co " : "")
+						+ (withDewars && withcontainers && withSamples ? "LEFT JOIN FETCH co.sampleVOs " : "")
+						+ " WHERE vo.shippingId = :pk";
+			return entityManager.createQuery(qlString, Shipping3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -230,12 +184,15 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
-		String st = null;
 		Shipping3VO vo = this.findByPk(pk, withDewars, withcontainers, withSamples, withSubSamples);
 		if (vo != null ) {
-			st = serialize( vo);			
+			Gson gson =  new GsonBuilder()
+					.excludeFieldsWithModifiers(Modifier.PRIVATE)
+					.serializeNulls()
+					.create();
+			return gson.toJson(vo);
 		}
-		return st;
+		return null;
 	}
 
 	public Shipping3VO findByPk(final Integer pk, final boolean withDewars, final boolean withcontainers, final boolean withSamples, final boolean withSubSamples) throws Exception {
@@ -245,7 +202,14 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withcontainers, withSamples, withSubSamples)).setParameter("pk", pk)
+			String qlString = "SELECT vo FROM Shipping3VO vo "
+						+ (withDewars ? "LEFT JOIN FETCH vo.dewarVOs LEFT JOIN vo.dewarVOs dewars ": "")
+						+ (withDewars && withcontainers ? "LEFT JOIN FETCH dewars.containerVOs LEFT JOIN dewars.containerVOs co " : "")
+						+ (withDewars && withcontainers && withSamples ? "LEFT JOIN FETCH co.sampleVOs LEFT JOIN co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs " : "")
+						+ (withDewars && withcontainers && withSamples && withSubSamples ? "LEFT JOIN FETCH sa.blSubSampleVOs " : "")
+						+ "WHERE vo.shippingId = :pk";
+			return entityManager.createQuery(qlString, Shipping3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -306,8 +270,7 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	@SuppressWarnings("unchecked")
 	public List<Shipping3VO> findAll() throws Exception {
 
-		List<Shipping3VO> foundEntities = entityManager.createQuery("from Shipping3VO vo ").getResultList();
-		return foundEntities;
+        return (List<Shipping3VO>) entityManager.createQuery("SELECT vo from Shipping3VO vo ").getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -406,9 +369,16 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Shipping3VO> findByProposal(final Integer proposalId,final boolean fetchDewars, final boolean fetchContainers, final boolean fetchSamples) throws Exception {
-		
+
 		try {
-			return  entityManager.createNativeQuery(FIND_BY_PROPOSAL_ID(fetchDewars, fetchContainers, fetchSamples))
+			String qlString = "SELECT vo FROM Shipping3VO vo "
+						+ (fetchDewars ? "LEFT JOIN FETCH vo.dewarVOs LEFT JOIN vo.dewarVOs dewars ": "")
+						+ (fetchDewars && fetchContainers ? "LEFT JOIN FETCH dewars.containerVOs LEFT JOIN dewars.containerVOs co " : "")
+						+ (fetchDewars && fetchContainers && fetchSamples ? "LEFT JOIN FETCH co.sampleVOs LEFT JOIN co.sampleVOs sa LEFT JOIN FETCH sa.blsampleImageVOs LEFT JOIN FETCH sa.blSubSampleVOs " : "")
+						+ "LEFT JOIN FETCH vo.sessions LEFT JOIN vo.sessions se "
+						+ "LEFT JOIN FETCH se.proposalVO LEFT JOIN se.proposalVO proposal "
+						+ "WHERE proposal.proposalId = :proposalId";
+			return  entityManager.createQuery(qlString, Shipping3VO.class)
 					.setParameter("proposalId", proposalId)
 					.getResultList();
 		} catch (NoResultException e) {
@@ -595,14 +565,12 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 	 * @throws Exception
 	 */
 	public Integer updateProposalId(final Integer newProposalId, final Integer oldProposalId) throws Exception {
-		
-		int nbUpdated = 0;
-		Query query = entityManager.createNativeQuery(" update Shipping  set proposalId = ?1 "
-				+ " WHERE proposalId = ?2")
-				.setParameter(1, newProposalId).setParameter(2, oldProposalId);// 2 old value to be replaced
-		nbUpdated = query.executeUpdate();
 
-		return new Integer(nbUpdated);
+		String sqlString = "UPDATE Shipping  SET proposalId = ?1 WHERE proposalId = ?2";
+		Query query = entityManager.createNativeQuery(sqlString)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);// 2 old value to be replaced
+		return query.executeUpdate();
 	}
 
 	public int deleteAllSamplesAndContainersForShipping(Integer shippingId) throws Exception {
@@ -672,7 +640,8 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 				// " OR histo.dewarStatus='" + Constants.SHIPPING_STATUS_SENT_TO_USER + "')" +
 				"AND (histo.dewarStatus='atESRF' "
 				+ "OR histo.dewarStatus='sent to User') "
-				+ "WHERE s.shippingId = ?1 GROUP BY s.shippingId ").setParameter(1, shippingId);
+				+ "WHERE s.shippingId = ?1 GROUP BY s.shippingId ")
+				.setParameter(1, shippingId);
 		List orders = query.getResultList();
 		int nb = orders.size();
 		Integer nbSamples = 0;
@@ -680,8 +649,8 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		Integer[] tab = new Integer[2];
 		if (nb > 0) {
 			Object[] o = (Object[]) orders.get(0);
-			nbDewarHistory = ((BigInteger) o[0]).intValue();
-			nbSamples = ((BigInteger) o[1]).intValue();
+			nbDewarHistory = ((Long) o[0]).intValue();
+			nbSamples = ((Long) o[1]).intValue();
 		}
 		tab[0] = nbDewarHistory;
 		tab[1] = nbSamples;
@@ -701,23 +670,19 @@ public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceL
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			if (withSession){
-				return (Shipping3VO) entityManager.createQuery(FIND_BY_PK(withDewars, withSession)).setParameter("pk", pk).getSingleResult();
-			}
-
-			return (Shipping3VO) entityManager.createQuery("from Shipping3VO vo " + (withDewars ? "left join fetch vo.dewarVOs " : "")
-					+ "where vo.shippingId = ?1").setParameter(1, pk).getSingleResult();
+				String pk1 = "SELECT vo FROM Shipping3VO vo "
+							+ (withDewars ? "LEFT JOIN FETCH vo.dewarVOs LEFT JOIN vo.dewarVOs dewars " : "")
+							+ (withDewars && withSession ? "LEFT JOIN FETCH dewars.sessionVO " : "")
+							+ "WHERE vo.shippingId = :pk";
+				return entityManager.createQuery(pk1, Shipping3VO.class)
+						.setParameter("pk", pk)
+						.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
 	}
 	
 	/* Private methods ------------------------------------------------------ */
-
-	public static String serialize(Shipping3VO shipping) {
-		Gson gson =  new GsonBuilder().excludeFieldsWithModifiers(Modifier.PRIVATE).serializeNulls().create();		
-		return  gson.toJson(shipping);
-	}
 
 	/**
 	 * Checks the data for integrity. E.g. if references and categories exist.
