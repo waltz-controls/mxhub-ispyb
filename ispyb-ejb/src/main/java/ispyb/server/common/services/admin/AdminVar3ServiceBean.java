@@ -117,7 +117,7 @@ public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceL
 		
 		checkCreateChangeRemoveAccess();
 		try {
-			return (AdminVar3VO) entityManager.createQuery("from AdminVar3VO vo where vo.adminVarId = :pk")
+			return (AdminVar3VO) entityManager.createQuery("SELECT vo from AdminVar3VO vo where vo.adminVarId = :pk")
 					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
