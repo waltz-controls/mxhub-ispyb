@@ -19,8 +19,8 @@
 package ispyb.server.common.util;
 
 import javax.naming.InitialContext;
-import javax.transaction.Status;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.Status;
+import jakarta.transaction.TransactionManager;
 
 /**
  * @author ricardo.leal@esrf.fr
