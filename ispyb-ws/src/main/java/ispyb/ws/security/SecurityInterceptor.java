@@ -5,7 +5,6 @@ import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 import ispyb.server.common.vos.login.Login3VO;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,9 +20,6 @@ import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.model.OperationResourceInfo;
-import org.apache.cxf.message.Message;
 import org.apache.log4j.Logger;
 
 /**
@@ -39,20 +35,11 @@ public class SecurityInterceptor implements ContainerRequestFilter {
 
 	@Context
 	private ResourceInfo info;
-//	private Response getUnauthorizedResponse(){
-//		return Response.status(401) 
-//				.header("Access-Control-Allow-Origin", "*").build();
-//	}
-	
+
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
 		Method method = info.getResourceMethod();
 
-		/** Allowing cross-domain **/
-		ArrayList<String> header = new ArrayList<String>();
-		header.add("*");
-		requestContext.getHeaders().put("Access-Control-Allow-Origin", header);
-		
 		if (method.isAnnotationPresent(PermitAll.class)) {
 			logger.info("PermitAll " + method.getName() + " "+ method.getDeclaredAnnotations() + " " + method.getAnnotations() + " " + method.getParameterAnnotations());
 			return;
@@ -114,9 +101,9 @@ public class SecurityInterceptor implements ContainerRequestFilter {
 			Login3Service service = (Login3Service) Ejb3ServiceLocator.getInstance().getLocalService(Login3Service.class);
 			return service.findByToken(token);
 		} catch (NamingException e) {
-			e.printStackTrace();
+			logger.error("", e);
+			return null;
 		}
-		return null;
 	}
 
 }
