@@ -26,6 +26,13 @@
         UserName pxadmin
         Password pxadmin
         JtaManaged true
+        defaultAutoCommit = false
+        testOnReturn = true
+        testWhileIdle = true
+        timeBetweenEvictionRunsMillis = 60
+        initialSize = 2
+        minIdle = 2
+        validationQuery = "select 1"
     </Resource>
     <Resource id="ispyb_config" type="DataSource">
         JdbcDriver org.mariadb.jdbc.Driver
@@ -33,5 +40,12 @@
         UserName pxadmin
         Password pxadmin
         JtaManaged true
+        defaultAutoCommit = false
+        testOnReturn = true
+        testWhileIdle = true
+        timeBetweenEvictionRunsMillis = 60
+        initialSize = 2
+        minIdle = 2
+        validationQuery = "select 1"
     </Resource>
 </tomee>
