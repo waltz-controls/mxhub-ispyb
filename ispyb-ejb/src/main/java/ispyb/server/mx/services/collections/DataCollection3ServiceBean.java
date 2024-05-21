@@ -157,9 +157,12 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (DataCollection3VO) entityManager.createQuery("from DataCollection3VO vo " + (withImage ? "left join fetch vo.imageVOs " : "")
-
-					+ (withAutoProcIntegration ? "left join fetch vo.autoProcIntegrationVOs " : "") + "where vo.dataCollectionId = :pk").setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from DataCollection3VO vo "
+					+ (withImage ? "left join fetch vo.imageVOs " : "")
+					+ (withAutoProcIntegration ? "left join fetch vo.autoProcIntegrationVOs " : "") + "where vo.dataCollectionId = :pk";
+			return (DataCollection3VO) entityManager.createQuery(qlString)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
