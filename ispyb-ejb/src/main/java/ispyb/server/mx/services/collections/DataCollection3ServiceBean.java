@@ -18,8 +18,6 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import ispyb.common.util.Constants;
-import ispyb.common.util.StringUtils;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
@@ -35,7 +33,6 @@ import ispyb.server.mx.vos.sample.BLSample3VO;
 import ispyb.server.mx.vos.sample.Crystal3VO;
 import ispyb.server.mx.vos.sample.Protein3VO;
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.*;
@@ -54,43 +51,9 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	private final static Logger LOG = Logger.getLogger(DataCollection3ServiceBean.class);
 
 	// Generic HQL request to find instances of DataCollection3 by pk
-	private static final String FIND_BY_PK(boolean fetchImage, boolean fetchAutoProcIntegration) {
-		return "from DataCollection3VO vo " + (fetchImage ? "left join fetch vo.imageVOs " : "")
-
-		+ (fetchAutoProcIntegration ? "left join fetch vo.autoProcIntegrationVOs " : "") + "where vo.dataCollectionId = :pk";
-	}
 
 	// Generic HQL request to find all instances of DataCollection3
-	private static final String FIND_ALL() {
-		return "from DataCollection3VO vo ";
-	}
 
-	private static final String FIND_BY_SHIPPING_ID = "select * from DataCollection, DataCollectionGroup, BLSample, Container, Dewar"
-			+ " where DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId AND "
-			+ "DataCollectionGroup.blSampleId = BLSample.blSampleId  " + " and BLSample.containerId = Container.containerId "
-			+ " and Container.dewarId = Dewar.dewarId " + " and Dewar.shippingId = :shippingId ";
-
-	private static final String FIND_BY_SAMPLE = "select * from DataCollection, DataCollectionGroup, BLSample "
-			+ " where DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId AND "
-			+ "DataCollectionGroup.blSampleId = BLSample.blSampleId  " + " and BLSample.blSampleId = :blSampleId ORDER BY DataCollection.endTime ASC ";
-
-	private static final String FIND_BY_IMAGE_FILE = "select * from DataCollection, Image "
-			+ " where DataCollection.dataCollectionId = Image.dataCollectionId  "
-			+ " and Image.fileLocation like :fileLocation AND Image.fileName like :fileName ORDER BY DataCollection.endTime ASC ";
-
-	private static final String FIND_PDB_PATH = "SELECT c.pdbFileName, c.pdbFilePath " + "FROM DataCollection d, DataCollectionGroup g, BLSample s, Crystal c "
-			+ "WHERE d.dataCollectionId = :dataCollectionId AND " + "d.dataCollectionGroupId = g.dataCollectionGroupId AND "
-			+ "g.blSampleId = s.blSampleId AND " + "s.crystalId = c.crystalId ";
-
-	private final static String NB_OF_COLLECTS_FOR_GROUP = "SELECT count(*) FROM DataCollection "
-			+ " WHERE  DataCollection.numberOfImages >4 and DataCollection.dataCollectionGroupId = :dcGroupId ";
-
-	private final static String NB_OF_TESTS_FOR_GROUP = "SELECT count(*) FROM DataCollection "
-			+ " WHERE  DataCollection.numberOfImages <=4 and DataCollection.dataCollectionGroupId = :dcGroupId ";
-
-	private static final String FIND_BY_PROPOSALID = "select * from DataCollection, DataCollectionGroup, BLSession, Proposal "
-			+ " where DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId AND BLSession.sessionId = DataCollectionGroup.sessionId"
-			+ " and BLSession.proposalId = Proposal.proposalId and Proposal.proposalId = :proposalId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -110,7 +73,11 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public DataCollection3VO create(final DataCollection3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -126,7 +93,11 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public DataCollection3VO update(final DataCollection3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -140,7 +111,11 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		DataCollection3VO vo = findByPk(pk, false, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -154,7 +129,11 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public void delete(final DataCollection3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(entityManager.merge(vo));
 	}
@@ -171,10 +150,16 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public DataCollection3VO findByPk(final Integer pk, final boolean withImage, final boolean withAutoProcIntegration) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (DataCollection3VO) entityManager.createQuery(FIND_BY_PK(withImage, withAutoProcIntegration)).setParameter("pk", pk).getSingleResult();
+			return (DataCollection3VO) entityManager.createQuery("from DataCollection3VO vo " + (withImage ? "left join fetch vo.imageVOs " : "")
+
+					+ (withAutoProcIntegration ? "left join fetch vo.autoProcIntegrationVOs " : "") + "where vo.dataCollectionId = :pk").setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -191,9 +176,17 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public DataCollectionWS3VO findForWSByPk(final Integer pk, final boolean withImage, final boolean withAutoProcIntegration) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
+		// // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
-			DataCollection3VO found = (DataCollection3VO) entityManager.createQuery(FIND_BY_PK(withImage, withAutoProcIntegration)).setParameter("pk", pk)
+			String qlString = "SELECT vo from DataCollection3VO vo "
+					+ (withImage ? "left join fetch vo.imageVOs " : "")
+					+ (withAutoProcIntegration ? "left join fetch vo.autoProcIntegrationVOs " : "") + "where vo.dataCollectionId = :pk";
+			DataCollection3VO found = (DataCollection3VO) entityManager.createQuery(qlString)
+					.setParameter("pk", pk)
 					.getSingleResult();
 			DataCollectionWS3VO sesLight = getWSDataCollectionVO(found);
 			return sesLight;
@@ -265,33 +258,23 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findAll() throws Exception {
 
-		List<DataCollection3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+		List<DataCollection3VO> foundEntities = entityManager.createQuery("from DataCollection3VO vo ").getResultList();
 		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<DataCollection3VO> findByShippingId(final Integer shippingId) throws Exception {
 
-		String query = FIND_BY_SHIPPING_ID;
-		List<DataCollection3VO> col = this.entityManager.createNativeQuery(query, "dataCollectionNativeQuery").setParameter("shippingId", shippingId)
+		String query = "select * from DataCollection, DataCollectionGroup, BLSample, Container, Dewar"
+				+ " where DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId AND "
+				+ "DataCollectionGroup.blSampleId = BLSample.blSampleId  "
+				+ " and BLSample.containerId = Container.containerId "
+				+ " and Container.dewarId = Dewar.dewarId "
+				+ " and Dewar.shippingId = ?1 ";
+		List<DataCollection3VO> col = this.entityManager.createNativeQuery(query, "dataCollectionNativeQuery")
+				.setParameter(1, shippingId)
 				.getResultList();
 		return col;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove
-	 * DataCollection3 entities. If not set rollback only and throw
-	 * AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);
-		// // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
 	}
 
 	/**
@@ -307,8 +290,12 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public DataCollectionWS3VO[] doInEJBAccess(Object parent) throws Exception {
-				String query = FIND_BY_SAMPLE;
-				List<DataCollection3VO> listVOs = entityManager.createNativeQuery(query, "dataCollectionNativeQuery").setParameter("blSampleId", blSampleId)
+				String query = "select * from DataCollection, DataCollectionGroup, BLSample "
+						+ " where DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId AND "
+						+ "DataCollectionGroup.blSampleId = BLSample.blSampleId  "
+						+ " and BLSample.blSampleId = ?1 ORDER BY DataCollection.endTime ASC ";
+				List<DataCollection3VO> listVOs = entityManager.createNativeQuery(query, "dataCollectionNativeQuery")
+						.setParameter(1, blSampleId)
 						.getResultList();
 				if (listVOs == null || listVOs.isEmpty())
 					listVOs = null;
@@ -418,9 +405,13 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public DataCollectionWS3VO[] doInEJBAccess(Object parent) throws Exception {
-				String query = FIND_BY_IMAGE_FILE;
+				String query = "select * from DataCollection, Image "
+						+ " where DataCollection.dataCollectionId = Image.dataCollectionId  "
+						+ " and Image.fileLocation like ?1 AND Image.fileName like ?2 ORDER BY DataCollection.endTime ASC ";
 				List<DataCollection3VO> listVOs = entityManager.createNativeQuery(query, "dataCollectionNativeQuery")
-						.setParameter("fileLocation", fileLocation).setParameter("fileName", fileName).getResultList();
+						.setParameter(1, fileLocation)
+						.setParameter(2, fileName)
+						.getResultList();
 				if (listVOs == null || listVOs.isEmpty())
 					listVOs = null;
 
@@ -449,9 +440,13 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public List<DataCollection3VO> doInEJBAccess(Object parent) throws Exception {
-				String query = FIND_BY_IMAGE_FILE;
+				String query = "select * from DataCollection, Image "
+						+ " where DataCollection.dataCollectionId = Image.dataCollectionId  "
+						+ " and Image.fileLocation like ?1 AND Image.fileName like ?2 ORDER BY DataCollection.endTime ASC ";
 				List<DataCollection3VO> listVOs = entityManager.createNativeQuery(query, "dataCollectionNativeQuery")
-						.setParameter("fileLocation", fileLocation).setParameter("fileName", fileName).getResultList();
+						.setParameter(1, fileLocation)
+						.setParameter(2, fileName)
+						.getResultList();
 				if (listVOs == null || listVOs.isEmpty())
 					listVOs = null;
 
@@ -844,7 +839,9 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public String findPdbFullPath(final Integer dataCollectionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(FIND_PDB_PATH).setParameter("dataCollectionId", dataCollectionId);
+		Query query = entityManager.createNativeQuery("SELECT c.pdbFileName, c.pdbFilePath " + "FROM DataCollection d, DataCollectionGroup g, BLSample s, Crystal c "
+				+ "WHERE d.dataCollectionId = :dataCollectionId AND " + "d.dataCollectionGroupId = g.dataCollectionGroupId AND "
+				+ "g.blSampleId = s.blSampleId AND " + "s.crystalId = c.crystalId ").setParameter("dataCollectionId", dataCollectionId);
 		List orders = query.getResultList();
 		if (orders == null || orders.size() < 1)
 			return null;
@@ -919,11 +916,14 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public Integer getNbOfCollects(final Integer dcgId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_COLLECTS_FOR_GROUP).setParameter("dcGroupId", dcgId);
+		String sqlString = "SELECT count(*) FROM DataCollection "
+				+ " WHERE  DataCollection.numberOfImages >4 and DataCollection.dataCollectionGroupId = ?1 ";
+		Query query = entityManager.createNativeQuery(sqlString)
+				.setParameter(1, dcgId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfCollects - NoResultException: " + dcgId);
 			e.printStackTrace();
@@ -943,11 +943,14 @@ public class DataCollection3ServiceBean implements DataCollection3Service, DataC
 	 */
 	public Integer getNbOfTests(final Integer dcgId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_TESTS_FOR_GROUP).setParameter("dcGroupId", dcgId);
+		String sqlString = "SELECT count(*) FROM DataCollection "
+				+ " WHERE  DataCollection.numberOfImages <=4 and DataCollection.dataCollectionGroupId = ?1 ";
+		Query query = entityManager.createNativeQuery(sqlString)
+				.setParameter(1, dcgId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfTests - NoResultException: " + dcgId);
 			e.printStackTrace();
