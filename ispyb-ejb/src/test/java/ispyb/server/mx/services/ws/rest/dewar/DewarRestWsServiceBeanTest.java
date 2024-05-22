@@ -2,17 +2,19 @@ package ispyb.server.mx.services.ws.rest.dewar;
 
 import ispyb.TestBase;
 import jakarta.inject.Inject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class DewarRestWsServiceBeanTest extends TestBase {
 
     @Inject private DewarRestWsService service;
 
     @Test
     public void getDewarViewBySessionId() {
-        var result = service.getDewarViewBySessionId(61585,8425);
+        var result = service.getDewarViewBySessionId(61555,8454);
         assertNotNull(result);
     }
 

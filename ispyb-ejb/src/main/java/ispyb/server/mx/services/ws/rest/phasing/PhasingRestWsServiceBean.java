@@ -40,58 +40,52 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 	private String getPhasingViewTableQuery(){
 		return this.getQueryFromResourceFile("/queries/PhasingRestWsServiceBean/getViewTableQuery.sql");
 	}
-	
-	private String ByDataCollectionGroupId = getPhasingViewTableQuery() + " where DataCollection_dataCollectionGroupId = :dataCollectionGroupId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	private String ByDataCollectionId = getPhasingViewTableQuery() + " where DataCollection_dataCollectionId = :dataCollectionId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	private String ByAutoProcIntegrationId = getPhasingViewTableQuery() + " where AutoProcIntegration_autoProcIntegrationId = :autoprocIntegrationId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	private String ByPhasingStepId = getPhasingViewTableQuery() + " where PhasingStep_phasingStepId = :phasingStepId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	
-	
-	private String BySampleId = getPhasingViewTableQuery()  + " where BLSample_blSampleId = :blSampleId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	private String ByProteinId = getPhasingViewTableQuery() + " where Protein_proteinId = :Protein_proteinId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	private String BySessionId = getPhasingViewTableQuery() + " where BLSession_sessionId = :sessionId and BLSession_proposalId = :proposalId group by PhasingStep_phasingStepId";
-	
+
 
 	@Override
 	public List<Map<String, Object>> getPhasingViewByDataCollectionGroupId(int dataCollectionGroupId, int proposalId) {
-		String sqlQuery = ByDataCollectionGroupId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where DataCollection_dataCollectionGroupId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("dataCollectionGroupId", dataCollectionGroupId); // Bind the dataCollectionGroupId parameter
-		query.setParameter("proposalId", proposalId);                       // Bind the proposalId parameter
+		query.setParameter(1, dataCollectionGroupId); // Bind the dataCollectionGroupId parameter
+		query.setParameter(2, proposalId);                       // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByDataCollectionId(int dataCollectionId, int proposalId) {
-		String sqlQuery = ByDataCollectionId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where DataCollection_dataCollectionId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("dataCollectionId", dataCollectionId); // Bind the dataCollectionId parameter
-		query.setParameter("proposalId", proposalId);             // Bind the proposalId parameter
+		query.setParameter(1, dataCollectionId); // Bind the dataCollectionId parameter
+		query.setParameter(2, proposalId);             // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByAutoProcIntegrationId(int autoprocIntegrationId, int proposalId) {
-		String sqlQuery = ByAutoProcIntegrationId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where AutoProcIntegration_autoProcIntegrationId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("autoprocIntegrationId", autoprocIntegrationId); // Bind the autoprocIntegrationId parameter
-		query.setParameter("proposalId", proposalId);                      // Bind the proposalId parameter
+		query.setParameter(1, autoprocIntegrationId); // Bind the autoprocIntegrationId parameter
+		query.setParameter(2, proposalId);                      // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByBlSampleId(int blSampleId, int proposalId) {
-		String sqlQuery = BySampleId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where BLSample_blSampleId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("blSampleId", blSampleId);   // Bind the blSampleId parameter
-		query.setParameter("proposalId", proposalId);   // Bind the proposalId parameter
+		query.setParameter(1, blSampleId);   // Bind the blSampleId parameter
+		query.setParameter(2, proposalId);   // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
@@ -99,22 +93,24 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 	@Override
 	public List<Map<String, Object>> getPhasingViewByProteinId(int proteinId,
 			int proposalId) {
-		String sqlQuery = ByProteinId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where Protein_proteinId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("proteinId", proteinId);   // Bind the proteinId parameter
-		query.setParameter("proposalId", proposalId); // Bind the proposalId parameter
+		query.setParameter(1, proteinId);   // Bind the proteinId parameter
+		query.setParameter(2, proposalId); // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
 
 	@Override
 	public List<Map<String, Object>> getPhasingViewBySessionId(int sessionId, int proposalId) {
-		String sqlQuery = BySessionId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where BLSession_sessionId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("sessionId", sessionId);   // Bind the sessionId parameter
-		query.setParameter("proposalId", proposalId); // Bind the proposalId parameter
+		query.setParameter(1, sessionId);   // Bind the sessionId parameter
+		query.setParameter(2, proposalId); // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
 
@@ -122,45 +118,34 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 	
 	@Override
 	public List<Map<String, Object>> getPhasingViewByStepId(int phasingStepId, int proposalId) {
-		String sqlQuery = ByPhasingStepId;
+		String sqlQuery = getPhasingViewTableQuery()
+				+ " where PhasingStep_phasingStepId = ?1 and BLSession_proposalId = ?2 group by PhasingStep_phasingStepId";
 
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class);
-		query.setParameter("phasingStepId", phasingStepId);   // Bind the phasingStepId parameter
-		query.setParameter("proposalId", proposalId);         // Bind the proposalId parameter
+		query.setParameter(1, phasingStepId);   // Bind the phasingStepId parameter
+		query.setParameter(2, proposalId);         // Bind the proposalId parameter
 
 		return (List<Map<String, Object>>) query.getResultList();
     }
-	
-	
-	
-	
-	
-	
-	
-	private String getPhasingFilesViewTableQuery(){
-		return "select * from v_datacollection_phasing_program_run ";
-	}
-	
-	private String FilesByPhasingStepId = getPhasingFilesViewTableQuery() + " where phasingStepId = :phasingStepId and proposalId = :proposalId";
-	
-	
-	private String FilesByPhasingProgramAttachmentId = getPhasingFilesViewTableQuery() + " where phasingProgramAttachmentId = :phasingProgramAttachmentId and proposalId = :proposalId";
-	
+
+
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByStepId(int phasingStepId, int proposalId) {
-		String session = FilesByPhasingStepId;
+		String session = "select * from v_datacollection_phasing_program_run "
+				+ " where phasingStepId = ?1 and proposalId = ?2";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
-				.setParameter("phasingStepId", phasingStepId)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, phasingStepId)
+				.setParameter(2, proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByPhasingProgramAttachmentId(int phasingProgramAttachmentId, int proposalId) {
-		String session = FilesByPhasingProgramAttachmentId;
+		String session = "select * from v_datacollection_phasing_program_run "
+				+ " where phasingProgramAttachmentId = ?1 and proposalId = ?2";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
-				.setParameter("phasingProgramAttachmentId", phasingProgramAttachmentId)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, phasingProgramAttachmentId)
+				.setParameter(2, proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
