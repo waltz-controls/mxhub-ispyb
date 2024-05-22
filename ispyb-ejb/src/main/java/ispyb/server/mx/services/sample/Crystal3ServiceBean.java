@@ -55,21 +55,9 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 
 	// Generic HQL request to find instances of Crystal3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchSamples) {
-		return "from Crystal3VO vo " + (fetchSamples ? "left join fetch vo.sampleVOs " : "")
-				+ "where vo.crystalId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Crystal3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchLink1, boolean fetchLink2) {
-		return "from Crystal3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "");
-	}
-
-	private final static String COUNT_SAMPLE = "SELECT " + " count(DISTINCT(bls.blSampleId)) samplesNumber "
-			+ "FROM Crystal c  " + "	 LEFT JOIN BLSample bls ON bls.crystalId = c.crystalId "
-			+ "WHERE c.crystalId = :crystalId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -168,7 +156,11 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (Crystal3VO) entityManager.createQuery(FIND_BY_PK(fetchSamples)).setParameter("pk", pk)
+			String qlString = "from Crystal3VO vo "
+					+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
+					+ "where vo.crystalId = :pk";
+			return (Crystal3VO) entityManager.createQuery(qlString)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -189,8 +181,11 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Crystal3VO> findAll(final boolean withLink1, final boolean withLink2) throws Exception {
-	
-		List<Crystal3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1, withLink2)).getResultList();
+
+		String qlString = "SELECT vo from Crystal3VO vo "
+				+ (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+				+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "");
+		List<Crystal3VO> foundEntities = entityManager.createQuery(qlString).getResultList();
 		return foundEntities;
 	}
 
@@ -333,10 +328,14 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 
 	public Integer countSamples(final Integer crystalId)throws Exception{
 
-		Query query = entityManager.createNativeQuery(COUNT_SAMPLE).setParameter("crystalId", crystalId);
+		String countSample = "SELECT count(DISTINCT(bls.blSampleId)) samplesNumber "
+				+ "FROM Crystal c LEFT JOIN BLSample bls ON bls.crystalId = c.crystalId "
+				+ "WHERE c.crystalId = ?1 ";
+		Query query = entityManager.createNativeQuery(countSample)
+				.setParameter(1, crystalId);
 		try{
 			BigInteger res = (BigInteger) query.getSingleResult();
-			return new Integer(res.intValue());
+			return res.intValue();
 		}catch(NoResultException e){
 			System.out.println("ERROR in countSamples - NoResultException: "+crystalId);
 			e.printStackTrace();

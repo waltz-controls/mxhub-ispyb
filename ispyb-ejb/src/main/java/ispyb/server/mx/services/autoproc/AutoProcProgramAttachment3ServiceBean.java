@@ -181,7 +181,8 @@ public class AutoProcProgramAttachment3ServiceBean implements AutoProcProgramAtt
 		try{
 
 			List<AutoProcProgramAttachment3VO> listVOs = this.entityManager.createNativeQuery(query, "autoProcProgramAttachmentNativeQuery")
-					.setParameter(1, autoProcProgramId).getResultList();
+					.setParameter(1, autoProcProgramId)
+					.getResultList();
 			return listVOs;
 		}catch(Exception e){
 			return null;
