@@ -115,7 +115,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	public Laboratory3VO findByPk(final Integer pk) throws Exception {
 		try {
-			return (Laboratory3VO) entityManager.createQuery("SELECT Laboratory3VO FROM Laboratory3VO vo  where vo.laboratoryId = :pk")
+			return (Laboratory3VO) entityManager.createQuery("SELECT vo FROM Laboratory3VO vo  where vo.laboratoryId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -129,7 +129,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public Laboratory3VO findByLaboratoryExtPk(final Integer laboExtPk) {
-		String query = "SELECT Laboratory3VO FROM Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
+		String query = "SELECT vo FROM Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
 		List<Laboratory3VO> listVOs =  this.entityManager.createQuery(query, Laboratory3VO.class)
 				.setParameter("labExtPk", laboExtPk)
 				.getResultList();
