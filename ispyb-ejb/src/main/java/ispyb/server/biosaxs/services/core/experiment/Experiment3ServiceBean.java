@@ -208,7 +208,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		}
 	}
 	
-	
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getExperimentDescription(Integer experimentId) {
 		String session = "select * from v_saxs_datacollection  where experimentId = ?1";

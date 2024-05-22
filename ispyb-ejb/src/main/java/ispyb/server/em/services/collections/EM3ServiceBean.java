@@ -77,16 +77,6 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3ServiceLocal {
 
-	private final String ByDataCollectionId = getViewTableQuery() + " where Movie_dataCollectionId = :dataCollectionId and Proposal_proposalId=:proposalId";
-
-	private final String StatsByDataCollectionId = getStatsQuery() + " where dataCollectionId in (:dataCollectionIdList) and BLSession.proposalId=:proposalId";
-	
-	private final String StatsByDataCollectionGroupId = getStatsQuery() + " where DataCollection.dataCollectionGroupId=:dataCollectionGroupId";
-	
-	private final String getStatsBySessionId = "select * from v_em_stats where sessionId = :sessionId and proposalId=:proposalId";
-
-	private final String getClassificationBySessionId = "select * from v_em_classification where sessionId = :sessionId and proposalId=:proposalId";
-	
 	protected final Logger LOG = LoggerFactory.getLogger(EM3ServiceBean.class);
 
 	@PersistenceContext(unitName = "ispyb_db")
@@ -116,19 +106,14 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	@EJB
 	private BeamLineSetup3Service beamLineSetup3Service;
 
-	private String getViewTableQuery(){
-		return this.getQueryFromResourceFile("/queries/em/movie/getViewTableQuery.sql");
-	}
-	
-	private String getStatsQuery(){
-		return this.getQueryFromResourceFile("/queries/em/stats/getStatsQuery.sql");
-	}
-	
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getMoviesDataByDataCollectionId(int proposalId, int dataCollectionId) {
-		Query query = entityManager.createNativeQuery(ByDataCollectionId, Map.class);;
-		query.setParameter("dataCollectionId", dataCollectionId);
-		query.setParameter("proposalId", proposalId);
+		String byDataCollectionId = "select * from v_em_movie"
+				+ " where Movie_dataCollectionId = ?1 and Proposal_proposalId=?2";
+		Query query = entityManager.createNativeQuery(byDataCollectionId, Map.class);;
+		query.setParameter(1, dataCollectionId);
+		query.setParameter(2, proposalId);
 		return (List<Map<String, Object>>) query.getResultList();
 	}
 	
@@ -717,14 +702,28 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 	public List<Map<String, Object>> getStatsByDataCollectionIds(int proposalId, String dataCollectionIdList) {
 
 
-		String queryString = StatsByDataCollectionId
-				.replace(":dataCollectionIdList", dataCollectionIdList)
-				.replace(":proposalId", String.valueOf(proposalId));
-		System.out.println(queryString); // Optionally log the query
+		String queryString = ("select dataCollectionId, \n" +
+				"(select count(*) from Movie where Movie.dataCollectionId = DataCollection.dataCollectionId) as movieCount,\n" +
+				"\n" +
+				"(select count(*) from MotionCorrection \n" +
+				"inner join Movie on Movie.movieId =  MotionCorrection.movieId \n" +
+				"where Movie.dataCollectionId = DataCollection.dataCollectionId) as motionCorrectionCount,\n" +
+				"\n" +
+				"(select count(*) from CTF \n" +
+				"inner join MotionCorrection on MotionCorrection.motionCorrectionId =  CTF.motionCorrectionId \n" +
+				"inner join Movie on Movie.movieId =  MotionCorrection.movieId \n" +
+				"where Movie.dataCollectionId = DataCollection.dataCollectionId) as ctfCorrectionCount\n" +
+				"\n" +
+				"\n" +
+				"from DataCollection\n" +
+				"INNER JOIN DataCollectionGroup on  DataCollectionGroup.dataCollectionGroupId = DataCollection.dataCollectionGroupId\n" +
+				"INNER JOIN BLSession on  BLSession.sessionId = DataCollectionGroup.sessionId" + " where dataCollectionId in (?1) and BLSession.proposalId=?2");
+		LOG.debug(queryString);
 
 		// Execute the native SQL query
-		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString)
-				.setHint("jakarta.persistence.resultType", Map.class)
+		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString, Map.class)
+				.setParameter(1, dataCollectionIdList)
+				.setParameter(2, proposalId)
 				.getResultList();
 
 		return results;
@@ -733,37 +732,56 @@ public class EM3ServiceBean extends WsServiceBean implements EM3Service, EM3Serv
 
 	@Override
 	public Collection<? extends Map<String, Object>> getStatsByDataDataCollectionGroupId(Integer dataCollectionGroupId) {
-		String queryString = StatsByDataCollectionGroupId.replace(":dataCollectionGroupId", String.valueOf(dataCollectionGroupId));
+		String queryString = ("select dataCollectionId, \n" +
+				"(select count(*) from Movie where Movie.dataCollectionId = DataCollection.dataCollectionId) as movieCount,\n" +
+				"\n" +
+				"(select count(*) from MotionCorrection \n" +
+				"inner join Movie on Movie.movieId =  MotionCorrection.movieId \n" +
+				"where Movie.dataCollectionId = DataCollection.dataCollectionId) as motionCorrectionCount,\n" +
+				"\n" +
+				"(select count(*) from CTF \n" +
+				"inner join MotionCorrection on MotionCorrection.motionCorrectionId =  CTF.motionCorrectionId \n" +
+				"inner join Movie on Movie.movieId =  MotionCorrection.movieId \n" +
+				"where Movie.dataCollectionId = DataCollection.dataCollectionId) as ctfCorrectionCount\n" +
+				"\n" +
+				"\n" +
+				"from DataCollection\n" +
+				"INNER JOIN DataCollectionGroup on  DataCollectionGroup.dataCollectionGroupId = DataCollection.dataCollectionGroupId\n" +
+				"INNER JOIN BLSession on  BLSession.sessionId = DataCollectionGroup.sessionId" + " where DataCollection.dataCollectionGroupId=?1");
 
 		// Execute the native SQL query
-		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString, Map.class).getResultList();
+		List<Map<String, Object>> results = entityManager.createNativeQuery(queryString, Map.class)
+				.setParameter(1, dataCollectionGroupId)
+				.getResultList();
 
 		return results;
 	}
 
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getStatsBySessionId(int proposalId, int sessionId) {
-		String queryString = getStatsBySessionId
-				.replace(":sessionId", String.valueOf(sessionId))
-				.replace(":proposalId", String.valueOf(proposalId));
-		Query query = entityManager.createNativeQuery(queryString, Map.class);
+		String queryString = "select * from v_em_stats where sessionId = ?1 and proposalId=?2";
+		Query query = entityManager.createNativeQuery(queryString, Map.class)
+				.setParameter(1, sessionId)
+				.setParameter(2, proposalId);
 
 		// Execute the query and retrieve the list of results
 		List<Map<String, Object>> results = query.getResultList();
 
 		return results;
 	}
-	
+
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getClassificationBySessionId(int proposalId, int sessionId) {
 		// Assume getClassificationBySessionId is a SQL string
 //		System.out.println(getClassificationBySessionId); // Optionally log the query
 
-		String queryString = getClassificationBySessionId
-				.replace(":sessionId", String.valueOf(sessionId))
-				.replace(":proposalId", String.valueOf(proposalId));
+		String queryString = "select * from v_em_classification where sessionId = ?1 and proposalId=?2";
 		// Create a native query using the EntityManager
-		Query query = entityManager.createNativeQuery(queryString, Tuple.class);
+		Query query = entityManager.createNativeQuery(queryString, Tuple.class)
+				.setParameter(1, sessionId)
+				.setParameter(2, proposalId);
 
 		// Execute the query and retrieve the list of results
 		List<Tuple> results = query.getResultList();

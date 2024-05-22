@@ -129,6 +129,7 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
     }
 
 
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByStepId(int phasingStepId, int proposalId) {
 		String session = "select * from v_datacollection_phasing_program_run "
@@ -138,7 +139,8 @@ public class PhasingRestWsServiceBean  extends WsServiceBean implements PhasingR
 				.setParameter(2, proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
-	
+
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getPhasingFilesViewByPhasingProgramAttachmentId(int phasingProgramAttachmentId, int proposalId) {
 		String session = "select * from v_datacollection_phasing_program_run "
