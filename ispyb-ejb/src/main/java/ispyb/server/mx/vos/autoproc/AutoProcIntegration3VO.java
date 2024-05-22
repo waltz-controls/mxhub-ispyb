@@ -47,7 +47,7 @@ public class AutoProcIntegration3VO extends ISPyBValueObject implements Cloneabl
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "autoProcIntegrationId")
 	protected Integer autoProcIntegrationId;
 	

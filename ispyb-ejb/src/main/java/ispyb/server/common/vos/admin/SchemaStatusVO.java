@@ -1,10 +1,6 @@
 package ispyb.server.common.vos.admin;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
@@ -15,7 +11,7 @@ public class SchemaStatusVO extends ISPyBValueObject {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "schemaStatusId")
 	protected Integer schemaStatusId;
 

@@ -21,16 +21,7 @@ package ispyb.server.mx.vos.autoproc;
 
 import java.util.Date;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityResult;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SqlResultSetMapping;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.ISPyBValueObject;
@@ -53,7 +44,7 @@ public class Phasing3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="phasingId")	
 	protected Integer phasingId;
 	

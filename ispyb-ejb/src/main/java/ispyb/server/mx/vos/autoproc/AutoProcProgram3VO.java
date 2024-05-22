@@ -26,13 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -51,7 +45,7 @@ public class AutoProcProgram3VO extends ISPyBValueObject {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "autoProcProgramId")
 	protected Integer autoProcProgramId;
 

@@ -49,7 +49,7 @@ public class Platetype3VO  implements java.io.Serializable {
 	 protected String description;
 	 protected Integer rowCount;
 	 protected Integer columnCount;
-//	 protected Integer experimentId;
+	 protected Integer experimentId;
 	 protected String shape;
      private Set<Sampleplate3VO> sampleplate3VOs = new HashSet<Sampleplate3VO>(0);
 
@@ -126,7 +126,7 @@ public class Platetype3VO  implements java.io.Serializable {
     }
 
     @XmlTransient
-    @OneToMany(fetch=FetchType.EAGER, mappedBy="platetype3VO")
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="platetype3VO")
     public Set<Sampleplate3VO> getSampleplate3VOs() {
         return this.sampleplate3VOs;
     }

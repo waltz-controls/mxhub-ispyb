@@ -44,7 +44,7 @@ public class ScreeningStrategyWedge3VO extends ISPyBValueObject implements Clone
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "screeningStrategyWedgeId")
 	protected Integer screeningStrategyWedgeId;
 	

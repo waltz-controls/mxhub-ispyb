@@ -21,11 +21,7 @@ package ispyb.server.mx.vos.collections;
 
 import java.sql.Blob;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
@@ -46,7 +42,7 @@ public class IspybReference3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "referenceId")
 	protected Integer referenceId;
 
