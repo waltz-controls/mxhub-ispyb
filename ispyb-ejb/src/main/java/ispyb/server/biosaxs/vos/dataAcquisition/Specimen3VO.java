@@ -60,8 +60,7 @@ public class Specimen3VO implements java.io.Serializable {
 	protected String volume;
 	protected String comments;
 	protected Set<Measurement3VO> measurements = new HashSet<Measurement3VO>(0);
-	protected Integer macromoleculeId;
-	 
+
 	public Specimen3VO() {
 	}
 
@@ -77,7 +76,7 @@ public class Specimen3VO implements java.io.Serializable {
 		this.specimenId = sampleId;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "macromoleculeId")
 
 	public Macromolecule3VO getMacromolecule3VO() {
@@ -88,7 +87,7 @@ public class Specimen3VO implements java.io.Serializable {
 		this.macromolecule3VO = macromolecule3VO;
 	}
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="samplePlatePositionId", nullable = true )
     public Sampleplateposition3VO getSampleplateposition3VO() {
         return this.sampleplateposition3VO;
@@ -180,8 +179,8 @@ public class Specimen3VO implements java.io.Serializable {
 		return String.format("Specimen: %s conc: %s \t macromolecule:[%s] bufferId:[ %s] ", this.specimenId, this.concentration, this.macromolecule3VO,  this.bufferId);
 	}
 
-	@OneToMany(fetch=FetchType.EAGER)
-	@JoinColumn(name="specimenId" )
+	@OneToMany(fetch=FetchType.LAZY)
+	@JoinColumn(name="specimenId", referencedColumnName = "specimenId")
 	public Set<Measurement3VO> getMeasurements() {
 		return measurements;
 	}

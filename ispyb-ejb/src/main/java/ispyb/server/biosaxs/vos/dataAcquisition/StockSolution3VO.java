@@ -153,7 +153,7 @@ public class StockSolution3VO implements java.io.Serializable {
 	}
 
 	@XmlTransient
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "stockSolutionId")
 	public Set<Specimen3VO> getSamples() {
 		return samples;
