@@ -47,23 +47,11 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 
 	// Generic HQL request to find instances of PhasingHasScaling3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from PhasingHasScaling3VO vo "
-				+ "where vo.phasingHasScalingId = :pk";
-	}
 
 	// Generic HQL request to find all instances of PhasingHasScaling3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from PhasingHasScaling3VO vo ";
-	}
 
-	private static final String FIND_BY_AUTOPROC = "SELECT * "
-			+ "FROM Phasing_has_Scaling, AutoProcScaling "
-			+ "WHERE Phasing_has_Scaling.autoProcScalingId = AutoProcScaling.autoProcScalingId AND "
-			+ "AutoProcScaling.autoProcId = :autoProcId ";
-	
-	
+
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -127,8 +115,10 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 	
 		checkCreateChangeRemoveAccess();
 		try {
-			return (PhasingHasScaling3VO) entityManager
-					.createQuery(FIND_BY_PK())
+			String qlString = "SELECT vo from PhasingHasScaling3VO vo "
+					+ "where vo.phasingHasScalingId = :pk";
+			return entityManager
+					.createQuery(qlString, PhasingHasScaling3VO.class)
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -140,11 +130,10 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<PhasingHasScaling3VO> findAll()throws Exception {
 
-		List<PhasingHasScaling3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+		String qlString = "SELECT vo from PhasingHasScaling3VO vo ";
+        return entityManager.createQuery(qlString, PhasingHasScaling3VO.class).getResultList();
 	}
 
 	/**
@@ -187,9 +176,12 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 	@SuppressWarnings("unchecked")
 	public List<PhasingHasScaling3VO> findByAutoProc(final Integer autoProcId) throws Exception {
 		
-		String query = FIND_BY_AUTOPROC;
+		String query = "SELECT * "
+				+ "FROM Phasing_has_Scaling, AutoProcScaling "
+				+ "WHERE Phasing_has_Scaling.autoProcScalingId = AutoProcScaling.autoProcScalingId AND "
+				+ "AutoProcScaling.autoProcId = ?1 ";
 		List<PhasingHasScaling3VO> listVOs = this.entityManager.createNativeQuery(query, "phasingHasScalingNativeQuery")
-				.setParameter("autoProcId", autoProcId).getResultList();
+				.setParameter(1, autoProcId).getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			listVOs = null;
 		List<PhasingHasScaling3VO> foundEntities = listVOs;
