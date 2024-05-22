@@ -43,7 +43,7 @@ public class Dewar3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "dewarId")
 	protected Integer dewarId;
 
