@@ -18,9 +18,6 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
-
 import ispyb.server.mx.vos.collections.DataCollection3VO;
 import ispyb.server.mx.vos.collections.DataCollectionGroup3VO;
 import ispyb.server.mx.vos.collections.Image3VO;
@@ -29,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
 import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -53,24 +49,10 @@ public class Image3ServiceBean implements Image3Service,
 
 	// Generic HQL request to find instances of Image3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from Image3VO vo " + "where vo.imageId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Image3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from Image3VO vo ";
-	}
 
-	private static String FIND_BY_IMAGE_PROPOSAL = "SELECT DISTINCT i.imageId, i.dataCollectionId, i.imageNumber, " +
-			"i.fileName, i.fileLocation, i.measuredIntensity, i.jpegFileFullPath, i.jpegThumbnailFileFullPath, " +
-			"i.temperature, i.cumulativeIntensity, i.synchrotronCurrent, i.comments, i.machineMessage " +
-			" FROM Image i, DataCollection dc, DataCollectionGroup dcg, BLSession ses, Proposal pro "
-			+ "WHERE  i.imageId  = :imageId AND i.dataCollectionId = dc.dataCollectionId AND " +
-			"dc.dataCollectionGroupId = dcg.dataCollectionGroupId AND " + 
-			"dcg.sessionId = ses.sessionId AND ses.proposalId = pro.proposalId AND pro.proposalId = :proposalId";
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -86,8 +68,9 @@ public class Image3ServiceBean implements Image3Service,
 	 * @return the persisted entity.
 	 */
 	public Image3VO create(final Image3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -101,8 +84,9 @@ public class Image3ServiceBean implements Image3Service,
 	 * @return the updated entity.
 	 */
 	public Image3VO update(final Image3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -114,7 +98,8 @@ public class Image3ServiceBean implements Image3Service,
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		Image3VO vo = findByPk(pk);
 		// TODO Edit this business code				
 		delete(vo);
@@ -126,7 +111,8 @@ public class Image3ServiceBean implements Image3Service,
 	 */
 	public void delete(final Image3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -139,11 +125,15 @@ public class Image3ServiceBean implements Image3Service,
 	 * @return the Image3 value object
 	 */
 	public Image3VO findByPk(final Integer pk) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
-			return (Image3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from Image3VO vo " + "where vo.imageId = :pk";
+			return entityManager.createQuery(qlString, Image3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		}catch(NoResultException e){
 			return null;
 		}
@@ -155,24 +145,13 @@ public class Image3ServiceBean implements Image3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<Image3VO> findAll()
 			throws Exception {
-	
-		List<Image3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+
+		String qlString = "SELECT vo from Image3VO vo ";
+        return entityManager.createQuery(qlString, Image3VO.class).getResultList();
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove Image3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-	
-		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-		//autService.checkUserRightToChangeAdminData();
-	}
-	
 	/**
 	 * 
 	 * @param fileLocation
@@ -274,9 +253,17 @@ public class Image3ServiceBean implements Image3Service,
 	@SuppressWarnings("unchecked")
 	public List<Image3VO> findByImageIdAndProposalId (final Integer imageId, final Integer proposalId)throws Exception{
 
-		String query = FIND_BY_IMAGE_PROPOSAL;
+		String query = "SELECT DISTINCT i.imageId, i.dataCollectionId, i.imageNumber, " +
+				"i.fileName, i.fileLocation, i.measuredIntensity, i.jpegFileFullPath, i.jpegThumbnailFileFullPath, " +
+				"i.temperature, i.cumulativeIntensity, i.synchrotronCurrent, i.comments, i.machineMessage " +
+				" FROM Image i, DataCollection dc, DataCollectionGroup dcg, BLSession ses, Proposal pro "
+				+ "WHERE  i.imageId  = ?1 AND i.dataCollectionId = dc.dataCollectionId AND " +
+				"dc.dataCollectionGroupId = dcg.dataCollectionGroupId AND " +
+				"dcg.sessionId = ses.sessionId AND ses.proposalId = pro.proposalId AND pro.proposalId = ?2";
 		List<Image3VO> listVOs = this.entityManager.createNativeQuery(query, "imageNativeQuery")
-				.setParameter("imageId", imageId).setParameter("proposalId", proposalId).getResultList();
+				.setParameter(1, imageId)
+				.setParameter(2, proposalId)
+				.getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			listVOs = null;
 		List<Image3VO> foundEntities = listVOs;
