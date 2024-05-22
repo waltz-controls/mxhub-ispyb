@@ -158,7 +158,7 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 		
 		checkCreateChangeRemoveAccess();
 		try {
-			return entityManager.createQuery("from Dewar3VO vo "
+			return entityManager.createQuery("SELECT vo from Dewar3VO vo "
 							+ (withContainers ? "left join fetch vo.containerVOs left join vo.containerVOs co" : "")
 							+ (withDewarTransportHistory ? "left join fetch vo.dewarTransportHistoryVOs " : "")
 							+ (withSamples ? "left join fetch co.sampleVOs " : "")
@@ -179,7 +179,7 @@ public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 	@SuppressWarnings("unchecked")
 	public List<Dewar3VO> findAll(final boolean withContainers, final boolean withDewarTransportHistory) throws Exception {
 
-		List<Dewar3VO> foundEntities = entityManager.createQuery("from Dewar3VO vo "
+		List<Dewar3VO> foundEntities = entityManager.createQuery("SELECT vo from Dewar3VO vo "
 						+ (withContainers ? "left join fetch vo.containerVOs " : "")
 				+ (withDewarTransportHistory ? "left join fetch vo.dewarTransportHistoryVOs " : ""))
 				.getResultList();

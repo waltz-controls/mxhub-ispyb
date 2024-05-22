@@ -151,7 +151,8 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 			Session3VO vo = (Session3VO) entityManager.createQuery("select vo from Session3VO vo "
 							+ (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
 							+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-							+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "") + "where vo.sessionId = :pk")
+							+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "")
+							+ "where vo.sessionId = :pk")
 					.setParameter("pk", pk)
 					.getSingleResult();
 			checkChangeRemoveAccess(vo);
