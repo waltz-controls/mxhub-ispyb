@@ -45,17 +45,9 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 
 	// Generic HQL request to find instances of ScreeningOutput3 by pkc
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchScreeningStrategy, boolean fetchScreeningOutpuLattice) {
-		return "from ScreeningOutput3VO vo " + (fetchScreeningStrategy ? "left join fetch vo.screeningStrategyVOs " : "")
-				 + (fetchScreeningOutpuLattice ? "left join fetch vo.screeningOutputLatticeVOs " : "")+ "where vo.screeningOutputId = :pk";
-	}
 
 	// Generic HQL request to find all instances of ScreeningOutput3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchScreeningStrategy, boolean fetchScreeningOutpuLattice) {
-		return "from ScreeningOutput3VO vo " + (fetchScreeningStrategy ? "left join fetch vo.screeningStrategyVOs " : "")
-		 + (fetchScreeningOutpuLattice ? "left join fetch vo.screeningOutputLatticeVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -74,8 +66,11 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	 * @return the persisted entity.
 	 */
 	public ScreeningOutput3VO create(final ScreeningOutput3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -90,8 +85,11 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	 * @return the updated entity.
 	 */
 	public ScreeningOutput3VO update(final ScreeningOutput3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -105,7 +103,10 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		ScreeningOutput3VO vo = findByPk(pk, false, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -119,7 +120,10 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	 */
 	public void delete(final ScreeningOutput3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -136,10 +140,17 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	public ScreeningOutput3VO findByPk(final Integer pk, final boolean withScreeningStrategy, final boolean withScreeningOutpuLattice)
 			throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
-			return (ScreeningOutput3VO) entityManager.createQuery(FIND_BY_PK(withScreeningStrategy, withScreeningOutpuLattice))
+			String qlString = "SELECT vo from ScreeningOutput3VO vo "
+					+ (withScreeningStrategy ? "left join fetch vo.screeningStrategyVOs " : "")
+					+ (withScreeningOutpuLattice ? "left join fetch vo.screeningOutputLatticeVOs " : "")
+					+ "where vo.screeningOutputId = :pk";
+			return entityManager.createQuery(qlString, ScreeningOutput3VO.class)
 				.setParameter("pk", pk).getSingleResult();
 		}catch(NoResultException e){
 			return null;
@@ -154,29 +165,16 @@ public class ScreeningOutput3ServiceBean implements ScreeningOutput3Service, Scr
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<ScreeningOutput3VO> findAll(final boolean withScreeningStrategy, final boolean withScreeningOutpuLattice) throws Exception {
 
-		List<ScreeningOutput3VO> foundEntities = entityManager.createQuery(FIND_ALL(withScreeningStrategy, withScreeningOutpuLattice)).getResultList();
-		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove ScreeningOutput3 entities. If not set rollback only
-	 * and throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
+		String qlString = "SELECT vo from ScreeningOutput3VO vo "
+				+ (withScreeningStrategy ? "left join fetch vo.screeningStrategyVOs " : "")
+				+ (withScreeningOutpuLattice ? "left join fetch vo.screeningOutputLatticeVOs " : "");
+		return entityManager.createQuery(qlString, ScreeningOutput3VO.class)
+				.getResultList();
 	}
 
 
-	
 	public ScreeningOutput3VO loadEager(ScreeningOutput3VO vo) throws Exception{
 		ScreeningOutput3VO newVO = this.findByPk(vo.getScreeningOutputId(),true, true);
 		return newVO;
