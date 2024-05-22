@@ -412,8 +412,8 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 	@Override
 	public List<Merge3VO> getMergesByIdsList(List<Integer> mergeIdList) {
 		String query = "SELECT DISTINCT(Merge) FROM Merge3VO Merge " +
-				"LEFT JOIN FETCH Merge.framelist3VO frameList " +
-				"LEFT JOIN FETCH frameList.frametolist3VOs frametolist3VOs " +
+				"LEFT JOIN FETCH Merge.framelist3VO LEFT JOIN Merge.framelist3VO frameList " +
+				"LEFT JOIN FETCH frameList.frametolist3VOs LEFT JOIN frameList.frametolist3VOs frametolist3VOs " +
 				"LEFT JOIN FETCH frametolist3VOs.frame3VO " +
 				"WHERE Merge.mergeId IN :mergeIdList";
 		Query EJBQuery = this.entityManager.createQuery( query, Merge3VO.class)

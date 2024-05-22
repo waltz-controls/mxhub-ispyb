@@ -27,8 +27,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
-
 import ispyb.server.mx.vos.autoproc.PhasingProgramRun3VO;
 
 /**
@@ -43,18 +41,9 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 
 	// Generic HQL request to find instances of PhasingProgram3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchAttachment) {
-		return "from PhasingProgramRun3VO vo "
-				+ (fetchAttachment ? "left join fetch vo.attachmentVOs " : "")
-				+ "where vo.phasingProgramRunId = :phasingProgramRunId";
-	}
 
 	// Generic HQL request to find all instances of PhasingProgram3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchAttachment) {
-		return "from PhasingProgramRun3VO vo "
-				+ (fetchAttachment ? "left join fetch vo.attachmentVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -68,8 +57,10 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	 * @return the persisted entity.
 	 */
 	public PhasingProgramRun3VO create(final PhasingProgramRun3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -82,7 +73,9 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	 */
 	public PhasingProgramRun3VO update(final PhasingProgramRun3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -93,9 +86,11 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	 * @param vo the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
-		PhasingProgramRun3VO vo = findByPk(pk, false);		
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+
+		PhasingProgramRun3VO vo = findByPk(pk, false);
 		delete(vo);
 	}
 
@@ -105,7 +100,9 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	 */
 	public void delete(final PhasingProgramRun3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+
 		entityManager.remove(vo);
 	}
 
@@ -116,12 +113,16 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	 * @return the PhasingProgram3 value object
 	 */
 	public PhasingProgramRun3VO findByPk(final Integer pk, final boolean withAttachment) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+
 		// TODO Edit this business code
 		try {
 			return (PhasingProgramRun3VO) entityManager
-					.createQuery(FIND_BY_PK(withAttachment))
+					.createQuery("SELECT vo from PhasingProgramRun3VO vo "
+							+ (withAttachment ? "left join fetch vo.attachmentVOs " : "")
+							+ "where vo.phasingProgramRunId = :phasingProgramRunId")
 					.setParameter("phasingProgramRunId", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -135,19 +136,9 @@ public class PhasingProgramRun3ServiceBean implements PhasingProgramRun3Service,
 	@SuppressWarnings("unchecked")
 	public List<PhasingProgramRun3VO> findAll(final boolean withAttachment)throws Exception {
 		List<PhasingProgramRun3VO> foundEntities = entityManager.createQuery(
-						FIND_ALL(withAttachment)).getResultList();
+				"SELECT vo from PhasingProgramRun3VO vo "
+						+ (withAttachment ? "left join fetch vo.attachmentVOs " : "")).getResultList();
 		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove PhasingProgram3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-	
-				//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-				//autService.checkUserRightToChangeAdminData();
-
 	}
 
 
