@@ -20,7 +20,6 @@ package ispyb.server.mx.services.sample;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -36,9 +35,6 @@ import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
 
 import ispyb.common.util.StringUtils;
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
-import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
-import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.services.shipping.Container3Service;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
@@ -65,29 +61,8 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	private final static Logger LOG = Logger.getLogger(BLSample3ServiceBean.class);
 
 	// Generic HQL request to find instances of BLSample3 by pk
-	private static final String FIND_BY_PK(boolean fetchEnergyScan, boolean fetchSubSamples, boolean fetchSampleImages) {
-		return "from BLSample3VO vo " + (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-		+ (fetchSubSamples ? "left join fetch vo.blSubSampleVOs " : "")
-		+ (fetchSampleImages ? "left join fetch vo.blsampleImageVOs " : "")
-				+ "where vo.blSampleId = :pk";
-	}
 
 	// Generic HQL request to find all instances of BLSample3
-	private static final String FIND_ALL(boolean fetchEnergyScan, boolean fetchSubSamples) {
-		return "from BLSample3VO vo " + (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-		+ (fetchSubSamples ? "left join fetch vo.blSubSampleVOs " : "");
-	}
-	
-	private static final String SELECT_SAMPLE_INFO = " SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
-			+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
-			+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
-			+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
-			+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
-			+ "Container.sampleChangerLocation, Container.code as containerCode "
-			+ "FROM BLSample, Crystal, Protein,Container "
-			+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
-			+ "Crystal.proteinId=Protein.proteinId AND "
-			+ "BLSample.containerId=Container.containerId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -160,7 +135,12 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	public BLSample3VO findByPk(final Integer pk, final boolean withEnergyScan, final boolean withSubSamples, final boolean withSampleImages) throws Exception {
 	
 		try {
-			return (BLSample3VO) entityManager.createQuery(FIND_BY_PK(withEnergyScan, withSubSamples, withSampleImages)).setParameter("pk", pk)
+			String qlString = "SELECT vo from BLSample3VO vo "
+					+ (withEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+					+ (withSubSamples ? "left join fetch vo.blSubSampleVOs " : "")
+					+ (withSampleImages ? "left join fetch vo.blsampleImageVOs " : "")
+					+ "where vo.blSampleId = :pk";
+			return entityManager.createQuery(qlString, BLSample3VO.class).setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -175,9 +155,11 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	 */
 	@SuppressWarnings("unchecked")
 	public List<BLSample3VO> findAll(final boolean withEnergyScan, final boolean withSubSamples) throws Exception {
-	
-		List<BLSample3VO> foundEntities = entityManager.createQuery(FIND_ALL(withEnergyScan, withSubSamples)).getResultList();
-		return foundEntities;
+
+		String qlString = "SELECT vo from BLSample3VO vo "
+				+ (withEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+				+ (withSubSamples ? "left join fetch vo.blSubSampleVOs " : "");
+        return entityManager.createQuery(qlString, BLSample3VO.class).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -489,25 +471,63 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 			public Object doInEJBAccess(Object parent) throws Exception {
 				List listInfo= new ArrayList<>();
 				if (beamlineLocation == null && status == null && crystalFormId == null){
-					List o = entityManager.createNativeQuery(SELECT_SAMPLE_INFO + " AND Protein.proposalId = " + proposalId).getResultList();
+					List o = entityManager.createNativeQuery(" SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
+							+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
+							+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
+							+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
+							+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
+							+ "Container.sampleChangerLocation, Container.code as containerCode "
+							+ "FROM BLSample, Crystal, Protein,Container "
+							+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
+							+ "Crystal.proteinId=Protein.proteinId AND "
+							+ "BLSample.containerId=Container.containerId "
+							+ " AND Protein.proposalId = " + proposalId).getResultList();
 					listInfo = o;
 				}
 				else if (crystalFormId != null){
 					Query q = entityManager
-							.createNativeQuery(SELECT_SAMPLE_INFO + " AND Crystal.crystalId = " + crystalFormId );
+							.createNativeQuery(" SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
+									+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
+									+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
+									+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
+									+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
+									+ "Container.sampleChangerLocation, Container.code as containerCode "
+									+ "FROM BLSample, Crystal, Protein,Container "
+									+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
+									+ "Crystal.proteinId=Protein.proteinId AND "
+									+ "BLSample.containerId=Container.containerId "
+									+ " AND Crystal.crystalId = " + crystalFormId );
 					List o = q.getResultList();
 					listInfo = o;
 				}
 		
 				else {
 					Query q = entityManager
-					.createNativeQuery(SELECT_SAMPLE_INFO + " AND Protein.proposalId = " + proposalId
+					.createNativeQuery(" SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
+							+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
+							+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
+							+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
+							+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
+							+ "Container.sampleChangerLocation, Container.code as containerCode "
+							+ "FROM BLSample, Crystal, Protein,Container "
+							+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
+							+ "Crystal.proteinId=Protein.proteinId AND "
+							+ "BLSample.containerId=Container.containerId " + " AND Protein.proposalId = " + proposalId
 							+ " AND " + "(Container.containerStatus LIKE '" + status
 							+ "' OR BLSample.blSampleStatus LIKE '" + status + "') AND "
 							+ "(Container.beamlineLocation like '" + beamlineLocation
 							+ "' OR (Container.beamlineLocation IS NULL OR Container.beamlineLocation like ''))");
 
-                                        System.out.println(SELECT_SAMPLE_INFO + " AND Protein.proposalId = " + proposalId
+                                        System.out.println(" SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
+												+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
+												+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
+												+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
+												+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
+												+ "Container.sampleChangerLocation, Container.code as containerCode "
+												+ "FROM BLSample, Crystal, Protein,Container "
+												+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
+												+ "Crystal.proteinId=Protein.proteinId AND "
+												+ "BLSample.containerId=Container.containerId " + " AND Protein.proposalId = " + proposalId
                                                         + " AND " + "(Container.containerStatus LIKE '" + status
                                                         + "' OR BLSample.blSampleStatus LIKE '" + status + "') AND "
                                                         + "(Container.beamlineLocation like '" + beamlineLocation
@@ -742,7 +762,12 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 	public BLSampleWS3VO findForWSByPk(final Integer pk, final boolean withEnergyScan, final boolean withSubSamples, final boolean withSampleImages) throws Exception {
 	
 		try {
-			BLSample3VO found = (BLSample3VO) entityManager.createQuery(FIND_BY_PK(withEnergyScan, withSubSamples, withSampleImages)).setParameter("pk", pk)
+			String qlString = "SELECT vo from BLSample3VO vo "
+					+ (withEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+					+ (withSubSamples ? "left join fetch vo.blSubSampleVOs " : "")
+					+ (withSampleImages ? "left join fetch vo.blsampleImageVOs " : "")
+					+ "where vo.blSampleId = :pk";
+			BLSample3VO found = (BLSample3VO) entityManager.createQuery(qlString).setParameter("pk", pk)
 					.getSingleResult();
 			BLSampleWS3VO sampleLight = getWSBLSampleVO(found);
 			return sampleLight;
@@ -994,7 +1019,17 @@ public class BLSample3ServiceBean implements BLSample3Service, BLSample3ServiceL
 		List orders = (List) template.execute(new EJBAccessCallback() {
 			public Object doInEJBAccess(Object parent) throws Exception {
 				Query q = entityManager
-						.createNativeQuery(SELECT_SAMPLE_INFO + " AND BLSample.blSampleId = " + sampleId);
+						.createNativeQuery(" SELECT BLSample.blSampleId, BLSample.name, BLSample.code,  "
+								+ "BLSample.holderLength, BLSample.location, BLSample.SMILES, BLSample.diffractionPlanId as BLSampleDiffractionPlanId, Protein.acronym, "
+								+ "Crystal.crystalId, Crystal.spaceGroup, Crystal.cell_a, Crystal.cell_b, Crystal.cell_c, "
+								+ "Crystal.cell_alpha, Crystal.cell_beta, Crystal.cell_gamma, "
+								+ "Crystal.diffractionPlanId as CrystalDiffractionPlanId, "
+								+ "Container.sampleChangerLocation, Container.code as containerCode "
+								+ "FROM BLSample, Crystal, Protein,Container "
+								+ "WHERE BLSample.crystalId=Crystal.crystalId AND "
+								+ "Crystal.proteinId=Protein.proteinId AND "
+								+ "BLSample.containerId=Container.containerId "
+								+ " AND BLSample.blSampleId = " + sampleId);
 				List orders = q.getResultList();
 				return orders;
 			}

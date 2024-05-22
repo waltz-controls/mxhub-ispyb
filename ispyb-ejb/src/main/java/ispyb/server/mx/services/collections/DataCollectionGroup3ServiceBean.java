@@ -150,7 +150,8 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (DataCollectionGroup3VO) entityManager.createQuery("from DataCollectionGroup3VO vo " + (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
+			return (DataCollectionGroup3VO) entityManager.createQuery("from DataCollectionGroup3VO vo "
+							+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
 							+ (withScreening ? "left join fetch vo.screeningVOs " : "")
 							+ "where vo.dataCollectionGroupId = :pk")
 					.setParameter("pk", pk).getSingleResult();
