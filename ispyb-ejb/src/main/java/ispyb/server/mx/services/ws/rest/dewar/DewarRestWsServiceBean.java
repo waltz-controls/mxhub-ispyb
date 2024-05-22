@@ -34,34 +34,28 @@ public class DewarRestWsServiceBean implements DewarRestWsService, DewarRestWsSe
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	
-	
-	
-	private String BySessionId = getDewarViewTableQuery() + " where v_dewar_summary.sessionId = :sessionId and proposalId = :proposalId";
-	private String ByProposalId = getDewarViewTableQuery() + " where v_dewar_summary.proposalId = :proposalId";
-	
-	private String getDewarViewTableQuery(){
-		return "select *,\n" + 
-				"(select count(*) from BLSample where BLSample.containerId = v_dewar_summary.containerId) as sampleCount\n" + 
-				"from v_dewar_summary ";
-	}
-
 
 	@Override
 	public List<Map<String, Object>> getDewarViewBySessionId(int sessionId,int proposalId) {
-		String sqlQuery = BySessionId;
+		String sqlQuery = "select *,\n"
+				+ "(select count(*) from BLSample where BLSample.containerId = v_dewar_summary.containerId) as sampleCount\n"
+				+ "from v_dewar_summary "
+				+ " where v_dewar_summary.sessionId = ?1 and proposalId = ?2";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("sessionId", sessionId)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, sessionId)
+				.setParameter(2, proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 
 	public List<Map<String, Object>> getDewarViewByProposalId(int proposalId) {
-		String sqlQuery = ByProposalId;
+		String sqlQuery = "select *,\n"
+				+ "(select count(*) from BLSample where BLSample.containerId = v_dewar_summary.containerId) as sampleCount\n"
+				+ "from v_dewar_summary "
+				+ " where v_dewar_summary.proposalId = ?1";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, proposalId);
 		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
