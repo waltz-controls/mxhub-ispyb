@@ -118,7 +118,9 @@ public class Menu3ServiceBean implements Menu3Service,
 		checkCreateChangeRemoveAccess();
 		try {
 			entityManager = entitymanagerFactory.createEntityManager();
-			return (Menu3VO) entityManager.createQuery("select vo from Menu3VO vo " + (withMenuGroup ? "left join fetch vo.menuGroupVOs " : "") + "where vo.menuId = :pk")
+			return (Menu3VO) entityManager.createQuery("select vo from Menu3VO vo "
+							+ (withMenuGroup ? "left join fetch vo.menuGroupVOs " : "")
+							+ "where vo.menuId = :pk")
 					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
@@ -155,7 +157,8 @@ public class Menu3ServiceBean implements Menu3Service,
 		
 		entityManager = entitymanagerFactory.createEntityManager();
 		try {
-			Collection<Menu3VO> foundEntities = entityManager.createQuery("select vo from Menu3VO vo " + (withMenuGroup ? "left join fetch vo.menuGroupVOs " : ""))
+			Collection<Menu3VO> foundEntities = entityManager.createQuery("select vo from Menu3VO vo "
+							+ (withMenuGroup ? "left join fetch vo.menuGroupVOs " : ""))
 					.getResultList();
 			List<Menu3VO> vos;
 			if (detachLight){

@@ -99,7 +99,8 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 */
 	@Override
 	public List<Additive3VO> findAdditivesByBufferId(int bufferId) {
-		String ejbQLQuery = "SELECT DISTINCT(additive) FROM Additive3VO additive " + "LEFT JOIN FETCH additive.bufferhasadditive3VOs b " +
+		String ejbQLQuery = "SELECT DISTINCT(additive) FROM Additive3VO additive "
+				+ "LEFT JOIN FETCH additive.bufferhasadditive3VOs LEFT JOIN additive.bufferhasadditive3VOs b " +
 				"LEFT JOIN FETCH b.buffer3VO " +
 				"WHERE b.buffer3VO.bufferId = :bufferId ";
 		TypedQuery<Additive3VO> query = entityManager.createQuery(ejbQLQuery, Additive3VO.class)
@@ -153,7 +154,8 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 
 	@Override
 	public List<Assembly3VO> findAssembliesByProposalId(Integer proposalId) {
-		String ejbQLQuery = "SELECT DISTINCT(assembly) FROM Assembly3VO assembly " + "LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs m " +
+		String ejbQLQuery = "SELECT DISTINCT(assembly) FROM Assembly3VO assembly "
+				+ "LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs LEFT JOIN assembly.assemblyHasMacromolecules3VOs m " +
 				"LEFT JOIN FETCH m.macromolecule3VO " +
 				"WHERE m.macromolecule3VO.proposalId = :proposalId ";
 		TypedQuery<Assembly3VO> query = entityManager.createQuery(ejbQLQuery, Assembly3VO.class)

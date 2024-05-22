@@ -27,8 +27,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
-
 import ispyb.server.mx.vos.autoproc.GeometryClassname3VO;
 
 /**
@@ -40,19 +38,13 @@ import ispyb.server.mx.vos.autoproc.GeometryClassname3VO;
 public class GeometryClassname3ServiceBean implements GeometryClassname3Service, GeometryClassname3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(GeometryClassname3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of GeometryClassname3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchSpaceGroups) {
-		return "from GeometryClassname3VO vo "+ (fetchSpaceGroups ? "left join fetch vo.spaceGroupVOs " : "") + "where vo.geometryClassnameId = :pk";
-	}
 
 	// Generic HQL request to find all instances of GeometryClassname3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchSpaceGroups) {
-		return "from GeometryClassname3VO vo " + (fetchSpaceGroups ? "left join fetch vo.spaceGroupVOs " : "")+" ORDER BY vo.geometryOrder";
-	}
-	
+
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -66,7 +58,8 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 */
 	public GeometryClassname3VO create(final GeometryClassname3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -79,7 +72,8 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 */
 	public GeometryClassname3VO update(final GeometryClassname3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -89,9 +83,10 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 * @param vo the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
-		GeometryClassname3VO vo = findByPk(pk, false);			
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+		GeometryClassname3VO vo = findByPk(pk, false);
 		delete(vo);
 	}
 
@@ -101,7 +96,8 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 */
 	public void delete(final GeometryClassname3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -112,11 +108,15 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 */
 	public GeometryClassname3VO findByPk(final Integer pk, final boolean fetchSpaceGroups) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		try {
-			return (GeometryClassname3VO) entityManager
-					.createQuery(FIND_BY_PK(fetchSpaceGroups))
-					.setParameter("pk", pk).getSingleResult();
+			return entityManager
+					.createQuery("SELECT vo from GeometryClassname3VO vo "
+							+ (fetchSpaceGroups ? "left join fetch vo.spaceGroupVOs " : "")
+							+ "where vo.geometryClassnameId = :pk", GeometryClassname3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -127,22 +127,13 @@ public class GeometryClassname3ServiceBean implements GeometryClassname3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<GeometryClassname3VO> findAll(final boolean fetchSpaceGroups)
 			throws Exception {
 
-		List<GeometryClassname3VO> foundEntities = entityManager.createQuery(FIND_ALL(fetchSpaceGroups)).getResultList();
-		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove GeometryClassname3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-		//autService.checkUserRightToChangeAdminData();
+        return entityManager.createQuery("SELECT vo from GeometryClassname3VO vo "
+				+ (fetchSpaceGroups ? "left join fetch vo.spaceGroupVOs " : "")
+				+ " ORDER BY vo.geometryOrder", GeometryClassname3VO.class)
+				.getResultList();
 	}
 
 	/* Private methods ------------------------------------------------------ */

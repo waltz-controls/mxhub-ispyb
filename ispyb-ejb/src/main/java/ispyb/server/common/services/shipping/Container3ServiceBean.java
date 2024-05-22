@@ -153,7 +153,9 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 		try {
 			return entityManager.createQuery("select vo Container3VO vo "
 							//	+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
-							+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs sa LEFT JOIN FETCH sa.blSubSampleVOs LEFT JOIN FETCH sa.blsampleImageVOs  " : "") //
+							+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs LEFT JOIN vo.sampleVOs sa " +
+							"LEFT JOIN FETCH sa.blSubSampleVOs " +
+							"LEFT JOIN FETCH sa.blsampleImageVOs  " : "") //
 							+ " where vo.containerId = :pk", Container3VO.class)
 					.setParameter("pk", pk)
 					.getSingleResult();

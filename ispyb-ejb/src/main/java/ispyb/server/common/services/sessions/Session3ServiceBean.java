@@ -148,7 +148,8 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Session3VO findByPk(Integer pk, boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) throws AccessDeniedException,Exception {
 		try {
-			Session3VO vo = (Session3VO) entityManager.createQuery("from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+			Session3VO vo = (Session3VO) entityManager.createQuery("select vo from Session3VO vo "
+							+ (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
 							+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
 							+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "") + "where vo.sessionId = :pk")
 					.setParameter("pk", pk)
@@ -176,7 +177,8 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findAll(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum)
 			throws Exception {
-		return entityManager.createQuery("select vo from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+		return entityManager.createQuery("select vo from Session3VO vo "
+						+ (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
 				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
 				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : ""))
 				.getResultList();
