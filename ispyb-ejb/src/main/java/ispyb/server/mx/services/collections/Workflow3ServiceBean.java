@@ -160,15 +160,16 @@ public class Workflow3ServiceBean implements Workflow3Service,
 			"      s.proposalId = p.proposalId and "+
 			"      p.proposalCode != 'opid' and "+
 			"      p.proposalId != 1170 and "+
-			"     YEAR(g.startTime) = :year AND "+
-			"     s.beamlineName like :beamline AND " +
-			"     w.workflowType = :workflowType AND "+
-			"     w.status = :status ";
+			"     YEAR(g.startTime) = ?1 AND "+
+			"     s.beamlineName like ?2 AND " +
+			"     w.workflowType = ?3 AND "+
+			"     w.status = ?4 ";
 			BigInteger ret = (BigInteger)this.entityManager.createNativeQuery(query)
-					.setParameter("year", year)
-					.setParameter("beamline", beamline)
-					.setParameter("status", status)
-					.setParameter("workflowType", workflowType).getSingleResult();
+					.setParameter(1, year)
+					.setParameter(2, beamline)
+					.setParameter(4, status)
+					.setParameter(3, workflowType)
+					.getSingleResult();
 			return ret.intValue();
 		} catch (NoResultException e) {
 			return null;
@@ -187,14 +188,14 @@ public class Workflow3ServiceBean implements Workflow3Service,
 					"      s.proposalId = p.proposalId and "+
 					"      p.proposalCode != 'opid' and "+
 					"      p.proposalId != 1170 and "+
-					"     YEAR(g.startTime) = :year AND "+
-					"     s.beamlineName like :beamline AND " +
-					"     w.workflowType = :workflowType AND "+
+					"     YEAR(g.startTime) = ?1 AND "+
+					"     s.beamlineName like ?2 AND " +
+					"     w.workflowType = ?3 AND "+
 					"     w.status = 'Failure' ";
 			List ret = this.entityManager.createNativeQuery(query)
-					.setParameter("year", year)
-					.setParameter("beamline", beamline)
-					.setParameter("workflowType", workflowType).getResultList();
+					.setParameter(1, year)
+					.setParameter(2, beamline)
+					.setParameter(3, workflowType).getResultList();
 			return ret;
 		} catch (NoResultException e) {
 			return null;
@@ -204,7 +205,7 @@ public class Workflow3ServiceBean implements Workflow3Service,
 	@SuppressWarnings("unchecked")
 	public List<Workflow3VO> findAllByStatus(final String status) throws Exception{
 		try {
-			String query = "SELECT Workflow3VO FROM Workflow3VO vo WHERE vo.status = :status ";
+			String query = "SELECT vo FROM Workflow3VO vo WHERE vo.status = :status ";
 			List<Workflow3VO> ret = this.entityManager.createQuery(query, Workflow3VO.class)
 					.setParameter("status", status)
 					.getResultList();
@@ -217,7 +218,7 @@ public class Workflow3ServiceBean implements Workflow3Service,
 	@SuppressWarnings("unchecked")
 	public List<InputParameterWorkflow> findInputParametersByWorkflowId(final int workflowId) throws Exception{
 		try {
-			String query = "SELECT InputParameterWorkflow FROM InputParameterWorkflow vo WHERE vo.workflowId= :workflowId ";
+			String query = "SELECT vo FROM InputParameterWorkflow vo WHERE vo.workflowId= :workflowId ";
 			List<Workflow3VO> ret = this.entityManager.createQuery(query, Workflow3VO.class)
 					.setParameter("workflowId", workflowId).getResultList();
 			List foundEntities = ret;//TODO type safety
