@@ -127,7 +127,7 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 		// to the one checking the needed access rights
 		// autService.checkUserRightToChangeAdminData();
 		try {
-			return entityManager.createQuery("SELECT LabContact3VO FROM LabContact3VO vo WHERE vo.labContactId = :pk", LabContact3VO.class)
+			return entityManager.createQuery("SELECT vo FROM LabContact3VO vo WHERE vo.labContactId = :pk", LabContact3VO.class)
 					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
@@ -144,7 +144,7 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public List<LabContact3VO> findAll() throws Exception {
-        String query = "SELECT LabContact3VO FROM LabContact3VO vo ";
+        String query = "SELECT vo FROM LabContact3VO vo ";
 		List<LabContact3VO> foundEntities = this.entityManager.createQuery(query, LabContact3VO.class)
 				.getResultList();
 		return foundEntities;
