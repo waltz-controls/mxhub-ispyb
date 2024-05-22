@@ -18,8 +18,6 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.autoproc;
 
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 
 import ispyb.server.mx.services.collections.DataCollection3Service;
@@ -29,9 +27,6 @@ import ispyb.server.mx.vos.collections.DataCollection3VO;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -54,34 +49,10 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 
 	// Generic HQL request to find instances of AutoProcProgram3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchAttachment) {
-		return "from AutoProcProgram3VO vo " + (fetchAttachment ? "left join fetch vo.attachmentVOs " : "")
-				+ "where vo.autoProcProgramId = :pk";
-	}
 
 	// Generic HQL request to find all instances of AutoProcProgram3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchAttachment) {
-		return "from AutoProcProgram3VO vo " + (fetchAttachment ? "left join fetch vo.attachmentVOs " : "");
-	}
 
-	private static final String FIND_COLLECT_API = 
-			"SELECT c.dataCollectionId "
-			+ "FROM DataCollection c, AutoProcIntegration api "
-			+ " WHERE c.dataCollectionId = api.dataCollectionId AND  "
-			+ "api.autoProcProgramId = :autoProcProgramId " 
-			+ " ORDER BY c.dataCollectionId ASC ";
-	
-	private static final String FIND_COLLECT_AP = 
-			"SELECT c.dataCollectionId "
-			+ "FROM DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps, AutoProc ap "
-			+ " WHERE c.dataCollectionId = api.dataCollectionId AND  "
-			+ "api.autoProcIntegrationId =  apshi.autoProcIntegrationId AND "
-			+ "apshi.autoProcScalingId =  aps.autoProcScalingId AND "
-			+ "aps.autoProcId =  ap.autoProcId AND "
-			+ "ap.autoProcProgramId = :autoProcProgramId " 
-			+ " ORDER BY c.dataCollectionId ASC ";
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -95,7 +66,8 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 */
 	public AutoProcProgram3VO create(final AutoProcProgram3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -107,8 +79,9 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 * @return the updated entity.
 	 */
 	public AutoProcProgram3VO update(final AutoProcProgram3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -119,8 +92,9 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
-		AutoProcProgram3VO vo = findByPk(pk, false);			
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+		AutoProcProgram3VO vo = findByPk(pk, false);
 		delete(vo);
 	}
 
@@ -129,8 +103,9 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 * @param vo the entity to remove.
 	 */
 	public void delete(final AutoProcProgram3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -143,11 +118,16 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 */
 	public AutoProcProgram3VO findByPk(final Integer pk, final boolean withAttachment
 			) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		try{
-			return (AutoProcProgram3VO) entityManager.createQuery(FIND_BY_PK(withAttachment))
-					.setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from AutoProcProgram3VO vo "
+					+ (withAttachment ? "left join fetch vo.attachmentVOs " : "")
+					+ "where vo.autoProcProgramId = :pk";
+			return entityManager.createQuery(qlString, AutoProcProgram3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 			}catch(NoResultException e){
 				return null;
 			}
@@ -159,22 +139,12 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<AutoProcProgram3VO> findAll(final boolean withAttachment)
 			throws Exception {
-	
-		List<AutoProcProgram3VO> foundEntities = entityManager.createQuery(FIND_ALL(withAttachment)).getResultList();
-		return foundEntities;
-	}
-	
-	/**
-	 * Check if user has access rights to create, change and remove AutoProcProgram3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
 
-				//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-				//autService.checkUserRightToChangeAdminData();
+		String qlString = "SELECT vo from AutoProcProgram3VO vo "
+				+ (withAttachment ? "left join fetch vo.attachmentVOs " : "");
+        return entityManager.createQuery(qlString, AutoProcProgram3VO.class).getResultList();
 	}
 
 	/**
@@ -186,10 +156,25 @@ public class AutoProcProgram3ServiceBean implements AutoProcProgram3Service,
 	@SuppressWarnings("rawtypes")
 	public List<DataCollection3VO> findCollects(final Integer autoProcProgramId) throws Exception{
 		try{
-			Query query1 = entityManager.createNativeQuery(FIND_COLLECT_AP).setParameter("autoProcProgramId", autoProcProgramId);
+			String findCollectAp = "SELECT c.dataCollectionId "
+			+ "FROM DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps, AutoProc ap "
+			+ " WHERE c.dataCollectionId = api.dataCollectionId AND  "
+			+ "api.autoProcIntegrationId =  apshi.autoProcIntegrationId AND "
+			+ "apshi.autoProcScalingId =  aps.autoProcScalingId AND "
+			+ "aps.autoProcId =  ap.autoProcId AND "
+			+ "ap.autoProcProgramId = ?1 "
+			+ " ORDER BY c.dataCollectionId ASC ";
+			Query query1 = entityManager.createNativeQuery(findCollectAp)
+					.setParameter(1, autoProcProgramId);
 			List resultList1 = query1.getResultList();
-			
-			Query query2 = entityManager.createNativeQuery(FIND_COLLECT_API).setParameter("autoProcProgramId", autoProcProgramId);
+
+			String findCollectApi = "SELECT c.dataCollectionId "
+			+ "FROM DataCollection c, AutoProcIntegration api "
+			+ " WHERE c.dataCollectionId = api.dataCollectionId AND  "
+			+ "api.autoProcProgramId = ?1 "
+			+ " ORDER BY c.dataCollectionId ASC ";
+			Query query2 = entityManager.createNativeQuery(findCollectApi)
+					.setParameter(1, autoProcProgramId);
 			List resultList2 = query2.getResultList();
 			
 			List results = new ArrayList();
