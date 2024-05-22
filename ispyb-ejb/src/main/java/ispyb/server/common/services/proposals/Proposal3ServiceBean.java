@@ -330,16 +330,22 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 
 	public Integer[] updateProposalFromIds(final Integer newProposalId, final Integer oldProposalId) throws Exception {
 		Integer[] nbUpdated = new Integer[3];
-		String sqlString = String.format("UPDATE BLSession SET proposalId = %d  WHERE proposalId = %d",newProposalId,oldProposalId);
-		Query query = entityManager.createNativeQuery(sqlString);
+		String sqlUpdateBLSession = "UPDATE BLSession SET proposalId = ?1  WHERE proposalId = ?2";
+		Query query = entityManager.createNativeQuery(sqlUpdateBLSession)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[0] = query.executeUpdate();
 
-		String sqlString1 = String.format("UPDATE Shipping  SET proposalId = %d WHERE proposalId = %d",newProposalId,oldProposalId);
-		query = entityManager.createNativeQuery(sqlString1);
+		String sqlUpdateShipping = "UPDATE Shipping  SET proposalId = ?1 WHERE proposalId = ?2";
+		query = entityManager.createNativeQuery(sqlUpdateShipping)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[1] = query.executeUpdate();
 
-		String sqlString2 = String.format("UPDATE Protein  SET proposalId = %d WHERE proposalId = %d",newProposalId,oldProposalId);
-		query = entityManager.createNativeQuery(sqlString2);
+		String sqlUpdateProtein = "UPDATE Protein  SET proposalId = ?1 WHERE proposalId = ?2";
+		query = entityManager.createNativeQuery(sqlUpdateProtein)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[2] = query.executeUpdate();
 
 		return nbUpdated;
