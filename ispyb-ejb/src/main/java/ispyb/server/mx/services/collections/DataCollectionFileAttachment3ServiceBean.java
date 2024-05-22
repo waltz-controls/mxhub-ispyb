@@ -18,9 +18,6 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import java.nio.file.AccessDeniedException;
-import java.util.List;
-
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -28,7 +25,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import ispyb.server.mx.vos.collections.DataCollection3VO;
 import ispyb.server.mx.vos.collections.DataCollectionFileAttachment3VO;
 
 	
@@ -42,18 +38,10 @@ import ispyb.server.mx.vos.collections.DataCollectionFileAttachment3VO;
 public class DataCollectionFileAttachment3ServiceBean implements DataCollectionFileAttachment3Service, DataCollectionFileAttachment3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DataCollectionFileAttachment3ServiceBean.class);
-	
+
 
 	// Generic HQL request to find instances of DataCollectionFileAttachment3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from DataCollectionFileAttachment3VO vo "
-				+ "where vo.DataCollectionFileAttachmentId = :pk";
-	}
-
-	private static final String FIND_BY_DATACOLLECTION() {
-		return "from DataCollectionFileAttachment3VO vo where vo.dataCollectionId = :siteId order by vo.DataCollectionFileAttachmentId desc";
-	}
 
 
 	@PersistenceContext(unitName = "ispyb_db")
@@ -94,7 +82,11 @@ public class DataCollectionFileAttachment3ServiceBean implements DataCollectionF
 	public void deleteByPk(final Integer pk) throws Exception {
 		
 		DataCollectionFileAttachment3VO vo = findByPk(pk);
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		delete(vo);
 	}
 
@@ -124,7 +116,10 @@ public class DataCollectionFileAttachment3ServiceBean implements DataCollectionF
 	 */
 	public DataCollectionFileAttachment3VO findByPk(Integer pk) {
 		try {
-			return (DataCollectionFileAttachment3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk)
+			String qlString = "SELECT vo from DataCollectionFileAttachment3VO vo "
+					+ "where vo.dataCollectionFileAttachmentId = :pk";
+			return entityManager.createQuery(qlString,DataCollectionFileAttachment3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -134,14 +129,14 @@ public class DataCollectionFileAttachment3ServiceBean implements DataCollectionF
 	/**
 	 * find a DataCollectionFileAttachment with a sessionId
 	 */
-	@SuppressWarnings("unchecked")
 	public DataCollectionFileAttachment3VO findDataCollectionFileAttachmentByDataCollectionId(Integer dcId) {
-		String query = FIND_BY_DATACOLLECTION();
-		List<DataCollectionFileAttachment3VO> listVOs = this.entityManager.createNativeQuery(query, "DataCollectionFileAttachmentNativeQuery")
-				.setParameter("dataCollectionId", dcId).getResultList();
-		if (listVOs == null || listVOs.isEmpty())
+		String query = "SELECT vo from DataCollectionFileAttachment3VO vo where vo.dataCollectionVO.dataCollectionId = :dcId order by vo.dataCollectionFileAttachmentId desc";
+		try {
+			return this.entityManager.createQuery(query, DataCollectionFileAttachment3VO.class)
+					.setParameter("dcId", dcId).getSingleResult();
+		} catch (NoResultException e) {
 			return null;
-		return (DataCollectionFileAttachment3VO) listVOs.toArray()[0];
+		}
 	}
 	
 	/**
@@ -171,25 +166,11 @@ public class DataCollectionFileAttachment3ServiceBean implements DataCollectionF
 		vo.checkValues(create);
 		// TODO check primary keys for existence in DB
 	}
-	
-	/**
-	 * Check if user has access rights to create, change and remove DataCollectionFileAttachment3 entities. If not set rollback only and throw
-	 * AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-		
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
-	}
 
 	@Override
 	public DataCollectionFileAttachment3VO update(DataCollectionFileAttachment3VO vo) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("DataCollectionFileAttachment3VO.update is not supported");
 	}
 
 }
