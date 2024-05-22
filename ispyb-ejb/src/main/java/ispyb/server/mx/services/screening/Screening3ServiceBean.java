@@ -47,17 +47,9 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 
 	// Generic HQL request to find instances of Screening3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchScreeningRank, boolean fetchScreeningOutput) {
-		return "from Screening3VO vo " + (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
-				+ (fetchScreeningOutput ? "left join fetch vo.screeningOutputVOs " : "")+ "where vo.screeningId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Screening3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchScreeningRank, boolean fetchScreeningOutput) {
-		return "from Screening3VO vo " + (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
-		+ (fetchScreeningOutput ? "left join fetch vo.screeningOutputVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -77,7 +69,10 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 */
 	public Screening3VO create(final Screening3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -93,7 +88,10 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 */
 	public Screening3VO update(final Screening3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -106,8 +104,11 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		Screening3VO vo = findByPk(pk, false,  false);
 		// TODO Edit this business code
 		delete(vo);
@@ -121,7 +122,10 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 */
 	public void delete(final Screening3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -137,12 +141,20 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 * @return the Screening3 value object
 	 */
 	public Screening3VO findByPk(final Integer pk, final boolean fetchScreeningRank,  final boolean fetchScreeningOutput) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
-			return (Screening3VO) entityManager.createQuery(FIND_BY_PK(fetchScreeningRank, fetchScreeningOutput ))
-				.setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from Screening3VO vo "
+					+ (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
+					+ (fetchScreeningOutput ? "left join fetch vo.screeningOutputVOs " : "")
+					+ "where vo.screeningId = :pk";
+			return entityManager.createQuery(qlString, Screening3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		}catch(NoResultException e){
 			return null;
 		}
@@ -156,25 +168,12 @@ public class Screening3ServiceBean implements Screening3Service, Screening3Servi
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<Screening3VO> findAll(final boolean fetchScreeningRank,  final boolean fetchScreeningOutput) throws Exception {
-	
-		List<Screening3VO> foundEntities = entityManager.createQuery(FIND_ALL(fetchScreeningRank, fetchScreeningOutput )).getResultList();
-		return foundEntities;
-	}
 
-	/**
-	 * Check if user has access rights to create, change and remove Screening3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-	
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
+		String qlString = "SELECT vo from Screening3VO vo "
+				+ (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
+				+ (fetchScreeningOutput ? "left join fetch vo.screeningOutputVOs " : "");
+        return entityManager.createQuery(qlString, Screening3VO.class).getResultList();
 	}
 
 	/**

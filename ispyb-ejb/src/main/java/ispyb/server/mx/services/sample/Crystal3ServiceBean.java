@@ -156,7 +156,7 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			String qlString = "from Crystal3VO vo "
+			String qlString = "SELECT vo from Crystal3VO vo "
 					+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
 					+ "where vo.crystalId = :pk";
 			return (Crystal3VO) entityManager.createQuery(qlString)
