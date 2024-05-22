@@ -18,16 +18,10 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.autoproc;
 
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
-
 import ispyb.server.mx.vos.autoproc.AutoProcIntegration3VO;
 
 import java.util.List;
 
-import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -46,53 +40,12 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 
 	private final static Logger LOG = Logger
 			.getLogger(AutoProcIntegration3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of AutoProcIntegration3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from AutoProcIntegration3VO vo " + "where vo.autoProcIntegrationId = :pk";
-	}
 
 	// Generic HQL request to find all instances of AutoProcIntegration3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from AutoProcIntegration3VO vo " ;
-	}
-	
-	private static String FIND_BY_AUTOPROC_ID = "SELECT DISTINCT * " +
-			"FROM AutoProcIntegration api, AutoProcScaling_has_Int aphi, AutoProcScaling aps " +
-			"WHERE aps.autoProcId = :autoProcId AND aps.autoProcScalingId = aphi.autoProcScalingId AND " +
-			"api.autoProcIntegrationId= aphi.autoProcIntegrationId " ;
-	
-	private static final String FIND_AUTOPROC_STATUS = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
-			"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
-			"WHERE api.dataCollectionId = :dataCollectionId AND " +
-			"api.autoProcProgramId = app.autoProcProgramId AND " +
-			"app.processingPrograms like :processingProgram AND  " +
-			"apppa.autoProcProgramId = app.autoProcProgramId AND " +
-			"apppa.fileName like '%XSCALE%' ";
-
-	/* XIA2_DIALS don't create any XSCALE files so here we look for
-	 * a file with the prefix 'di' and the suffix '.mtz'.
-	 */
-	private static final String FIND_XIA2_DIALS_STATUS = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
-			"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
-			"WHERE api.dataCollectionId = :dataCollectionId AND " +
-			"api.autoProcProgramId = app.autoProcProgramId AND " +
-			"app.processingPrograms like :processingProgram AND  " +
-			"apppa.autoProcProgramId = app.autoProcProgramId AND " +
-			"apppa.fileName like 'di%.mtz' ";
-
-	/* FAST DP don't create any XSCALE files so here we look for
-	 * a file with the prefix 'fast' and the suffix '.mtz.gz'.
-	 */
-	private static final String FIND_FASTDP_STATUS = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
-			"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
-			"WHERE api.dataCollectionId = :dataCollectionId AND " +
-			"api.autoProcProgramId = app.autoProcProgramId AND " +
-			"app.processingPrograms like :processingProgram AND  " +
-			"apppa.autoProcProgramId = app.autoProcProgramId AND " +
-			"apppa.fileName like '%fast_dp%.mtz.gz' ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -107,7 +60,8 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 */
 	public AutoProcIntegration3VO create(final AutoProcIntegration3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -119,8 +73,9 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @return the updated entity.
 	 */
 	public AutoProcIntegration3VO update(final AutoProcIntegration3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -131,8 +86,9 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
-		AutoProcIntegration3VO vo = findByPk(pk);			
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+		AutoProcIntegration3VO vo = findByPk(pk);
 		delete(vo);
 	}
 
@@ -141,8 +97,9 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @param vo the entity to remove.
 	 */
 	public void delete(final AutoProcIntegration3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -154,11 +111,14 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @return the AutoProcIntegration3 value object
 	 */
 	public AutoProcIntegration3VO findByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		try{
-			return (AutoProcIntegration3VO) entityManager.createQuery(FIND_BY_PK())
-					.setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from AutoProcIntegration3VO vo where vo.autoProcIntegrationId = :pk";
+			return entityManager.createQuery(qlString, AutoProcIntegration3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 			}catch(NoResultException e){
 				return null;
 			}
@@ -173,19 +133,10 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	@SuppressWarnings("unchecked")
 	public List<AutoProcIntegration3VO> findAll() throws Exception {
 
-		List<AutoProcIntegration3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+		String qlString = "SELECT vo from AutoProcIntegration3VO vo ";
+        return entityManager.createQuery(qlString, AutoProcIntegration3VO.class).getResultList();
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove AutoProcIntegration3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-				//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-				//autService.checkUserRightToChangeAdminData();
-	}
-	
 	/**
 	 * 
 	 * @param autoProcId
@@ -194,9 +145,12 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AutoProcIntegration3VO> findByAutoProcId(final Integer autoProcId) throws Exception{
-		String query = FIND_BY_AUTOPROC_ID;
+		String query = "SELECT DISTINCT * " +
+				"FROM AutoProcIntegration api, AutoProcScaling_has_Int aphi, AutoProcScaling aps " +
+				"WHERE aps.autoProcId = ?1 AND aps.autoProcScalingId = aphi.autoProcScalingId AND " +
+				"api.autoProcIntegrationId= aphi.autoProcIntegrationId ";
 		List<AutoProcIntegration3VO> listVOs = this.entityManager.createNativeQuery(query, "autoProcIntegrationNativeQuery")
-				.setParameter("autoProcId", autoProcId).getResultList();
+				.setParameter(1, autoProcId).getResultList();
 		return listVOs;
 	}
 
@@ -209,11 +163,17 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @throws Exception
 	 */
 	public Boolean getAutoProcStatus(final Integer dataCollectionId, final String processingProgram) throws Exception {
-		String query = FIND_AUTOPROC_STATUS ;
+		String query = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
+				"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
+				"WHERE api.dataCollectionId = ?1 AND " +
+				"api.autoProcProgramId = app.autoProcProgramId AND " +
+				"app.processingPrograms like ?2 AND  " +
+				"apppa.autoProcProgramId = app.autoProcProgramId AND " +
+				"apppa.fileName like '%XSCALE%' ";
 		try{
 			List res = this.entityManager.createNativeQuery(query)
-					.setParameter("dataCollectionId", dataCollectionId)
-					.setParameter("processingProgram", processingProgram)
+					.setParameter(1, dataCollectionId)
+					.setParameter(2, processingProgram)
 					.getResultList();
 			if (res == null || res.isEmpty()){
 				return false;
@@ -232,11 +192,17 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @throws Exception
 	 */
 	public Boolean getAutoProcXia2DialsStatus(final Integer dataCollectionId, final String processingProgram) throws Exception {
-		String query = FIND_XIA2_DIALS_STATUS ;
+		String query = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
+				"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
+				"WHERE api.dataCollectionId = ?1 AND " +
+				"api.autoProcProgramId = app.autoProcProgramId AND " +
+				"app.processingPrograms like ?2 AND  " +
+				"apppa.autoProcProgramId = app.autoProcProgramId AND " +
+				"apppa.fileName like 'di%.mtz' ";
 		try{
 			List res = this.entityManager.createNativeQuery(query)
-					.setParameter("dataCollectionId", dataCollectionId)
-					.setParameter("processingProgram", processingProgram)
+					.setParameter(1, dataCollectionId)
+					.setParameter(2, processingProgram)
 					.getResultList();
 			if (res == null || res.isEmpty()){
 				return false;
@@ -255,11 +221,17 @@ public class AutoProcIntegration3ServiceBean implements AutoProcIntegration3Serv
 	 * @throws Exception
 	 */
 	public Boolean getAutoProcFastDPStatus(final Integer dataCollectionId, final String processingProgram) throws Exception {
-		String query = FIND_FASTDP_STATUS ;
+		String query = "SELECT app.processingPrograms, api.autoProcIntegrationId, apppa.fileName " +
+				"FROM `AutoProcIntegration` api, AutoProcProgram app, AutoProcProgramAttachment apppa " +
+				"WHERE api.dataCollectionId = ?1 AND " +
+				"api.autoProcProgramId = app.autoProcProgramId AND " +
+				"app.processingPrograms like ?2 AND  " +
+				"apppa.autoProcProgramId = app.autoProcProgramId AND " +
+				"apppa.fileName like '%fast_dp%.mtz.gz' ";
 		try{
 			List res = this.entityManager.createNativeQuery(query)
-					.setParameter("dataCollectionId", dataCollectionId)
-					.setParameter("processingProgram", processingProgram)
+					.setParameter(1, dataCollectionId)
+					.setParameter(2, processingProgram)
 					.getResultList();
 			if (res == null || res.isEmpty()){
 				return false;
