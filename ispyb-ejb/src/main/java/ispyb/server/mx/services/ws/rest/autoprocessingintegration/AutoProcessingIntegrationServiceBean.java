@@ -37,8 +37,6 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	
-	private String ByDataCollectionId = getViewTableQuery() + " where v_datacollection_summary_phasing_dataCollectionId = :dataCollectionId and v_datacollection_summary_session_proposalId=:proposalId";
 
 	private String getViewTableQuery(){
 		return this.getQueryFromResourceFile("/queries/AutoProcessingIntegrationServiceBean/getViewTableQuery.sql");
@@ -46,10 +44,10 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 	
 	@Override
 	public List<Map<String, Object>> getViewByDataCollectionId(int proposalId, int dataCollectionId) {
-		String sqlQuery = ByDataCollectionId;
+		String sqlQuery = getViewTableQuery() + " where v_datacollection_summary_phasing_dataCollectionId = ?1 and v_datacollection_summary_session_proposalId= ?2";
 		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
-				.setParameter("dataCollectionId", dataCollectionId)
-				.setParameter("proposalId", proposalId);
+				.setParameter(1, dataCollectionId)
+				.setParameter(2, proposalId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 	
