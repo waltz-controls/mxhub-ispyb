@@ -27,8 +27,6 @@ import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
-
 import ispyb.server.mx.vos.autoproc.AutoProc3VO;
 
 /**
@@ -40,35 +38,14 @@ import ispyb.server.mx.vos.autoproc.AutoProc3VO;
 public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AutoProc3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of AutoProc3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from AutoProc3VO vo "  + "where vo.autoProcId = :pk";
-	}
-	
+
 	// Generic HQL request to find all instances of AutoProc3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from AutoProc3VO vo " ;
-	}
 
-	private static final String FIND_BY_COLLECTION_ID = "select * from AutoProc ap , AutoProcScaling aps, AutoProcScaling_has_Int apshi1, AutoProcScaling_has_Int apshi2, AutoProcIntegration api"
-			+ " WHERE aps.autoProcId = ap.autoProcId AND aps.autoProcScalingId = apshi1.autoProcScalingId AND apshi1.autoProcScaling_has_IntId = apshi2.autoProcScaling_has_IntId"
-			+ " AND apshi2.autoProcIntegrationId = api.autoProcIntegrationId AND api.dataCollectionId = :dataCollectionId";
 
-	
-	private static final String FIND_BY_ANOMALOUS_DATACOLLECTIONID =  
-		"SELECT o.autoProcId, o.autoProcProgramId, o.spaceGroup, " +
-					"o.refinedCell_a, o.refinedCell_b, o.refinedCell_c, " +
-					"o.refinedCell_alpha, o.refinedCell_beta, o.refinedCell_gamma, o.recordTimeStamp "+ 
-				"FROM AutoProc o, AutoProcScaling aps, AutoProcScaling_has_Int apshi , AutoProcIntegration api, SpaceGroup sp  "+
-				"WHERE  api.dataCollectionId = :dataCollectionId AND api.anomalous = :anomalous AND "+
-				"api.autoProcIntegrationId = apshi.autoProcIntegrationId AND apshi.autoProcScalingId = aps.autoProcScalingId AND "+
-				"aps.autoProcId = o.autoProcId AND "+
-				"REPLACE(o.spaceGroup, ' ', '') = sp.spaceGroupShortName  "+
-				"ORDER BY sp.spaceGroupNumber DESC";
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -84,7 +61,10 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 */
 	public AutoProc3VO create(final AutoProc3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -99,7 +79,10 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 */
 	public AutoProc3VO update(final AutoProc3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -111,8 +94,11 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		AutoProc3VO vo = findByPk(pk);
 		delete(vo);
 	}
@@ -124,8 +110,11 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 *            the entity to remove.
 	 */
 	public void delete(final AutoProc3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -140,9 +129,13 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 */
 	public AutoProc3VO findByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try{
-			return (AutoProc3VO) entityManager.createQuery(FIND_BY_PK())
+			String qlString = "SELECT vo from AutoProc3VO vo where vo.autoProcId = :pk";
+			return (AutoProc3VO) entityManager.createQuery(qlString)
 					.setParameter("pk", pk).getSingleResult();
 			}catch(NoResultException e){
 				return null;
@@ -158,16 +151,19 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AutoProc3VO> findAll() throws Exception {
-		
-		List<AutoProc3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+
+        return (List<AutoProc3VO>) entityManager.createQuery("SELECT vo from AutoProc3VO vo ").getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<AutoProc3VO> findByDataCollectionId(final Integer dataCollectionId) throws Exception {
 
-		List<AutoProc3VO> foundEntities = this.entityManager.createNativeQuery(FIND_BY_COLLECTION_ID, "autoProcNativeQuery")
-				.setParameter("dataCollectionId", dataCollectionId).getResultList();
+		String findByCollectionId = "select * from AutoProc ap , AutoProcScaling aps, AutoProcScaling_has_Int apshi1, AutoProcScaling_has_Int apshi2, AutoProcIntegration api"
+				+ " WHERE aps.autoProcId = ap.autoProcId AND aps.autoProcScalingId = apshi1.autoProcScalingId AND apshi1.autoProcScaling_has_IntId = apshi2.autoProcScaling_has_IntId"
+				+ " AND apshi2.autoProcIntegrationId = api.autoProcIntegrationId AND api.dataCollectionId = ?1";
+		List<AutoProc3VO> foundEntities = this.entityManager.createNativeQuery(findByCollectionId, "autoProcNativeQuery")
+				.setParameter(1, dataCollectionId)
+				.getResultList();
 		return foundEntities;
 	}
 
@@ -184,26 +180,22 @@ public class AutoProc3ServiceBean implements AutoProc3Service, AutoProc3ServiceL
 	public List<AutoProc3VO> findByAnomalousDataCollectionIdAndOrderBySpaceGroupNumber(final Integer dataCollectionId,
 			final boolean anomalous) throws Exception {
 		
-		String query = FIND_BY_ANOMALOUS_DATACOLLECTIONID;
+		String query = "SELECT o.autoProcId, o.autoProcProgramId, o.spaceGroup, " +
+					"o.refinedCell_a, o.refinedCell_b, o.refinedCell_c, " +
+					"o.refinedCell_alpha, o.refinedCell_beta, o.refinedCell_gamma, o.recordTimeStamp "+
+				"FROM AutoProc o, AutoProcScaling aps, AutoProcScaling_has_Int apshi , AutoProcIntegration api, SpaceGroup sp  "+
+				"WHERE  api.dataCollectionId = ?1 AND api.anomalous = ?2 AND "+
+				"api.autoProcIntegrationId = apshi.autoProcIntegrationId AND apshi.autoProcScalingId = aps.autoProcScalingId AND "+
+				"aps.autoProcId = o.autoProcId AND "+
+				"REPLACE(o.spaceGroup, ' ', '') = sp.spaceGroupShortName  "+
+				"ORDER BY sp.spaceGroupNumber DESC";
 		List<AutoProc3VO> listVOs = this.entityManager.createNativeQuery(query, "autoProcNativeQuery")
-						.setParameter("dataCollectionId", dataCollectionId)
-						.setParameter("anomalous", anomalous).getResultList();
+						.setParameter(1, dataCollectionId)
+						.setParameter(2, anomalous)
+				.getResultList();
 		return listVOs;
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove AutoProc3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
-	}
-	
 	/* Private methods ------------------------------------------------------ */
 
 	/**

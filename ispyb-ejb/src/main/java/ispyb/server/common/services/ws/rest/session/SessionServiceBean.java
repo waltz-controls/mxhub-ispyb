@@ -68,7 +68,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 				+ "or "
 				+ " (BLSession_endDate >= ?2 and BLSession_startDate <= ?1)"
 				+ "or "
-				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))" + " order by v_session.sessionId DESC";
+				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))"
+				+ " order by v_session.sessionId DESC";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
 				.setParameter(1, startDate)
 				.setParameter(2, endDate);
@@ -83,7 +84,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 				+ "or "
 				+ " (BLSession_endDate >= ?3 and BLSession_startDate <= ?2)"
 				+ "or "
-				+ " (BLSession_endDate <= ?3 and BLSession_startDate >= ?2))" + " order by v_session.sessionId DESC";
+				+ " (BLSession_endDate <= ?3 and BLSession_startDate >= ?2))"
+				+ " order by v_session.sessionId DESC";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
 				.setParameter(2, startDate)
 				.setParameter(3, endDate)
@@ -93,7 +95,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByBeamlineOperator( String beamlineOperator) {
-		String session = getViewTableQuery() + " where v_session.beamLineOperator LIKE ?1 order by v_session.sessionId DESC";
+		String session = getViewTableQuery()
+				+ " where v_session.beamLineOperator LIKE ?1 order by v_session.sessionId DESC";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
 				.setParameter(1, "%" +  beamlineOperator + "%");
         return (List<Map<String, Object>>) ((Query) query).getResultList();
@@ -107,7 +110,8 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 				+ "or "
 				+ " (BLSession_endDate >= ?2 and BLSession_startDate <= ?1)"
 				+ "or "
-				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))" + " and v_session.operatorSiteNumber=?3 order by v_session.sessionId DESC";
+				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))"
+				+ " and v_session.operatorSiteNumber=?3 order by v_session.sessionId DESC";
 		Query query = this.entityManager.createNativeQuery(session, Map.class)
 				.setParameter(1, startDate)
 				.setParameter(2, endDate)
