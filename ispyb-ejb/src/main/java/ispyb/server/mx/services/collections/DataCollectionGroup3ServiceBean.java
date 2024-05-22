@@ -34,8 +34,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
-
 import ispyb.server.mx.vos.collections.DataCollectionGroup3VO;
 import ispyb.server.mx.vos.collections.DataCollectionGroupWS3VO;
 
@@ -48,18 +46,10 @@ import ispyb.server.mx.vos.collections.DataCollectionGroupWS3VO;
 public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Service, DataCollectionGroup3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DataCollectionGroup3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of DataCollectionGroup3 by pk
-	private static final String FIND_BY_PK(boolean fetchDataCollection, boolean fetchScreening) {
-		return "from DataCollectionGroup3VO vo " + (fetchDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
-				+ (fetchScreening ? "left join fetch vo.screeningVOs " : "")
-				+ "where vo.dataCollectionGroupId = :pk";
-	}
 
 	// Generic HQL request to find all instances of DataCollectionGroup3
-	private static final String FIND_ALL(boolean fetchDataCollection) {
-		return "from DataCollectionGroup3VO vo " + (fetchDataCollection ? "left join fetch vo.dataCollectionVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -78,8 +68,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @return the persisted entity.
 	 */
 	public DataCollectionGroup3VO create(final DataCollectionGroup3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -94,8 +88,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @return the updated entity.
 	 */
 	public DataCollectionGroup3VO update(final DataCollectionGroup3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -107,8 +105,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		DataCollectionGroup3VO vo = findByPk(pk, false, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -121,8 +123,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 *            the entity to remove.
 	 */
 	public void delete(final DataCollectionGroup3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -137,10 +143,16 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 */
 	public DataCollectionGroup3VO findByPk(final Integer pk, final boolean withDataCollection, final boolean withScreening) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (DataCollectionGroup3VO) entityManager.createQuery(FIND_BY_PK(withDataCollection, withScreening))
+			return (DataCollectionGroup3VO) entityManager.createQuery("from DataCollectionGroup3VO vo " + (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
+							+ (withScreening ? "left join fetch vo.screeningVOs " : "")
+							+ "where vo.dataCollectionGroupId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -157,11 +169,18 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @throws Exception
 	 */
 	public DataCollectionGroupWS3VO findForWSByPk(final Integer pk, final boolean withDataCollection, final boolean withScreening) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			DataCollectionGroup3VO found = (DataCollectionGroup3VO) entityManager.createQuery(FIND_BY_PK(withDataCollection, withScreening))
+			DataCollectionGroup3VO found = (DataCollectionGroup3VO) entityManager.createQuery("SELECT vo from DataCollectionGroup3VO vo "
+							+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
+							+ (withScreening ? "left join fetch vo.screeningVOs " : "")
+							+ "where vo.dataCollectionGroupId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 			DataCollectionGroupWS3VO sesLight = getWSDataCollectionGroupVO(found);
 			return sesLight;
@@ -207,26 +226,11 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<DataCollectionGroup3VO> findAll(final boolean withDataCollection) throws Exception {
 
-		List<DataCollectionGroup3VO> foundEntities = entityManager.createQuery(FIND_ALL(withDataCollection)).getResultList();
-		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove DataCollectionGroup3 entities. If not set rollback
-	 * only and throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
-				// .getInstance().getService(
-				// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
-				// rights
-				// autService.checkUserRightToChangeAdminData();
+        return entityManager.createQuery("SELECT vo from DataCollectionGroup3VO vo "
+				+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : ""), DataCollectionGroup3VO.class)
+				.getResultList();
 	}
 
 
