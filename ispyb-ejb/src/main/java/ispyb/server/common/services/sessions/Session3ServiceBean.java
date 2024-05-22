@@ -226,7 +226,8 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findByShippingId(Integer shippingId) {
 		String query = "select * from BLSession, ShippingHasSession "
-				+ " where BLSession.sessionId =  ShippingHasSession.sessionId " + " and ShippingHasSession.shippingId = ?1 ";
+				+ " where BLSession.sessionId =  ShippingHasSession.sessionId "
+				+ " and ShippingHasSession.shippingId = ?1 ";
 		List<Session3VO> col = this.entityManager.createNativeQuery(query, Session3VO.class)
 				.setParameter(1, shippingId)
 				.getResultList();

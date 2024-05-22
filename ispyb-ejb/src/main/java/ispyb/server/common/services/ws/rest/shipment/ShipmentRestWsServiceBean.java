@@ -30,23 +30,22 @@ import jakarta.persistence.PersistenceContext;
 
 import jakarta.persistence.Query;
 
-
+@Deprecated(forRemoval = true)
 @Stateless
 public class ShipmentRestWsServiceBean extends WsServiceBean implements ShipmentRestWsService, ShipmentRestWsServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
-	
-	
-	public String getHistoryQuery = "select * from v_tracking_shipment_history";
-	
+
+
 	@Override
 	public List<Map<String, Object>> getShipmentHistoryByShipmentId(int proposalId, int shipmentId) {
-		
-		String mySQLQuery = getHistoryQuery + " where Shipping_shippingId = :shippingId and Shipping_proposalId = :proposalId";
+		//TODO no such table
+		String mySQLQuery = "select * from v_tracking_shipment_history"
+				+ " where Shipping_shippingId = ?1 and Shipping_proposalId = ?2";
 		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
-				.setParameter("proposalId", proposalId)
-				.setParameter("shippingId", shipmentId);
+				.setParameter(2, proposalId)
+				.setParameter(1, shipmentId);
         return (List<Map<String, Object>>) ((Query) query).getResultList();
     }
 
