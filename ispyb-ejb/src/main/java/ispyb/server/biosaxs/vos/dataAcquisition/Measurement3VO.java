@@ -69,8 +69,16 @@ public class Measurement3VO implements java.io.Serializable {
 	}
 
 	@Expose
+	@XmlTransient
+	@ManyToOne(fetch=FetchType.EAGER)
+//	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="runId")
 	protected Run3VO run3VO;
 	@Expose
+	@XmlTransient
+//    @OneToMany(fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.LAZY)
+	@JoinColumn(name = "measurementId")
 	protected Set<Merge3VO> merge3VOs = new HashSet<Merge3VO>(0);
 	 
 	@Transient
@@ -230,10 +238,7 @@ public class Measurement3VO implements java.io.Serializable {
 		this.specimenId = specimenId;
 	}
 	
-	@XmlTransient
-//	@ManyToOne(fetch=FetchType.EAGER)
-	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="runId")
+
     public Run3VO getRun3VO() {
         return this.run3VO;
     }
@@ -242,10 +247,7 @@ public class Measurement3VO implements java.io.Serializable {
         this.run3VO = run3VO;
     }
     
-    @XmlTransient
-//    @OneToMany(fetch=FetchType.EAGER)
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "measurementId")
+
     public Set<Merge3VO> getMerge3VOs() {
         return this.merge3VOs;
     }
