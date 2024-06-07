@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.sample;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface  Crystal3ServiceLocal  extends Crystal3Service{

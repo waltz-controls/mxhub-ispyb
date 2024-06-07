@@ -23,14 +23,17 @@ import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.rmi.RMISecurityManager;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 
@@ -50,11 +53,14 @@ public class EJB3Test {
 
 		System.out.println("Setting environment up. Fix path is required " + jbossPath);
 		System.setProperty("java.security.auth.login.config", jbossPath);
-		UsernamePasswordHandler handler = null;
 		String username = "mx415";
 		String password = "pimx415";
-		handler = new UsernamePasswordHandler(username, password);
-		LoginContext lc = new LoginContext("testEJB", handler);
+		LoginContext lc = new LoginContext("testEJB", new CallbackHandler() {
+			@Override
+			public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+
+			}
+		});
 		lc.login();
 		System.setProperty("java.security.policy", jbossPolicy);
 		System.setSecurityManager(new RMISecurityManager());

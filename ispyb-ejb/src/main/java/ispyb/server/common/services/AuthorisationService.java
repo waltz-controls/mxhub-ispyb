@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.proposals.Proposal3VO;

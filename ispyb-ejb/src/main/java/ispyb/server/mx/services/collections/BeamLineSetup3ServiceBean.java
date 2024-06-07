@@ -26,14 +26,14 @@ import ispyb.server.mx.vos.collections.BeamLineSetup3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
 
@@ -47,25 +47,12 @@ import org.apache.log4j.Logger;
 public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLineSetup3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(BeamLineSetup3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of BeamLineSetup by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(Integer pk) {
-		return "from BeamLineSetup3VO vo  where vo.beamLineSetupId = :pk";
-	}
 
 	// Generic HQL request to find all instances of BeamLineSetup
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from BeamLineSetup3VO vo ";
-	}
-
-	private static final String FIND_BY_SCREENING_INPUT = "SELECT * "
-			+ "FROM BeamLineSetup bls, ScreeningInput si, Screening s, DataCollection dc, DataCollectionGroup g, BLSession ses  "
-			+ " WHERE si.screeningInputId = :screeningInputId AND si.screeningId = s.screeningId "
-			+ "AND s.dataCollectionId = dc.dataCollectionId AND "
-			+ "dc.dataCollectionGroupId = g.dataCollectionGroupId AND "
-			+ "g.sessionId = ses.sessionId AND ses.beamLineSetupId = bls.beamLineSetupId";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -85,7 +72,11 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 	 */
 	public BeamLineSetup3VO create(final BeamLineSetup3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// TODO add an authorization service bean for ISPyB
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance()
+		// .getService(AuthorizationServiceLocalHome.class); // TODO change method to the one checking the
+		// // needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -100,8 +91,12 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 	 * @return the updated entity.
 	 */
 	public BeamLineSetup3VO update(final BeamLineSetup3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// TODO add an authorization service bean for ISPyB
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance()
+		// .getService(AuthorizationServiceLocalHome.class); // TODO change method to the one checking the
+		// // needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -114,8 +109,12 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// TODO add an authorization service bean for ISPyB
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance()
+		// .getService(AuthorizationServiceLocalHome.class); // TODO change method to the one checking the
+		// // needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		BeamLineSetup3VO vo = findByPk(pk);
 		// TODO Edit this business code
 		delete(vo);
@@ -130,7 +129,11 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 	 */
 	public void delete(final BeamLineSetup3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// TODO add an authorization service bean for ISPyB
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance()
+		// .getService(AuthorizationServiceLocalHome.class); // TODO change method to the one checking the
+		// // needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -151,13 +154,16 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public Object doInEJBAccess(Object parent) throws Exception {
-				
-				List<BeamLineSetup3VO> listVOs = entityManager.createQuery(FIND_BY_PK(pk)).setParameter("pk", pk).getResultList();
-				if (listVOs == null || listVOs.isEmpty())
-					listVOs = null;
-				
-				BeamLineSetup3VO found = (BeamLineSetup3VO) listVOs.toArray()[0];
-				return found;
+
+				String qlString = "SELECT vo from BeamLineSetup3VO vo  where vo.beamLineSetupId = :pk";
+				try {
+					return entityManager.createQuery(qlString, BeamLineSetup3VO.class)
+							.setParameter("pk", pk)
+							.getSingleResult();
+				} catch (NoResultException e) {
+					return null;
+				}
+
 			};
 		};
 		BeamLineSetup3VO vo = (BeamLineSetup3VO) template.execute(callBack);
@@ -178,7 +184,8 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public Object doInEJBAccess(Object parent) throws Exception {
-				Query query = entityManager.createQuery(FIND_ALL());
+				String qlString = "SELECT vo from BeamLineSetup3VO vo ";
+				Query query = entityManager.createQuery(qlString);
 				List<BeamLineSetup3VO> vos = query.getResultList();
 				return vos;
 			};
@@ -187,24 +194,7 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 		return ret;
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove Scientist entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
 
-				// TODO add an authorization service bean for ISPyB
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance()
-				// .getService(AuthorizationServiceLocalHome.class); // TODO change method to the one checking the
-				// // needed access rights
-				// autService.checkUserRightToChangeAdminData();
-	}
-
-
-	
-	
 	/**
 	 * Find a beamLineSetup  for a given screeningInput
 	 * @param screeningInputId
@@ -217,19 +207,27 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 		EJBAccessCallback callBack = new EJBAccessCallback() {
 
 			public BeamLineSetup3VO doInEJBAccess(Object parent) throws Exception {
-				String query = FIND_BY_SCREENING_INPUT;
-				List<BeamLineSetup3VO> listVOs = entityManager.createNativeQuery(query, "beamLineSetupNativeQuery")
-						.setParameter("screeningInputId", screeningInputId).getResultList();
-				if (listVOs == null || listVOs.isEmpty())
-					listVOs = null;
-				
-				BeamLineSetup3VO foundEntities = (BeamLineSetup3VO) listVOs.toArray()[0];
-				BeamLineSetup3VO vos;
-				if (detachLight)
-					vos = getLightBeamLineSetupVO(foundEntities);
-				else
-					vos = getBeamLineSetupVO(foundEntities);
-				return vos;
+				String query = "SELECT * "
+						+ "FROM BeamLineSetup bls, ScreeningInput si, Screening s, DataCollection dc, DataCollectionGroup g, BLSession ses  "
+						+ " WHERE si.screeningInputId = ?1 AND si.screeningId = s.screeningId "
+						+ "AND s.dataCollectionId = dc.dataCollectionId AND "
+						+ "dc.dataCollectionGroupId = g.dataCollectionGroupId AND "
+						+ "g.sessionId = ses.sessionId AND ses.beamLineSetupId = bls.beamLineSetupId";
+				try {
+					BeamLineSetup3VO foundEntities = (BeamLineSetup3VO) entityManager.createNativeQuery(query, BeamLineSetup3VO.class)
+							.setParameter(1, screeningInputId)
+							.getSingleResult();
+
+					BeamLineSetup3VO vos;
+					//vo.get;
+					if (detachLight)
+						vos = cloneBeamLineSetup3VO(foundEntities);
+					else
+						vos = foundEntities;
+					return vos;
+				} catch (NoResultException e) {
+					return null;
+				}
 			};
 		};
 		BeamLineSetup3VO ret = (BeamLineSetup3VO) template.execute(callBack);
@@ -247,22 +245,10 @@ public class BeamLineSetup3ServiceBean implements BeamLineSetup3Service, BeamLin
 	 * @return
 	 * @throws CloneNotSupportedException
 	 */
-	private BeamLineSetup3VO getLightBeamLineSetupVO(BeamLineSetup3VO vo) throws CloneNotSupportedException {
+	private BeamLineSetup3VO cloneBeamLineSetup3VO(BeamLineSetup3VO vo) throws CloneNotSupportedException {
 		BeamLineSetup3VO otherVO = (BeamLineSetup3VO) vo.clone();
 		//otherVO.setSessionVOs(null);
 		return otherVO;
-	}
-	
-	/**
-	 * Get all lights entities
-	 * 
-	 * @param localEntities
-	 * @return
-	 * @throws CloneNotSupportedException
-	 */
-	private BeamLineSetup3VO getBeamLineSetupVO(BeamLineSetup3VO vo)  {
-		//vo.get;
-		return vo;
 	}
 
 

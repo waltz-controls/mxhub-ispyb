@@ -20,16 +20,14 @@ package ispyb.server.mx.services.autoproc;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.autoproc.PhasingAnalysis3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -155,15 +153,20 @@ public class ModelBuilding3ServiceBean implements ModelBuilding3Service,
 
 	@SuppressWarnings("unchecked")
 	public List<ModelBuilding3VO> findFiltered(final Integer phasingAnalysisId) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(ModelBuilding3VO.class);
-		
+		CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<ModelBuilding3VO> cq = cb.createQuery(ModelBuilding3VO.class);
+		Root<ModelBuilding3VO> modelBuildingRoot = cq.from(ModelBuilding3VO.class);
+
+// Join to phasingAnalysisVO if phasingAnalysisId is provided
 		if (phasingAnalysisId != null) {
-			Criteria subCrit = criteria.createCriteria("phasingAnalysisVO");
-			subCrit.add(Restrictions.eq("phasingAnalysisId", phasingAnalysisId));
-			subCrit.addOrder(Order.asc("phasingAnalysisId"));
+			Join<ModelBuilding3VO, PhasingAnalysis3VO> phasingAnalysisJoin = modelBuildingRoot.join("phasingAnalysisVO", JoinType.INNER);
+			cq.where(cb.equal(phasingAnalysisJoin.get("phasingAnalysisId"), phasingAnalysisId));
+			cq.orderBy(cb.asc(phasingAnalysisJoin.get("phasingAnalysisId")));
 		}
-		List<ModelBuilding3VO> foundEntities = criteria.list();
+
+// Execute the query
+		List<ModelBuilding3VO> foundEntities = this.entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

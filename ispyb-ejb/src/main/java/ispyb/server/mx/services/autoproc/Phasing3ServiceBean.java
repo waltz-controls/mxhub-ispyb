@@ -20,16 +20,14 @@ package ispyb.server.mx.services.autoproc;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.autoproc.PhasingAnalysis3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -156,17 +154,28 @@ public class Phasing3ServiceBean implements Phasing3Service,Phasing3ServiceLocal
 
 	@SuppressWarnings("unchecked")
 	public List<Phasing3VO> findFiltered(final Integer phasingAnalysisId) throws Exception {
-	
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(Phasing3VO.class);
-		
+
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Phasing3VO> cq = cb.createQuery(Phasing3VO.class);
+		Root<Phasing3VO> root = cq.from(Phasing3VO.class);
+
+// Establishing the join to navigate to the related PhasingAnalysisVO entity
+		Join<Phasing3VO, PhasingAnalysis3VO> phasingAnalysisJoin = root.join("phasingAnalysisVO", JoinType.INNER);
+
+// Applying conditions
 		if (phasingAnalysisId != null) {
-			Criteria subCrit = criteria.createCriteria("phasingAnalysisVO");
-			subCrit.add(Restrictions.eq("phasingAnalysisId", phasingAnalysisId));
-			subCrit.addOrder(Order.asc("phasingAnalysisId"));
+			cq.where(cb.equal(phasingAnalysisJoin.get("phasingAnalysisId"), phasingAnalysisId));
+			cq.orderBy(cb.asc(phasingAnalysisJoin.get("phasingAnalysisId")));
 		}
-		List<Phasing3VO> foundEntities = criteria.list();
+
+// Selecting distinct results
+		cq.select(root).distinct(true);
+
+// Execute the query and return the results
+		List<Phasing3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 
 	/* Private methods ------------------------------------------------------ */

@@ -21,12 +21,14 @@ package ispyb.common.util;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.rmi.RMISecurityManager;
+import java.util.Arrays;
 import java.util.Properties;
 
+import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
 
 public class IspybUnitTest {
@@ -42,11 +44,7 @@ public class IspybUnitTest {
 
 		System.out.println("Setting environment up. Fix path is required " + jbossPath);
 		System.setProperty("java.security.auth.login.config", jbossPath);
-		UsernamePasswordHandler handler = null;
-		String username = "mx415";
-		String password = "pimx415";
-		handler = new UsernamePasswordHandler(username, password);
-		LoginContext lc = new LoginContext("testEJB", handler);
+		LoginContext lc = new LoginContext("testEJB", new UsernamePasswordHandler("mx415","pimx415"));
 		lc.login();
 		System.setProperty("java.security.policy", jbossPolicy);
 		System.setSecurityManager(new RMISecurityManager());

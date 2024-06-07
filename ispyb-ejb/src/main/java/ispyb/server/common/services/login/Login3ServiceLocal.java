@@ -19,7 +19,7 @@
 
 package ispyb.server.common.services.login;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Login3ServiceLocal extends Login3Service {

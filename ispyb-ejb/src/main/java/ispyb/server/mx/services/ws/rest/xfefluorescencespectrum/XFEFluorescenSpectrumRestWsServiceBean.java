@@ -16,7 +16,7 @@
  * 
  * Contributors : S. Delageniere, R. Leal, L. Launer, K. Levik, S. Veyrier, P. Brenchereau, M. Bodin, A. De Maria Antolinos
  ******************************************************************************************************************************/
-
+//TODO do we need this class?
 package ispyb.server.mx.services.ws.rest.xfefluorescencespectrum;
 
 import ispyb.server.mx.services.ws.rest.WsServiceBean;
@@ -24,12 +24,11 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -39,31 +38,26 @@ public class XFEFluorescenSpectrumRestWsServiceBean extends WsServiceBean implem
 	private EntityManager entityManager;
 
 
-	private String BySessionId = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE sessionId = :sessionId and BLSession_proposalId=:proposalId";
-	private String ById = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE xfeFluorescenceSpectrumId = :xfeFluorescenceSpectrumId and BLSession_proposalId=:proposalId";
-	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
+		String sqlQuery = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE sessionId = ?1 and BLSession_proposalId=?2";
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, sessionId);
 
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
-		
-		return executeSQLQuery(query);
-	}
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int xfeFluorescenceSpectrumId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ById);
+		String sqlQuery = "SELECT * FROM v_xfeFluorescenceSpectrum WHERE xfeFluorescenceSpectrumId = ?1 and BLSession_proposalId=?2";
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, xfeFluorescenceSpectrumId);
 		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("xfeFluorescenceSpectrumId", xfeFluorescenceSpectrumId);
-		
-		return executeSQLQuery(query);
-	}
+
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	

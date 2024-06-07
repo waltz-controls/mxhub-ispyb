@@ -2,17 +2,18 @@ package ispyb.server.webservice.smis.util;
 
 import java.util.Map;
 
-import javax.xml.ws.BindingProvider;
+import ispyb.server.smis.SMISWebService;
+import ispyb.server.smis.SMISWebService_Service;
+import jakarta.xml.ws.BindingProvider;
 
-import generated.ws.smis.SMISWebService;
-import generated.ws.smis.SMISWebService_Service;
+
 import ispyb.common.util.Constants;
 
 public class SMISWebServiceGenerator {
 	
 	public static SMISWebService getSMISWebService()  {
 		
-		SMISWebService_Service sws = new SMISWebService_Service();	
+		SMISWebService_Service sws = new SMISWebService_Service();
 		SMISWebService wsPort = sws.getSMISWebServiceBeanPort();
 
 		//SMISWebService ws=service.get

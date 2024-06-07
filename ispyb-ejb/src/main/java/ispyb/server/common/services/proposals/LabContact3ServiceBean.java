@@ -20,21 +20,16 @@
 package ispyb.server.common.services.proposals;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.*;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.proposals.LabContact3VO;
 
 
@@ -50,20 +45,6 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 
 	private final static Logger LOG = Logger.getLogger(LabContact3ServiceBean.class);
 
-	private final static String HAS_SHIPPING = "SELECT COUNT(*) FROM Shipping "
-			+ "WHERE sendingLabContactId = :labContactId OR returnLabContactId = :labContactId";
-
-	// Generic HQL request to find instances of LabContact3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from LabContact3VO vo where vo.labContactId = :pk";
-	}
-
-	// Generic HQL request to find all instances of LabContact3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from LabContact3VO vo ";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -110,7 +91,10 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	public void deleteByPk(final Integer pk) throws Exception {
 		
 		LabContact3VO vo = findByPk(pk);
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		delete(vo);
 	}
 
@@ -138,9 +122,14 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	 * @return the LabContact3 value object
 	 */
 	public LabContact3VO findByPk(final Integer pk) throws Exception {
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (LabContact3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
+			return entityManager.createQuery("SELECT vo FROM LabContact3VO vo WHERE vo.labContactId = :pk", LabContact3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -155,55 +144,74 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public List<LabContact3VO> findAll() throws Exception {
-		
-		List<LabContact3VO> foundEntities = this.entityManager.createQuery(FIND_ALL()).getResultList();
+        String query = "SELECT vo FROM LabContact3VO vo ";
+		List<LabContact3VO> foundEntities = this.entityManager.createQuery(query, LabContact3VO.class)
+				.getResultList();
 		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<LabContact3VO> findFiltered(Integer proposalId, String cardName)  {
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(LabContact3VO.class);
+		CriteriaQuery<LabContact3VO> cq = cb.createQuery(LabContact3VO.class);
+		Root<LabContact3VO> root = cq.from(LabContact3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
+// Applying conditions based on the input
 		if (cardName != null && !cardName.isEmpty()) {
-			crit.add(Restrictions.ilike("cardName", cardName));
+			predicates.add(cb.like(cb.lower(root.get("cardName")), "%" + cardName.toLowerCase() + "%"));
 		}
 
 		if (proposalId != null) {
-			Criteria subCrit = crit.createCriteria("proposalVO");
-			subCrit.add(Restrictions.eq("proposalId", proposalId));
+			Join<LabContact3VO, Proposal3VO> proposalJoin = root.join("proposalVO", JoinType.INNER);
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
 
-		crit.addOrder(Order.desc("labContactId"));
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
-		return crit.list();
-	}
+// Ensuring distinct results
+		cq.distinct(true);
 
-	/**
-	 * Check if user has access rights to create, change and remove LabContact3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
+// Ordering the results
+		cq.orderBy(cb.desc(root.get("labContactId")));
+
+// Executing the query
+		List<LabContact3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<LabContact3VO> findByPersonIdAndProposalId(final Integer personId, final Integer proposalId) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
-		return session.createQuery("from LabContact3VO where personId=:personId and proposalId=:proposalId")
-					.setParameter("personId", personId).setParameter("proposalId", proposalId)
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+// Create the criteria query object specifying the result type
+		CriteriaQuery<LabContact3VO> cq = cb.createQuery(LabContact3VO.class);
+		Root<LabContact3VO> labContact = cq.from(LabContact3VO.class);
+
+// Define predicates for the query parameters
+		Predicate personIdPredicate = cb.equal(labContact.get("personId"), personId);
+		Predicate proposalIdPredicate = cb.equal(labContact.get("proposalId"), proposalId);
+
+// Add the predicates to the criteria query
+		cq.select(labContact)
+				.where(cb.and(personIdPredicate, proposalIdPredicate))
+				.distinct(true);  // Ensuring that the results are distinct
+
+// Execute the query
+		List<LabContact3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 
 	}
 
@@ -211,9 +219,28 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	@Override
 	public List<LabContact3VO> findByCardName(final String cardNameWithNum) throws Exception {
 
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
-		return session.createCriteria(LabContact3VO.class).add(Restrictions.eq("cardName", cardNameWithNum)).list();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
+		EntityManager em = this.entityManager;
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+// Create the criteria query object specifying the result type
+		CriteriaQuery<LabContact3VO> cq = cb.createQuery(LabContact3VO.class);
+		Root<LabContact3VO> labContact = cq.from(LabContact3VO.class);
+
+// Define the condition for the query
+		Predicate cardNamePredicate = cb.equal(labContact.get("cardName"), cardNameWithNum);
+
+// Add the condition to the criteria query
+		cq.select(labContact)
+				.where(cardNamePredicate);
+
+// Execute the query and get the results
+		List<LabContact3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 	
 	/* Private methods ------------------------------------------------------ */
@@ -248,10 +275,12 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	
 	public Integer hasShipping(final Integer labContactId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(HAS_SHIPPING).setParameter("labContactId", labContactId);
+		String sqlQuery = "SELECT COUNT(shipping) FROM Shipping3VO shipping WHERE shipping.sendingLabContactVO.labContactId = :labContactId OR shipping.returnLabContactVO.labContactId = :labContactId";
+		Query query = entityManager.createQuery(sqlQuery)
+				.setParameter("labContactId", labContactId);
 		try{
 			BigInteger res = (BigInteger) query.getSingleResult();
-			return new Integer(res.intValue());
+			return res.intValue();
 		}catch(NoResultException e){
 			System.out.println("ERROR in hasShipping - NoResultException: "+labContactId);
 			e.printStackTrace();
@@ -265,12 +294,23 @@ public class LabContact3ServiceBean implements LabContact3Service, LabContact3Se
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<LabContact3VO> findByProposalId(final Integer proposalId) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
-		return session.createQuery("from LabContact3VO where proposalId=:proposalId")
-				.setParameter("proposalId", proposalId)
-				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
+		EntityManager em = this.entityManager;
+
+		//TODO test proposalId
+// Create a typed query using JPQL (Java Persistence Query Language)
+		TypedQuery<LabContact3VO> query = em.createQuery(
+						"SELECT DISTINCT lc FROM LabContact3VO lc WHERE lc.proposalVO.proposalId = :proposalId", LabContact3VO.class)
+				.setParameter("proposalId", proposalId);
+
+// Execute the query and collect the results
+		List<LabContact3VO> results = query.getResultList();
+		return results;
+
 
 	}
 

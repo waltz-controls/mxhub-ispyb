@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.proposal;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface SaxsProposal3ServiceLocal extends SaxsProposal3Service {

@@ -24,27 +24,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 
 import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ws.api.annotation.WebContext;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
-import ispyb.server.biosaxs.services.core.ExperimentScope;
-import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
-import ispyb.server.biosaxs.vos.utils.serializer.ExperimentExclusionStrategy;
 import ispyb.server.common.services.proposals.Laboratory3Service;
 import ispyb.server.common.services.proposals.Person3Service;
 import ispyb.server.common.services.proposals.Proposal3Service;
@@ -69,8 +64,8 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
 @SOAPBinding(style = Style.DOCUMENT, use = SOAPBinding.Use.LITERAL, parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)
 @Stateless(name="ToolsForShippingWebService")
 @RolesAllowed({ "WebService", "User", "Industrial"}) // allow special access roles
-@SecurityDomain("ispyb")
-@WebContext(authMethod="BASIC",  secureWSDLAccess=false, transportGuarantee="NONE")
+//@SecurityDomain("ispyb")
+//@WebContext(authMethod="BASIC",  secureWSDLAccess=false, transportGuarantee="NONE")
 public class ToolsForShippingWebService {
 	private final static Logger LOG = Logger.getLogger(ToolsForShippingWebService.class);
 
@@ -352,9 +347,9 @@ public class ToolsForShippingWebService {
 				boolean stopSearch = Boolean.FALSE;
 				for (ProposalWS3VO proposal : proposalValues) {
 					//check if there is a proposal with a current session if not in house or industrial
-					LOG.debug("findProposalByLoginAndBeamline: Check proposal with code:" +proposal.getCode());
-					if (!(proposal.getCode().startsWith(Constants.PROPOSAL_CODE_MXIHR) || proposal.getCode().startsWith(Constants.PROPOSAL_CODE_FX))){
-						SessionWS3VO[] sessions = sessionService.findForWSByProposalCodeAndNumber(proposal.getCode(), proposal.getNumber(), beamline);
+					LOG.debug("findProposalByLoginAndBeamline: Check proposal with code:" +proposal.getProposalCode());
+					if (!(proposal.getProposalCode().startsWith(Constants.PROPOSAL_CODE_MXIHR) || proposal.getProposalCode().startsWith(Constants.PROPOSAL_CODE_FX))){
+						SessionWS3VO[] sessions = sessionService.findForWSByProposalCodeAndNumber(proposal.getProposalCode(), proposal.getProposalNumber(), beamline);
 						if (!stopSearch) {
 							if (sessions != null && sessions.length == 1) {
 								// Only an active session
@@ -363,16 +358,16 @@ public class ToolsForShippingWebService {
 							} else if ((sessions != null && sessions.length == 0) || sessions == null) {
 								//No active session
 								proposalValue = proposal;
-								LOG.debug("findProposalByLoginAndBeamline: The user " +login +" has no active session for the proposal " +proposal.getCode() + "-" +proposal.getNumber());
+								LOG.debug("findProposalByLoginAndBeamline: The user " +login +" has no active session for the proposal " +proposal.getProposalCode() + "-" +proposal.getProposalNumber());
 							}
 						}
 					} else {
-						LOG.debug("findProposalByLoginAndBeamline: proposal with code " +proposal.getCode() +" is a in house research / industrial");
+						LOG.debug("findProposalByLoginAndBeamline: proposal with code " +proposal.getProposalCode() +" is a in house research / industrial");
 						proposalValue = proposal;
 					}
 				}
 				if (proposalValue != null){
-					LOG.debug("findProposalByLoginAndBeamline: return the proposal for the current session... " + proposalValue.getCode() + "-" +proposalValue.getNumber());
+					LOG.debug("findProposalByLoginAndBeamline: return the proposal for the current session... " + proposalValue.getProposalCode() + "-" +proposalValue.getProposalNumber());
 				}
 			} else {
 				LOG.debug("findProposalByLoginAndBeamline: no proposals found");
@@ -408,8 +403,8 @@ public class ToolsForShippingWebService {
 			for (Proposal3VO proposal3vo : proposals) {
 				HashMap<String, String> entry = new HashMap<String, String>();
 				entry.put("title", proposal3vo.getTitle());
-				entry.put("code", proposal3vo.getCode());
-				entry.put("number", proposal3vo.getNumber());
+				entry.put("code", proposal3vo.getProposalCode());
+				entry.put("number", proposal3vo.getProposalNumber());
 				entry.put("type", proposal3vo.getType());
 				entry.put("proposalId", proposal3vo.getProposalId().toString());
 				entry.put("timeStamp", dateFormat.format(proposal3vo.getTimeStamp()).toString());

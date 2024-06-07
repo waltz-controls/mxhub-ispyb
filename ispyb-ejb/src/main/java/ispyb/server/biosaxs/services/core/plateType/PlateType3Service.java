@@ -23,7 +23,7 @@ import java.util.List;
 
 import ispyb.server.biosaxs.vos.dataAcquisition.plate.Platetype3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

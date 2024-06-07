@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.analysis.advanced;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface AdvancedAnalysis3ServiceLocal extends AdvancedAnalysis3Service {

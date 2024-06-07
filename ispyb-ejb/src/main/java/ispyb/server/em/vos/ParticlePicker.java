@@ -2,11 +2,7 @@ package ispyb.server.em.vos;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 
 @SuppressWarnings("serial")
@@ -19,7 +15,7 @@ public class ParticlePicker implements Serializable{
 	}
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "particlePickerId")
 	protected Integer particlePickerId;
 	

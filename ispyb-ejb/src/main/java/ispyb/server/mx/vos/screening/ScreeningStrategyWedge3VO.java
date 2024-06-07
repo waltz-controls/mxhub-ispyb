@@ -25,17 +25,9 @@ import java.util.Set;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.OrderBy;
 
 /**
  * ScreeningStrategyWedge3 value object mapping table ScreeningStrategyWedge
@@ -52,7 +44,7 @@ public class ScreeningStrategyWedge3VO extends ISPyBValueObject implements Clone
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "screeningStrategyWedgeId")
 	protected Integer screeningStrategyWedgeId;
 	
@@ -95,7 +87,7 @@ public class ScreeningStrategyWedge3VO extends ISPyBValueObject implements Clone
 	
 	@OneToMany
 	@JoinColumn(name = "screeningStrategyWedgeId")
-	@OrderBy(clause = "screeningStrategySubWedgeId")
+	@OrderBy("screeningStrategySubWedgeId")
 	private Set<ScreeningStrategySubWedge3VO> screeningStrategySubWedgeVOs;
 	
 	public ScreeningStrategyWedge3VO(){

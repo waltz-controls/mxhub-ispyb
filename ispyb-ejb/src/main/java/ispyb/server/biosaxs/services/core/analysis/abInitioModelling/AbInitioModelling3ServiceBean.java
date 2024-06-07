@@ -29,15 +29,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
 import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.datacollection.AbInitioModel3VO;
@@ -68,50 +65,51 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	
 	@Override
 	public ModelList3VO getModelListById(int modelListId) {
-		String query = "SELECT modelList FROM ModelList3VO modelList where modelList.modelListId = :modelListId" ;
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("modelListId", modelListId);
+		String query = "SELECT modelList FROM ModelList3VO modelList WHERE modelList.modelListId = :modelListId" ;
+		Query EJBQuery = this.entityManager.createQuery(query, ModelList3VO.class)
+				.setParameter("modelListId", modelListId);
 		return (ModelList3VO) EJBQuery.getSingleResult();	
 	}
 	
 	private List<Map<String, Object>> getAll(String mySQLQuery) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
-	
+
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAllByProposalId(int proposalId) {
-		return this.getAll(SQLQueryKeeper.getAnalysisByProposalId(proposalId));
+		return this.getAll(SQLQueryKeeper.getAnalysisQuery() + " and p.proposalId = " + proposalId);
 	}
-	
+
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAnalysisInformationByExperimentId(int experimentId) {
-		return this.getAll(SQLQueryKeeper.getAnalysisByExperimentId(experimentId));
+		return this.getAll(SQLQueryKeeper.getAnalysisQuery() + " and exp.experimentId = " + experimentId);
 	}
-	
+
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAnalysisCalibrationByProposalId(int experimentId) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysisCalibrationByProposalId(experimentId);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		String sb = SQLQueryKeeper.getAnalysisQuery()
+				+ "  and exp.experimentType = 'CALIBRATION' and p.proposalId = ?1";
+		Query query = this.entityManager.createNativeQuery(sb)
+				.setParameter(1, experimentId);//TODO potential bug proposalId set to experimentId
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
-	
+	@Deprecated
 	@Override
 	public List<Map<String, Object>> getAnalysisInformation(int limit) {
-		String mySQLQuery = SQLQueryKeeper.getAnalysis(limit);
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		String mySQLQuery = SQLQueryKeeper.getAnalysisQuery()
+				+ "  ORDER BY exp.experimentId DESC limit " + limit;
+		Query query = this.entityManager.createNativeQuery(mySQLQuery);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -192,10 +190,11 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@Override
 	public List<Subtraction3VO> getSubtractionsByMeasurementList(ArrayList<Integer> measurementIdList) {
 		String query = "SELECT DISTINCT(subtraction) FROM Subtraction3VO subtraction, SaxsDataCollection3VO da, MeasurementTodataCollection3VO me  " +
-				" WHERE da.dataCollectionId = me.dataCollectionId and " +
-				" subtraction.dataCollectionId = da.dataCollectionId and " +
-				" me.measurementId in :measurementIdList" ;
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("measurementIdList", measurementIdList);
+				" WHERE da.dataCollectionId = me.dataCollectionId AND " +
+				" subtraction.dataCollectionId = da.dataCollectionId AND " +
+				" me.measurementId IN :measurementIdList" ;
+		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class)
+				.setParameter("measurementIdList", measurementIdList);
 		return (List<Subtraction3VO>)EJBQuery.getResultList();
 	}
 	
@@ -265,11 +264,20 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<AbInitioModel3VO> getAbinitioModelsByExperimentId(int experimentId) {
-		String query = SQLQueryKeeper.getAbinitioModelQuery();
-		query = query + " and dc.experimentId = " + experimentId;	
-		
-		LOG.info(query);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT DISTINCT(subtraction) FROM Subtraction3VO subtraction "
+				+ " LEFT JOIN FETCH subtraction.substractionToAbInitioModel3VOs LEFT JOIN subtraction.substractionToAbInitioModel3VOs subtractiontoAbInitioModel3VO"
+				+ " LEFT JOIN FETCH subtractiontoAbInitioModel3VO.abinitiomodel3VO LEFT JOIN subtractiontoAbInitioModel3VO.abinitiomodel3VO abInitioModel3VO"
+				+ " LEFT JOIN FETCH abInitioModel3VO.averagedModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.rapidShapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.shapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.modelList3VO LEFT JOIN abInitioModel3VO.modelList3VO modelList "
+				+ " LEFT JOIN FETCH modelList.modeltolist3VOs LEFT JOIN modelList.modeltolist3VOs modelToList "
+				+ " LEFT JOIN FETCH modelToList.model3VO "
+				+ " AND dc.experimentId = :experimentId";//TODO this will obviously fail, we need to realize what is dc in this context
+
+
+		Query EJBQuery = this.entityManager.createQuery(query, AbInitioModel3VO.class)
+				.setParameter("experimentId", experimentId);
 		return (List<AbInitioModel3VO>)EJBQuery.getResultList();
 	}
 	
@@ -278,32 +286,51 @@ public class AbInitioModelling3ServiceBean implements AbInitioModelling3Service,
 	public List test(String query) {
 		LOG.info(query);
 		Query EJBQuery = this.entityManager.createQuery(query);
-		return (List)EJBQuery.getResultList();
+		return EJBQuery.getResultList();
 	}
 	
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Subtraction3VO> getAbinitioModelsBySubtractionId(int subtractionId) {
-		String query = SQLQueryKeeper.getAbinitioModelQuery();
-		query = query + " WHERE subtraction.subtractionId = " + subtractionId;	
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT DISTINCT(subtraction) FROM Subtraction3VO subtraction "
+				+ " LEFT JOIN FETCH subtraction.substractionToAbInitioModel3VOs LEFT JOIN subtraction.substractionToAbInitioModel3VOs subtractiontoAbInitioModel3VO"
+				+ " LEFT JOIN FETCH subtractiontoAbInitioModel3VO.abinitiomodel3VO LEFT JOIN subtractiontoAbInitioModel3VO.abinitiomodel3VO abInitioModel3VO"
+				+ " LEFT JOIN FETCH abInitioModel3VO.averagedModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.rapidShapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.shapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.modelList3VO LEFT JOIN abInitioModel3VO.modelList3VO modelList "
+				+ " LEFT JOIN FETCH modelList.modeltolist3VOs LEFT JOIN modelList.modeltolist3VOs modelToList "
+				+ " LEFT JOIN FETCH modelToList.model3VO "
+				+ " WHERE subtraction.subtractionId = :subtractionId";
+		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class)
+				.setParameter("subtractionId", subtractionId);
 		return (List<Subtraction3VO>)EJBQuery.getResultList();
 	}
 	
 
 	@Override
 	public AbInitioModel3VO getAbinitioModelsById(int abinitioModelId) {
-		String query = SQLQueryKeeper.getSingleAbinitioModelQuery();
-		query = query + " and abInitioModel3VO.abInitioModelId= " + abinitioModelId;	
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT DISTINCT(abInitioModel3VO) FROM AbInitioModel3VO abInitioModel3VO, Subtraction3VO su, SaxsDataCollection3VO dc, SubtractiontoAbInitioModel3VO subs "
+				+ " LEFT JOIN FETCH abInitioModel3VO.averagedModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.rapidShapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.shapeDeterminationModel "
+				+ " LEFT JOIN FETCH abInitioModel3VO.modelList3VO LEFT JOIN abInitioModel3VO.modelList3VO modelList "
+				+ " LEFT JOIN FETCH modelList.modeltolist3VOs LEFT JOIN modelList.modeltolist3VOs modelToList "
+				+ " LEFT JOIN FETCH modelToList.model3VO "
+				+ " WHERE su.dataCollectionId = dc.dataCollectionId and "
+				+ " subs.subtraction3VO.subtractionId = su.subtractionId "
+				+ " AND abInitioModel3VO.abInitioModelId= :abinitioModelId";
+		Query EJBQuery = this.entityManager.createQuery(query, AbInitioModel3VO.class)
+				.setParameter("abinitioModelId", abinitioModelId);
 		return (AbInitioModel3VO)EJBQuery.getSingleResult();
 	}
 
 	@Override
 	public Model3VO getModelById(int modelId) {
-		String query = SQLQueryKeeper.getModelQuery(modelId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT model FROM Model3VO model WHERE model.modelId = :modelId";
+		Query EJBQuery = this.entityManager.createQuery(query, Model3VO.class)
+				.setParameter("modelId", modelId);
 		return (Model3VO)EJBQuery.getSingleResult();
 	}
 

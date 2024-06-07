@@ -21,16 +21,15 @@ package ispyb.server.mx.services.autoproc;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
 
@@ -48,23 +47,12 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 
 	private final static Logger LOG = Logger
 			.getLogger(ImageQualityIndicators3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of ImageQualityIndicators3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from ImageQualityIndicators3VO vo " + "where vo.imageQualityIndicatorsId = :pk";
-	}
 
 	// Generic HQL request to find all instances of ImageQualityIndicators3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from ImageQualityIndicators3VO vo " ;
-	}
-
-	private static String FIND_BY_DATACOLLECTION_ID = "select * " + " FROM ImageQualityIndicators q, Image i "
-			+ "WHERE q.imageId = i.imageId  AND  i.dataCollectionId = :dataCollectionId ";
-
-	private static String FIND_BY_IMAGE_ID = "select * FROM ImageQualityIndicators q " + "WHERE q.imageId = :imageId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -82,7 +70,8 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 */
 	public ImageQualityIndicators3VO create(final ImageQualityIndicators3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -96,7 +85,8 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 */
 	public ImageQualityIndicators3VO update(final ImageQualityIndicators3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -108,7 +98,8 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		ImageQualityIndicators3VO vo = findByPk(pk);
 		// TODO Edit this business code				
 		delete(vo);
@@ -120,7 +111,8 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 */
 	public void delete(final ImageQualityIndicators3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -133,10 +125,12 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 * @return the ImageQualityIndicators3 value object
 	 */
 	public ImageQualityIndicators3VO findByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		try{
-			return (ImageQualityIndicators3VO) entityManager.createQuery(FIND_BY_PK())
+			String qlString = "SELECT vo from ImageQualityIndicators3VO vo where vo.imageQualityIndicatorsId = :pk";
+			return entityManager.createQuery(qlString, ImageQualityIndicators3VO.class)
 					.setParameter("pk", pk).getSingleResult();
 			}catch(NoResultException e){
 				return null;
@@ -149,24 +143,13 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<ImageQualityIndicators3VO> findAll()
 			throws Exception {
 
-		List<ImageQualityIndicators3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+		String qlString = "SELECT vo from ImageQualityIndicators3VO vo ";
+        return entityManager.createQuery(qlString, ImageQualityIndicators3VO.class).getResultList();
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove ImageQualityIndicators3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-		//autService.checkUserRightToChangeAdminData();
-	}
-	
 	/**
 	 * 
 	 * @param dataCollectionId
@@ -175,10 +158,12 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	 */
 	
 	public List<ImageQualityIndicators3VO> findByDataCollectionIdDAO(Integer dataCollectionId) {
-		String query = FIND_BY_DATACOLLECTION_ID;
+		String query = "select * FROM ImageQualityIndicators q, Image i "
+				+ "WHERE q.imageId = i.imageId  AND  i.dataCollectionId = ?1 ";
 		List<ImageQualityIndicators3VO> listVOs = this.entityManager
 				.createNativeQuery(query, "imageQualityIndicatorsNativeQuery")
-				.setParameter("dataCollectionId", dataCollectionId).getResultList();
+				.setParameter(1, dataCollectionId)
+				.getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
 		return listVOs;
@@ -248,9 +233,11 @@ public class ImageQualityIndicators3ServiceBean implements ImageQualityIndicator
 	@SuppressWarnings("unchecked")
 	public List<ImageQualityIndicators3VO> findByImageId(final Integer imageId) throws Exception{
 		
-		String query = FIND_BY_IMAGE_ID;
+		String query = "select * FROM ImageQualityIndicators q "
+				+ "WHERE q.imageId = ?1 ";
 		List<ImageQualityIndicators3VO> listVOs = this.entityManager
-				.createNativeQuery(query, "imageQualityIndicatorsNativeQuery").setParameter("imageId", imageId)
+				.createNativeQuery(query, "imageQualityIndicatorsNativeQuery")
+				.setParameter(1, imageId)
 				.getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			listVOs = null;

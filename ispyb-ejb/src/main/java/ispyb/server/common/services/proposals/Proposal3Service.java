@@ -25,8 +25,8 @@ import ispyb.server.common.vos.proposals.ProposalWS3VO;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
-import javax.jws.WebMethod;
+import jakarta.ejb.Remote;
+import jakarta.jws.WebMethod;
 
 @Remote
 public interface Proposal3Service {

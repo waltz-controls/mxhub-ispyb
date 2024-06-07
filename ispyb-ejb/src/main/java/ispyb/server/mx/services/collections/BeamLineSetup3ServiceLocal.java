@@ -18,7 +18,7 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface BeamLineSetup3ServiceLocal extends BeamLineSetup3Service {

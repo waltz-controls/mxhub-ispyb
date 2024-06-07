@@ -23,8 +23,8 @@ import java.util.List;
 
 import ispyb.server.mx.vos.collections.BeamLineSetup3VO;
 
-import javax.ejb.Remote;
-import javax.jws.WebMethod;
+import jakarta.ejb.Remote;
+import jakarta.jws.WebMethod;
 
 @Remote
 public interface BeamLineSetup3Service {

@@ -7,10 +7,33 @@
 
 	<display-name>ISPyB</display-name>
 	<description>ISPyB Web Application</description>
-<!-- 	<context-param> -->
-<!-- 		<param-name>resteasy.scan</param-name> -->
-<!-- 		<param-value>true</param-value> -->
-<!-- 	</context-param> -->
-	
-    
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>ispybWS</web-resource-name>
+			<url-pattern>/ispybWS/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>WebService</role-name>
+			<role-name>User</role-name>
+			<role-name>Industrial</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>NONE</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>ispyb</realm-name>
+	</login-config>
+
+	<security-role>
+		<role-name>WebService</role-name>
+	</security-role>
+	<security-role>
+		<role-name>User</role-name>
+	</security-role>
+	<security-role>
+		<role-name>Industrial</role-name>
+	</security-role>
 </web-app>

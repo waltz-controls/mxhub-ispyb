@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.analysis.hplc;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface HPLCDataProcessing3ServiceLocal extends HPLCDataProcessing3Service {

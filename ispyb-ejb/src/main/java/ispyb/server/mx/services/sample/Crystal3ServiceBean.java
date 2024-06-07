@@ -20,41 +20,28 @@ package ispyb.server.mx.services.sample;
 
 import ispyb.server.common.util.ejb.EJBAccessCallback;
 import ispyb.server.common.util.ejb.EJBAccessTemplate;
+import ispyb.server.common.vos.proposals.Proposal3VO;
 import ispyb.server.mx.vos.sample.Crystal3VO;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
+import ispyb.server.mx.vos.sample.Protein3VO;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-
-import ispyb.server.mx.vos.sample.Crystal3VO;
 
 import java.math.BigInteger;
-import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.axis.utils.StringUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
-
-
-import ispyb.server.common.exceptions.AccessDeniedException;
-import ispyb.server.mx.services.sample.Crystal3Service;
-import ispyb.server.mx.services.sample.Crystal3ServiceLocal;
 
 /**
  * <p>
@@ -68,21 +55,9 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 
 	// Generic HQL request to find instances of Crystal3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchSamples) {
-		return "from Crystal3VO vo " + (fetchSamples ? "left join fetch vo.sampleVOs " : "")
-				+ "where vo.crystalId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Crystal3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchLink1, boolean fetchLink2) {
-		return "from Crystal3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "");
-	}
-
-	private final static String COUNT_SAMPLE = "SELECT " + " count(DISTINCT(bls.blSampleId)) samplesNumber "
-			+ "FROM Crystal c  " + "	 LEFT JOIN BLSample bls ON bls.crystalId = c.crystalId "
-			+ "WHERE c.crystalId = :crystalId ";
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -102,7 +77,10 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	public Crystal3VO create(final Crystal3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -118,7 +96,10 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	public Crystal3VO update(final Crystal3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -132,7 +113,10 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		Crystal3VO vo = findByPk(pk, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -147,7 +131,10 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	public void delete(final Crystal3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(entityManager.merge(vo));
 	}
@@ -163,10 +150,17 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	public Crystal3VO findByPk(final Integer pk, final boolean fetchSamples) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (Crystal3VO) entityManager.createQuery(FIND_BY_PK(fetchSamples)).setParameter("pk", pk)
+			String qlString = "SELECT vo from Crystal3VO vo "
+					+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
+					+ "where vo.crystalId = :pk";
+			return (Crystal3VO) entityManager.createQuery(qlString)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -187,8 +181,11 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Crystal3VO> findAll(final boolean withLink1, final boolean withLink2) throws Exception {
-	
-		List<Crystal3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1, withLink2)).getResultList();
+
+		String qlString = "SELECT vo from Crystal3VO vo "
+				+ (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+				+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "");
+		List<Crystal3VO> foundEntities = entityManager.createQuery(qlString).getResultList();
 		return foundEntities;
 	}
 
@@ -196,36 +193,46 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	public List<Crystal3VO> findFiltered(final Integer proposalId, final Integer proteinId, final String acronym,
 			final String spaceGroup) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		// Assuming entityManager is properly instantiated and available
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Crystal3VO> cq = cb.createQuery(Crystal3VO.class);
+		Root<Crystal3VO> crystal = cq.from(Crystal3VO.class);
 
-		Criteria crit = session.createCriteria(Crystal3VO.class).setFetchMode("structure3VOs", FetchMode.JOIN);
+// Joining with ProteinVO and ProposalVO (nested join)
+		Join<Crystal3VO, Protein3VO> protein = crystal.join("proteinVO");
+		Join<Protein3VO, Proposal3VO> proposal = protein.join("proposalVO", JoinType.LEFT); // Optional join
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
-		if (acronym != null && !spaceGroup.isEmpty()) {
-			crit.add(Restrictions.like("spaceGroup", spaceGroup));
+// Conditions on Crystal3VO
+		if (spaceGroup != null && !spaceGroup.isEmpty()) {
+			predicates.add(cb.like(crystal.get("spaceGroup"), spaceGroup));
 		}
 
-		Criteria subCrit = crit.createCriteria("proteinVO");
-
+// Conditions on ProteinVO
 		if (acronym != null && !acronym.isEmpty()) {
-
-			subCrit.add(Restrictions.like("acronym", acronym.toUpperCase()));
+			predicates.add(cb.like(cb.upper(protein.get("acronym")), acronym.toUpperCase()));
 		}
-		
-		if (proteinId != null ) {
-			subCrit.add(Restrictions.eq("proteinId", proteinId));
-		}
-		
 
+		if (proteinId != null) {
+			predicates.add(cb.equal(protein.get("proteinId"), proteinId));
+		}
+
+// Condition on ProposalVO
 		if (proposalId != null) {
-			Criteria subSubCrit = subCrit.createCriteria("proposalVO");
-			subSubCrit.add(Restrictions.eq("proposalId", proposalId));
+			predicates.add(cb.equal(proposal.get("proposalId"), proposalId));
 		}
-		subCrit.addOrder(Order.asc("acronym"));
-		crit.addOrder(Order.desc("crystalId"));
-		
-		List<Crystal3VO> foundEntities = crit.list();
+
+		cq.where(predicates.toArray(new Predicate[0]));
+		cq.orderBy(cb.asc(protein.get("acronym")), cb.desc(crystal.get("crystalId")));
+		cq.distinct(true);
+
+// Fetch associated Structure3VOs
+		crystal.fetch("structure3VOs", JoinType.LEFT);
+
+// Execute the query
+		List<Crystal3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 
@@ -245,75 +252,70 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 		EJBAccessTemplate template = new EJBAccessTemplate(LOG, context, this);
 		
 		List<Crystal3VO> list = (List<Crystal3VO>) template.execute(new EJBAccessCallback() {
+			// Assuming entityManager is properly instantiated and available
+			final EntityManager entityManager = Crystal3ServiceBean.this.entityManager;
+			final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+
+			// Helper method to handle nullability and equality of cell parameters
+			private void addCellParameterPredicate(List<Predicate> predicates, Root<Crystal3VO> crystal, String attributeName, Double attributeValue) {
+				if (attributeValue != null) {
+					predicates.add(cb.equal(crystal.get(attributeName), attributeValue));
+				} else {
+					predicates.add(cb.isNull(crystal.get(attributeName)));
+				}
+			}
 
 			public Object doInEJBAccess(Object parent) throws Exception {
-				
-				Session session = (Session) entityManager.getDelegate();
 
-				Criteria crit = session.createCriteria(Crystal3VO.class);
-				crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
 
-				Criteria subCrit = crit.createCriteria("proteinVO");
+				CriteriaQuery<Crystal3VO> cq = cb.createQuery(Crystal3VO.class);
+				Root<Crystal3VO> crystal = cq.from(Crystal3VO.class);
 
+// Joining with ProteinVO
+				Join<Crystal3VO, Protein3VO> protein = crystal.join("proteinVO");
+// Conditional join with ProposalVO
+				Join<Protein3VO, Proposal3VO> proposal = protein.join("proposalVO", JoinType.LEFT);
+
+				List<Predicate> predicates = new ArrayList<>();
+
+// Conditions on the acronym of the ProteinVO
 				if (acronym != null && !acronym.isEmpty()) {
-					subCrit.add(Restrictions.like("acronym", acronym.toUpperCase()));
+					predicates.add(cb.like(cb.upper(protein.get("acronym")), acronym.toUpperCase()));
 				}
 
+// Condition on proposalId of the ProposalVO
 				if (proposalId != null) {
-					Criteria subSubCrit = subCrit.createCriteria("proposalVO");
-					subSubCrit.add(Restrictions.eq("proposalId", proposalId));
-					
+					predicates.add(cb.equal(proposal.get("proposalId"), proposalId));
 				}
-				if (currentCrystal.getSpaceGroup() != null){
-					if (!StringUtils.isEmpty(currentCrystal.getSpaceGroup())) {
-						crit.add(Restrictions.like("spaceGroup", currentCrystal.getSpaceGroup()));
-					}
-					else {
-						crit.add(Restrictions.isNull("spaceGroup"));
-					}
-				}
-					
-				if (currentCrystal.getCellA() != null) {
-					crit.add(Restrictions.eq("cellA", currentCrystal.getCellA()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellA"));
-				}
-				
-				if (currentCrystal.getCellB() != null) {
-					crit.add(Restrictions.eq("cellB", currentCrystal.getCellB()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellB"));
-				}
-				if (currentCrystal.getCellC() != null) {
-					crit.add(Restrictions.eq("cellC", currentCrystal.getCellC()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellB"));
-				}
-				if (currentCrystal.getCellAlpha() != null) {
-					crit.add(Restrictions.eq("cellAlpha", currentCrystal.getCellAlpha()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellAlpha"));
-				}
-				if (currentCrystal.getCellBeta() != null) {
-					crit.add(Restrictions.eq("cellBeta", currentCrystal.getCellBeta()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellBeta"));
-				}
-				if (currentCrystal.getCellGamma() != null) {
-					crit.add(Restrictions.eq("cellGamma", currentCrystal.getCellGamma()));
-				}
-				else{
-					crit.add(Restrictions.isNull("cellGamma"));
-				}
-				crit.addOrder(Order.desc("crystalId"));
 
-				List<Crystal3VO> foundEntities = crit.list();
+// Additional conditions on Crystal3VO fields
+				if (currentCrystal.getSpaceGroup() != null) {
+					if (!StringUtils.isEmpty(currentCrystal.getSpaceGroup())) {
+						predicates.add(cb.like(crystal.get("spaceGroup"), currentCrystal.getSpaceGroup()));
+					} else {
+						predicates.add(cb.isNull(crystal.get("spaceGroup")));
+					}
+				}
+
+// Conditions for cell parameters
+				addCellParameterPredicate(predicates, crystal, "cellA", currentCrystal.getCellA());
+				addCellParameterPredicate(predicates, crystal, "cellB", currentCrystal.getCellB());
+				addCellParameterPredicate(predicates, crystal, "cellC", currentCrystal.getCellC());
+				addCellParameterPredicate(predicates, crystal, "cellAlpha", currentCrystal.getCellAlpha());
+				addCellParameterPredicate(predicates, crystal, "cellBeta", currentCrystal.getCellBeta());
+				addCellParameterPredicate(predicates, crystal, "cellGamma", currentCrystal.getCellGamma());
+
+// Apply all predicates
+				cq.where(predicates.toArray(new Predicate[0]));
+				cq.orderBy(cb.desc(crystal.get("crystalId")));
+				cq.distinct(true);
+
+// Execute the query
+				List<Crystal3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 				return foundEntities;
+
+
 			}
 		});
 			
@@ -323,28 +325,17 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 			return null;
 	}
 
-	/**
-	 * Check if user has access rights to create, change and remove Crystal3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
 
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
-	}
-
-	
-	
 	public Integer countSamples(final Integer crystalId)throws Exception{
 
-		Query query = entityManager.createNativeQuery(COUNT_SAMPLE).setParameter("crystalId", crystalId);
+		String countSample = "SELECT count(DISTINCT(bls.blSampleId)) samplesNumber "
+				+ "FROM Crystal c LEFT JOIN BLSample bls ON bls.crystalId = c.crystalId "
+				+ "WHERE c.crystalId = ?1 ";
+		Query query = entityManager.createNativeQuery(countSample)
+				.setParameter(1, crystalId);
 		try{
 			BigInteger res = (BigInteger) query.getSingleResult();
-			return new Integer(res.intValue());
+			return res.intValue();
 		}catch(NoResultException e){
 			System.out.println("ERROR in countSamples - NoResultException: "+crystalId);
 			e.printStackTrace();
@@ -363,32 +354,38 @@ public class Crystal3ServiceBean implements Crystal3Service, Crystal3ServiceLoca
 	 * @throws Exception
 	 */
 	public String findPdbFullPath(final String proteinAcronym, final String spaceGroup) throws Exception{
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager entityManager = this.entityManager;
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Crystal3VO> cq = cb.createQuery(Crystal3VO.class);
+		Root<Crystal3VO> crystalRoot = cq.from(Crystal3VO.class);
 
-		Criteria crit = session.createCriteria(Crystal3VO.class);
+		List<Predicate> predicates = new ArrayList<>();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-
+// Condition on spaceGroup, assuming spaceGroup is not null when proteinAcronym is checked
 		if (proteinAcronym != null && !spaceGroup.isEmpty()) {
-			crit.add(Restrictions.like("spaceGroup", spaceGroup));
+			predicates.add(cb.like(crystalRoot.get("spaceGroup"), spaceGroup));
 		}
 
-		Criteria subCrit = crit.createCriteria("proteinVO");
+// Joining with ProteinVO
+		Join<Crystal3VO, Protein3VO> proteinJoin = crystalRoot.join("proteinVO");
 
+// Condition on the acronym of the ProteinVO
 		if (proteinAcronym != null && !proteinAcronym.isEmpty()) {
-
-			subCrit.add(Restrictions.like("acronym", proteinAcronym.toUpperCase()));
+			predicates.add(cb.like(cb.upper(proteinJoin.get("acronym")), proteinAcronym.toUpperCase()));
 		}
 
-		subCrit.addOrder(Order.asc("acronym"));
-		crit.addOrder(Order.desc("crystalId"));
-		
-		List<Crystal3VO> foundEntities = crit.list();
+// Apply all predicates
+		cq.where(predicates.toArray(new Predicate[0]));
+		cq.orderBy(cb.asc(proteinJoin.get("acronym")), cb.desc(crystalRoot.get("crystalId")));
+		cq.distinct(true);
+
+// Execute the query
+		List<Crystal3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		String fileFullPath = "";
-		if (foundEntities != null && foundEntities.size() > 0){
+		if (foundEntities != null && !foundEntities.isEmpty()) {
 			Crystal3VO crystal = foundEntities.get(0);
-			if (crystal.getPdbFilePath() != null && crystal.getPdbFileName() != null){
-				fileFullPath = crystal.getPdbFilePath()+crystal.getPdbFileName();
+			if (crystal.getPdbFilePath() != null && crystal.getPdbFileName() != null) {
+				fileFullPath = crystal.getPdbFilePath() + crystal.getPdbFileName();
 			}
 		}
 		return fileFullPath;

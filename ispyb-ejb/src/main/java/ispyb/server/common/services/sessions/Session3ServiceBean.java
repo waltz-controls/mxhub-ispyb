@@ -27,19 +27,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -49,11 +51,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.jboss.ejb3.annotation.TransactionTimeout;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.beamlines.ESRFBeamlineEnum;
@@ -68,90 +65,11 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
  * </p>
  */
 @Stateless
-@TransactionTimeout(3600)
+//@TransactionTimeout(3600)
 public class Session3ServiceBean implements Session3Service, Session3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Session3ServiceBean.class);
-	
-	// Generic HQL request to find instances of Session3 by pk
-	private static final String FIND_BY_PK(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) {
-		return "from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
-				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "") + "where vo.sessionId = :pk";
-	}
 
-	// Generic HQL request to find all instances of Session3
-	private static final String FIND_ALL(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) {
-		return "from Session3VO vo " + (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
-				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
-				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "");
-	}
-
-	private final static String SET_USED_SESSION_STATEMENT = " UPDATE BLSession SET usedFlag = 1 WHERE BLSession.proposalId = :proposalId"
-			+ " and (BLSession.usedFlag is null OR BLSession.usedFlag = 0) "
-			+ " and (BLSession.sessionId IN (select c.sessionId from DataCollectionGroup c) "
-			+ " or BLSession.sessionId IN (select e.sessionId from EnergyScan e) "
-			+ " or BLSession.sessionId IN (select x.sessionId from XFEFluorescenceSpectrum x)) ";// 1
-
-	private final static String HAS_SESSION_DATACOLLECTIONGROUP = "SELECT COUNT(*) FROM DataCollectionGroup WHERE sessionId = :sessionId ";
-
-	private static final String FIND_BY_SHIPPING_ID = "select * from BLSession, ShippingHasSession "
-			+ " where BLSession.sessionId =  ShippingHasSession.sessionId " + " and ShippingHasSession.shippingId = :shippingId ";
-
-	// Be careful, when JBoss starts, the property file is not loaded, and it tries to initialize the class and fails.
-	// private static String FIND_BY_PROPOSAL_CODE_NUMBER = getProposalCodeNumberQuery();
-
-	// private static String FIND_BY_PROPOSAL_CODE_NUMBER_OLD = getProposalCodeNumberOldQuery();
-
-	private final static String UPDATE_PROPOSALID_STATEMENT = " update BLSession  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	private static final String FIND_BY_AUTOPROCSCALING_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps "
-			+ " where s.sessionId = g.sessionId and  " + " g.dataCollectionGroupId = c.dataCollectionGroupId and "
-			+ " c.dataCollectionId = api.dataCollectionId and " + " api.autoProcIntegrationId = apshi.autoProcIntegrationId and "
-			+ " apshi.autoProcScalingId = aps.autoProcScalingId and " + " aps.autoProcScalingId = :autoProcScalingId ";
-	
-	private static final String FIND_BY_AUTOPROCPROGRAMATTACHMENT_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram, AutoProcProgramAttachment autoProcProgramAttachment"
-			+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
-			+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = autoProcProgramAttachment.autoProcProgramId "
-			+ " and autoProcProgramAttachment.autoProcProgramAttachmentId = :autoProcProgramAttachmentId ";
-	
-	
-	private static final String FIND_BY_AUTOPROCPROGRAM_ID = "select s.* from BLSession s, "
-			+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram "
-			+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
-			+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = :autoProcProgramId ";
-	
-
-	private static String getProposalCodeNumberQuery() {
-		String query = "select * " + " FROM BLSession ses, Proposal pro "
-				+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
-				+ "AND ses.beamLineName like :beamLineName " + "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " "
-				+ "AND DATE(ses.startDate) <= DATE(" + Constants.MYSQL_ORACLE_CURRENT_DATE + ")  ORDER BY startDate DESC ";
-
-		return query;
-	}
-
-	private static String getProposalCodeNumberOldQuery() {
-		String query = "select * "
-				+ " FROM BLSession ses, Proposal pro "
-				+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like :code AND pro.proposalNumber = :number "
-				+ "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + "  AND ses.startDate <= "
-				+ Constants.MYSQL_ORACLE_CURRENT_DATE + "  ORDER BY sessionId DESC ";
-
-		return query;
-	}
-
-	private final static String NB_OF_COLLECTS = "SELECT count(*) FROM DataCollection, DataCollectionGroup "
-			+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
-			+ " and DataCollection.numberOfImages >4 and DataCollectionGroup.sessionId  = :sessionId ";
-
-	private final static String NB_OF_TESTS = "SELECT count(*) FROM DataCollection, DataCollectionGroup "
-			+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
-			+ " and DataCollection.numberOfImages <=4 and DataCollectionGroup.sessionId  = :sessionId ";
-	
 	//private final String[] beamlinesToProtect = { "ID29", "ID23-1", "ID23-2", "ID30A-1", "ID30A-2","ID30A-3", "ID30B" };
 	private final String[] beamlinesToProtect = ESRFBeamlineEnum.getBeamlineNamesToBeProtected();
 	
@@ -230,8 +148,13 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Session3VO findByPk(Integer pk, boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum) throws AccessDeniedException,Exception {
 		try {
-			Session3VO vo = (Session3VO) entityManager.createQuery(FIND_BY_PK(fetchDataCollectionGroup, fetchEnergyScan, fetchXFESpectrum))
-					.setParameter("pk", pk).getSingleResult();
+			Session3VO vo = (Session3VO) entityManager.createQuery("select vo from Session3VO vo "
+							+ (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+							+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+							+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : "")
+							+ "where vo.sessionId = :pk")
+					.setParameter("pk", pk)
+					.getSingleResult();
 			checkChangeRemoveAccess(vo);
 			return vo;
 		} catch (NoResultException e) {
@@ -255,25 +178,33 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findAll(boolean fetchDataCollectionGroup, boolean fetchEnergyScan, boolean fetchXFESpectrum)
 			throws Exception {
-		return entityManager.createQuery(FIND_ALL(fetchDataCollectionGroup, fetchEnergyScan, fetchXFESpectrum)).getResultList();
+		return entityManager.createQuery("select vo from Session3VO vo "
+						+ (fetchDataCollectionGroup ? "left join fetch vo.dataCollectionGroupVOs " : "")
+				+ (fetchEnergyScan ? "left join fetch vo.energyScanVOs " : "")
+				+ (fetchXFESpectrum ? "left join fetch vo.xfeSpectrumVOs " : ""))
+				.getResultList();
 	}
 
 	public Integer updateUsedSessionsFlag(Integer proposalId) throws Exception {
 
-			int nbUpdated = 0;
-			Query query = entityManager.createNativeQuery(SET_USED_SESSION_STATEMENT).setParameter("proposalId", proposalId);
-			nbUpdated = query.executeUpdate();
 
-			return new Integer(nbUpdated);
+			Query query = entityManager.createNativeQuery(" UPDATE BLSession SET usedFlag = 1 WHERE BLSession.proposalId = ?1"
+					+ " and (BLSession.usedFlag is null OR BLSession.usedFlag = 0) "
+					+ " and (BLSession.sessionId IN (select c.sessionId from DataCollectionGroup c) "
+					+ " or BLSession.sessionId IN (select e.sessionId from EnergyScan e) "
+					+ " or BLSession.sessionId IN (select x.sessionId from XFEFluorescenceSpectrum x)) ")
+					.setParameter(1, proposalId);
+			return query.executeUpdate();
 	}
 
 	public Integer hasDataCollectionGroups(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(HAS_SESSION_DATACOLLECTIONGROUP).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM DataCollectionGroup WHERE sessionId = ?1 ")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in hasDataCollectionGroups - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -297,9 +228,12 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findByShippingId(Integer shippingId) {
-		String query = FIND_BY_SHIPPING_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-				.setParameter("shippingId", shippingId).getResultList();
+		String query = "select * from BLSession, ShippingHasSession "
+				+ " where BLSession.sessionId =  ShippingHasSession.sessionId "
+				+ " and ShippingHasSession.shippingId = ?1 ";
+		List<Session3VO> col = this.entityManager.createNativeQuery(query, Session3VO.class)
+				.setParameter(1, shippingId)
+				.getResultList();
 		return col;
 	}
 
@@ -322,37 +256,65 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	@SuppressWarnings("unchecked")
 	public List<Session3VO> findFiltered(Integer nbMax, String beamline, Date date1, Date date2, Date dateEnd,
 			boolean usedFlag, String operatorSiteNumber) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> criteriaQuery = criteriaBuilder.createQuery(Session3VO.class);
 
-		if (beamline != null)
-			crit.add(Restrictions.like("beamlineName", beamline));
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = criteriaQuery.from(Session3VO.class);
 
-		if (date1 != null)
-			crit.add(Restrictions.ge("startDate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("startDate", date2));
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
 
-		if (dateEnd != null)
-			crit.add(Restrictions.ge("endDate", dateEnd));
-
-		// usedFlag =1 or endDate > yesterday
-		if (usedFlag)
-			crit.add(Restrictions.sqlRestriction("(usedFlag = 1 OR endDate >= " + Constants.MYSQL_ORACLE_YESTERDAY + " )"));
-
-		if (nbMax != null)
-			crit.setMaxResults(nbMax);
-
-
-		if (operatorSiteNumber != null) {
-			crit.add(Restrictions.eq("operatorSiteNumber", operatorSiteNumber));
+// Add conditions based on method parameters
+		if (beamline != null) {
+			predicates.add(criteriaBuilder.like(root.get("beamlineName"), "%" + beamline + "%"));
 		}
 
-		crit.addOrder(Order.desc("startDate"));
+		if (date1 != null) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startDate"), date1));
+		}
+		if (date2 != null) {
+			predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), date2));
+		}
 
-		return crit.list();
+		if (dateEnd != null) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), dateEnd));
+		}
+
+		if (usedFlag) {
+			// Assuming usedFlag is a boolean that if true applies a special filter
+			Predicate usedFlagPredicate = criteriaBuilder.equal(root.get("usedFlag"), 1);
+			Predicate endDatePredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), new Date()); // Adjust the date as per your application logic
+			predicates.add(criteriaBuilder.or(usedFlagPredicate, endDatePredicate));
+		}
+
+		if (operatorSiteNumber != null) {
+			predicates.add(criteriaBuilder.equal(root.get("operatorSiteNumber"), operatorSiteNumber));
+		}
+
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
+
+// Order the results
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("startDate")));
+
+// Prepare the query to be executed
+		List<Session3VO> result;
+		if (nbMax != null) {
+			result = entityManager.createQuery(criteriaQuery)
+					.setMaxResults(nbMax)
+					.getResultList();
+		} else {
+			result = entityManager.createQuery(criteriaQuery).getResultList();
+		}
+
+		return result;
 	}
 
 	/**
@@ -367,13 +329,28 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 		String query = null;
 		List<Session3VO> listVOs = null;
 		if (beamLineName == null || beamLineName.equals("")) {
-			query = getProposalCodeNumberOldQuery();
-			listVOs = this.entityManager.createNativeQuery(query, "sessionNativeQuery").setParameter("code", code)
-					.setParameter("number", number).getResultList();
+
+			query = "select * "
+					+ " FROM BLSession ses, Proposal pro "
+					+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like ?1 AND pro.proposalNumber = ?2 "
+					+ "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + "  AND ses.startDate <= "
+					+ Constants.MYSQL_ORACLE_CURRENT_DATE + "  ORDER BY sessionId DESC ";
+
+			listVOs = this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.getResultList();
 		} else {
-			query = getProposalCodeNumberQuery();
-			listVOs = this.entityManager.createNativeQuery(query, "sessionNativeQuery").setParameter("code", code)
-					.setParameter("number", number).setParameter("beamLineName", beamLineName).getResultList();
+			query = "select * " + " FROM BLSession ses, Proposal pro "
+					+ "WHERE ses.proposalId = pro.proposalId AND pro.proposalCode like ?1 AND pro.proposalNumber = ?2 "
+					+ "AND ses.beamLineName like ?3 " + "AND ses.endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " "
+					+ "AND DATE(ses.startDate) <= DATE(" + Constants.MYSQL_ORACLE_CURRENT_DATE + ")  ORDER BY startDate DESC ";
+
+			listVOs = this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.setParameter(3, beamLineName)
+					.getResultList();
 		}
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
@@ -445,11 +422,14 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Integer getNbOfCollects(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_COLLECTS).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT count(*) FROM DataCollection, DataCollectionGroup "
+				+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
+				+ " and DataCollection.numberOfImages >4 and DataCollectionGroup.sessionId  = ?1")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfCollects - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -469,11 +449,14 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	public Integer getNbOfTests(Integer sessionId) throws Exception {
 
-		Query query = entityManager.createNativeQuery(NB_OF_TESTS).setParameter("sessionId", sessionId);
+		Query query = entityManager.createNativeQuery("SELECT count(*) FROM DataCollection, DataCollectionGroup "
+				+ " WHERE DataCollection.dataCollectionGroupId = DataCollectionGroup.dataCollectionGroupId"
+				+ " and DataCollection.numberOfImages <=4 and DataCollectionGroup.sessionId  = ?1 ")
+				.setParameter(1, sessionId);
 		try {
 			BigInteger res = (BigInteger) query.getSingleResult();
 
-			return new Integer(res.intValue());
+			return res.intValue();
 		} catch (NoResultException e) {
 			System.out.println("ERROR in getNbOfTests - NoResultException: " + sessionId);
 			e.printStackTrace();
@@ -491,14 +474,18 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 * @param oldProposalId
 	 * @return
 	 * @throws Exception
+	 *
+	 * 	// Be careful, when JBoss starts, the property file is not loaded, and it tries to initialize the class and fails.
+	 * 	// private static String FIND_BY_PROPOSAL_CODE_NUMBER = getProposalCodeNumberQuery();
+	 *
+	 * 	// private static String FIND_BY_PROPOSAL_CODE_NUMBER_OLD = getProposalCodeNumberOldQuery();
 	 */
 	public Integer updateProposalId(Integer newProposalId, Integer oldProposalId) throws Exception {
-			int nbUpdated = 0;
-			Query query = entityManager.createNativeQuery(UPDATE_PROPOSALID_STATEMENT).setParameter("newProposalId", newProposalId)
-					.setParameter("oldProposalId", oldProposalId);
-			nbUpdated = query.executeUpdate();
-
-			return new Integer(nbUpdated);
+			Query query = entityManager.createNativeQuery(" update BLSession  set proposalId = ?1 "
+					+ " WHERE proposalId = ?2")
+					.setParameter(1, newProposalId)
+					.setParameter(2, oldProposalId);
+			return query.executeUpdate();
 	}
 
 	/**
@@ -508,21 +495,29 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 * @return
 	 */
 	public Session3VO findByExpSessionPk(final Long expSessionPk) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		
-		if (expSessionPk != null)
-			crit.add(Restrictions.eq("expSessionPk", expSessionPk));
-		
-		crit.addOrder(Order.desc("startDate"));
-		
-		List<Session3VO> foundEntities = crit.list();
-			if (foundEntities == null || foundEntities.size() == 0) {
-					return null;
-			} else {
-					return foundEntities.get(0);
-			}
+		// Get the EntityManager and CriteriaBuilder
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> criteriaQuery = criteriaBuilder.createQuery(Session3VO.class);
+
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = criteriaQuery.from(Session3VO.class);
+
+// Condition to filter by expSessionPk if not null
+		if (expSessionPk != null) {
+			Predicate expSessionPkPredicate = criteriaBuilder.equal(root.get("expSessionPk"), expSessionPk);
+			criteriaQuery.where(expSessionPkPredicate);
+		}
+
+// Order the results by startDate in descending order
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("startDate")));
+
+// Execute the query and retrieve the list
+		List<Session3VO> foundEntities = entityManager.createQuery(criteriaQuery).getResultList();
+
+// Return the first element if list is not empty, otherwise return null
+		return foundEntities.isEmpty() ? null : foundEntities.get(0);
 		
 	}
 
@@ -535,38 +530,51 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	 */
 	@SuppressWarnings("unchecked")
 	public Session3VO findByAutoProcScalingId(final Integer autoProcScalingId) throws Exception {
-		String query = FIND_BY_AUTOPROCSCALING_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcScalingId", autoProcScalingId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcScaling_has_Int apshi, AutoProcScaling aps "
+				+ " where s.sessionId = g.sessionId and  " + " g.dataCollectionGroupId = c.dataCollectionGroupId and "
+				+ " c.dataCollectionId = api.dataCollectionId and " + " api.autoProcIntegrationId = apshi.autoProcIntegrationId and "
+				+ " apshi.autoProcScalingId = aps.autoProcScalingId and " + " aps.autoProcScalingId = ?1 ";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, autoProcScalingId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	public Session3VO findByAutoProcProgramAttachmentId(final Integer autoProcProgramAttachmentId) throws Exception {
-		String query = FIND_BY_AUTOPROCPROGRAMATTACHMENT_ID;
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcProgramAttachmentId", autoProcProgramAttachmentId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram, AutoProcProgramAttachment autoProcProgramAttachment"
+				+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
+				+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = autoProcProgramAttachment.autoProcProgramId "
+				+ " and autoProcProgramAttachment.autoProcProgramAttachmentId = ?1";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+						.setParameter(1, autoProcProgramAttachmentId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
 	@Override
 	public Session3VO findByAutoProcProgramId(int autoProcProgramId) {
-		String query = FIND_BY_AUTOPROCPROGRAM_ID;
-		@SuppressWarnings("unchecked")
-		List<Session3VO> col = this.entityManager.createNativeQuery(query, "sessionNativeQuery")
-					.setParameter("autoProcProgramId", autoProcProgramId).getResultList();
-		if (col != null && col.size() > 0) {
-				return col.get(0);
+		String query = "select s.* from BLSession s, "
+				+ " DataCollectionGroup g, DataCollection c, AutoProcIntegration api, AutoProcProgram autoprocProgram "
+				+ " where s.sessionId = g.sessionId and  g.dataCollectionGroupId = c.dataCollectionGroupId and autoprocProgram.autoProcProgramId = api.autoProcProgramId"
+				+ " and c.dataCollectionId = api.dataCollectionId and autoprocProgram.autoProcProgramId = ?1 ";
+		try {
+			return (Session3VO) this.entityManager.createNativeQuery(query, Session3VO.class)
+					.setParameter(1, autoProcProgramId)
+					.getResultList();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	
@@ -673,64 +681,66 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	//******************************     PRIVATE METHODS  ********************************************************
 
 	private List<Session3VO> findSessionToBeProtected(Integer delay, Integer window) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Get the EntityManager and CriteriaBuilder
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		Integer delayToTrigger = 26;
-		Integer windowForTrigger = 24;
-		if (delay != null)
-			delayToTrigger = delay;
-		if (window != null)
-			windowForTrigger = window;
+// Create a CriteriaQuery object for Session3VO
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
 
+// Define the root of the query (the main entity to query from)
+		Root<Session3VO> root = cq.from(Session3VO.class);
+
+// List to hold all conditions (Predicates)
+		List<Predicate> predicates = new ArrayList<>();
+
+// Calculate date ranges based on delay and window
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger);
-
+		cal.add(Calendar.HOUR_OF_DAY, -delay); // Adjusted by delay
 		Date date2 = cal.getTime();
-		cal.add(Calendar.HOUR_OF_DAY, -windowForTrigger);
+		cal.add(Calendar.HOUR_OF_DAY, -window); // Adjusted by window
 		Date date1 = cal.getTime();
 
-		if (date1 != null)
-			crit.add(Restrictions.ge("lastUpdate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("lastUpdate", date2));
-		
+// Add date range conditions
+		predicates.add(cb.greaterThanOrEqualTo(root.get("lastUpdate"), date1));
+		predicates.add(cb.lessThanOrEqualTo(root.get("lastUpdate"), date2));
+
+// Add beamline name condition, protected beamlines
 		String[] beamlinesToProtect = ESRFBeamlineEnum.getBeamlineNamesToBeProtected();
-		
-		if (LOG.isDebugEnabled()) {
-			String beamlines = "";
-			for (String beamline: beamlinesToProtect) { 
-				beamlines = beamlines + " " + beamline;
-			};
-			LOG.debug("beamlinesToProtect: " + beamlines);
-		}
-		
-		
-		crit.add(Restrictions.in("beamlineName", beamlinesToProtect));
+		predicates.add(root.get("beamlineName").in((Object[]) beamlinesToProtect));
 
-		// account not to protect: opid*, opd*, mxihr*
-		Criteria subCrit = crit.createCriteria("proposalVO");
+// Add subquery to filter out specific proposal codes
+		Join<Session3VO, Proposal3VO> proposalJoin = root.join("proposalVO");
+		String[] accountNotToProtect = new String[] {"opid*", "opd*", "mxihr*"}; // example pattern codes
+		predicates.add(cb.not(proposalJoin.get("code").in((Object[]) accountNotToProtect)));
 
-		subCrit.add(Restrictions.not(Restrictions.in("code", account_not_to_protect)));
+// Set where clause with combined predicates
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
-		crit.addOrder(Order.asc("lastUpdate"));
+// Order by lastUpdate ascending
+		cq.orderBy(cb.asc(root.get("lastUpdate")));
 
-		return crit.list();
+// Execute the query
+		List<Session3VO> results = entityManager.createQuery(cq).getResultList();
+		return results;
 	}
 	
 	private List<Session3VO> findSessionNotProtectedToBeProtected(Date date1, Date date2) {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Assume entityManager is already injected or created
+		EntityManager entityManager = this.entityManager;
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
+		Root<Session3VO> root = cq.from(Session3VO.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		Integer delayToTrigger = 8;
-		Integer windowForTrigger = 14 * 24;
+		int delayToTrigger = 8;
+		int windowForTrigger = 14 * 24;
 
+// Calculate the dates
 		cal.add(Calendar.HOUR_OF_DAY, -delayToTrigger);
 		// launch the protection of sessions which have not been protected during the last 14 days.
 		if (date2 == null)
@@ -742,34 +752,35 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 			date1 = cal.getTime();
 		}
 
+// Adding date conditions
 		if (date1 != null)
-			crit.add(Restrictions.ge("lastUpdate", date1));
+			predicates.add(cb.greaterThanOrEqualTo(root.get("lastUpdate"), date1));
 		if (date2 != null)
-			crit.add(Restrictions.le("lastUpdate", date2));
+			predicates.add(cb.lessThanOrEqualTo(root.get("lastUpdate"), date2));
 
-		crit.add(Restrictions.in("beamlineName", beamlinesToProtect));
+// Filter by beamline names that need protection
+		predicates.add(root.get("beamlineName").in(beamlinesToProtect));
 
-		crit.add(Restrictions.isNull("protectedData"));
+// Sessions without protected data
+		predicates.add(cb.isNull(root.get("protectedData")));
 
-		// account not to protect: opid*, opd*, mxihr*
-		Criteria subCrit = crit.createCriteria("proposalVO");
+// Filter out specific account codes
+		Join<Session3VO, Proposal3VO> joinProposal = root.join("proposalVO");
+		predicates.add(cb.not(joinProposal.get("code").in(account_not_to_protect)));
 
-		subCrit.add(Restrictions.not(Restrictions.in("code", account_not_to_protect)));
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.asc(root.get("lastUpdate")));
 
-		crit.addOrder(Order.asc("lastUpdate"));
+		List<Session3VO> resultList = entityManager.createQuery(cq).getResultList();
 
-		List<Session3VO> listNotProtected = crit.list();
+// Log information about the query
 		LOG.info("find not protected sessions between " + date1 + " and  " + date2);
-		if (listNotProtected != null) {
-			String sessionsIds = "";
-			for (Iterator iterator = listNotProtected.iterator(); iterator.hasNext();) {
-				Session3VO session3vo = (Session3VO) iterator.next();
-				sessionsIds = sessionsIds + ", " + session3vo.getSessionId();
-			}
-			LOG.info(listNotProtected.size() + " sessions found : " + sessionsIds);
+		if (resultList != null) {
+			String sessionsIds = resultList.stream().map(s -> s.getSessionId().toString()).collect(Collectors.joining(", "));
+			LOG.info(resultList.size() + " sessions found: " + sessionsIds);
 		}
 
-		return listNotProtected;
+		return resultList;
 	}
 	
 	/**
@@ -828,46 +839,55 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 	private List<Session3VO> findFiltered(Integer proposalId, Integer nbMax, String beamline, Date date1, Date date2, Date dateEnd,
 			boolean usedFlag, Integer nbShifts, String operatorSiteNumber) {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(Session3VO.class);
+		// Assume entityManager is already injected or created
+		EntityManager entityManager = this.entityManager;
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Session3VO> cq = cb.createQuery(Session3VO.class);
+		Root<Session3VO> session = cq.from(Session3VO.class);
 
+		List<Predicate> predicates = new ArrayList<>();
+
+// Adding conditions based on method parameters
 		if (proposalId != null) {
-			Criteria subCrit = crit.createCriteria("proposalVO");
-			subCrit.add(Restrictions.eq("proposalId", proposalId));
+			Join<Session3VO, Proposal3VO> proposalJoin = session.join("proposalVO");
+			predicates.add(cb.equal(proposalJoin.get("proposalId"), proposalId));
 		}
-		if (beamline != null)
-			crit.add(Restrictions.like("beamlineName", beamline));
-
-		if (date1 != null)
-			crit.add(Restrictions.ge("startDate", date1));
-		if (date2 != null)
-			crit.add(Restrictions.le("startDate", date2));
-
-		if (dateEnd != null)
-			crit.add(Restrictions.ge("endDate", dateEnd));
-
-		// usedFlag =1 or endDate >= yesterday
-		
+		if (beamline != null) {
+			predicates.add(cb.like(session.get("beamlineName"), beamline));
+		}
+		if (date1 != null) {
+			predicates.add(cb.greaterThanOrEqualTo(session.<Date>get("startDate"), date1));
+		}
+		if (date2 != null) {
+			predicates.add(cb.lessThanOrEqualTo(session.<Date>get("startDate"), date2));
+		}
+		if (dateEnd != null) {
+			predicates.add(cb.greaterThanOrEqualTo(session.<Date>get("endDate"), dateEnd));
+		}
 		if (usedFlag) {
-			crit.add(Restrictions.sqlRestriction("(usedFlag = 1 OR endDate >= " + Constants.MYSQL_ORACLE_CURRENT_DATE + " )"));
+			// Assuming Constants.MYSQL_ORACLE_CURRENT_DATE is a static import or available as a constant
+			predicates.add(cb.or(
+					cb.equal(session.get("usedFlag"), 1),
+					cb.greaterThanOrEqualTo(session.<Date>get("endDate"), cb.currentDate())
+			));
 		}
-
-		if (nbMax != null)
-			crit.setMaxResults(nbMax);
-
 		if (nbShifts != null) {
-			crit.add(Restrictions.eq("nbShifts", nbShifts));
+			predicates.add(cb.equal(session.get("nbShifts"), nbShifts));
 		}
-
 		if (operatorSiteNumber != null) {
-			crit.add(Restrictions.eq("operatorSiteNumber", operatorSiteNumber));
+			predicates.add(cb.equal(session.get("operatorSiteNumber"), operatorSiteNumber));
 		}
 
-		crit.addOrder(Order.desc("startDate"));
-		List<Session3VO> ret = crit.list();
-		return ret;
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.orderBy(cb.desc(session.get("startDate")));
+
+// Set the maximum results if specified
+		if (nbMax != null) {
+			return entityManager.createQuery(cq).setMaxResults(nbMax).getResultList();
+		} else {
+			return entityManager.createQuery(cq).getResultList();
+		}
 	}
 	
 	/**
@@ -880,11 +900,4 @@ public class Session3ServiceBean implements Session3Service, Session3ServiceLoca
 		if (vo == null) return;
 		autService.checkUserRightToAccessSession(vo);				
 	}
-
-
-
-
-
-
-
 }

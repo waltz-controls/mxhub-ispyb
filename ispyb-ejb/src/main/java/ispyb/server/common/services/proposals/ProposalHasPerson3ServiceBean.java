@@ -22,21 +22,18 @@ package ispyb.server.common.services.proposals;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
-import ispyb.server.biosaxs.services.sql.SqlTableMapper;
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.services.AuthorisationServiceLocal;
 import ispyb.server.common.vos.proposals.ProposalHasPerson3VO;
@@ -49,23 +46,7 @@ import ispyb.server.common.vos.proposals.ProposalHasPerson3VO;
  */
 @Stateless
 public class ProposalHasPerson3ServiceBean implements ProposalHasPerson3Service, ProposalHasPerson3ServiceLocal {
-	
-	private static final String FIND_BY_PK(Integer pk) {
-		return "from ProposalHasPerson3VO vo  where vo.proposalHasPersonId = :pk";
-	}
 
-	private static final String FIND_BY_PROPOSAL_PK(Integer proposalPk) {
-		return "from ProposalHasPerson3VO vo  where vo.proposalId = :proposalPk";
-	}
-
-	private static final String FIND_BY_PERSON_PK(Integer personPk) {
-		return "from ProposalHasPerson3VO vo  where vo.personId = :personPk";
-	}
-	
-	private static final String FIND_BY_PERSON_AND_PROPOSAL_PK(Integer proposalPk, Integer personPk) {
-		return "from ProposalHasPerson3VO vo  where vo.personId = :personPk and vo.proposalId = :proposalPk";
-	}
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -161,37 +142,41 @@ public class ProposalHasPerson3ServiceBean implements ProposalHasPerson3Service,
 	@WebMethod
 	public ProposalHasPerson3VO findByPk(final Integer pk) throws Exception {
 
-		Query query = entityManager.createQuery(FIND_BY_PK(pk))
+		Query query = entityManager.createQuery("select vo from ProposalHasPerson3VO vo  where vo.proposalHasPersonId = :pk", ProposalHasPerson3VO.class)
 				.setParameter("pk", pk);
-		List listVOs = query.getResultList();
-		if (listVOs == null || listVOs.isEmpty())
+		try {
+			var result = query.getSingleResult();
+			checkChangeRemoveAccess( (ProposalHasPerson3VO) result);
+			return (ProposalHasPerson3VO) result;
+		} catch (NoResultException e) {
 			return null;
-		
-		checkChangeRemoveAccess( (ProposalHasPerson3VO) listVOs.toArray()[0]);
-		return (ProposalHasPerson3VO) listVOs.toArray()[0];
+		}
+
+
 	}
 		
 	@SuppressWarnings("unchecked")
 	public List<ProposalHasPerson3VO> findByProposalPk(Integer proposalId) throws Exception {
-		
-		Query query = entityManager.createQuery(FIND_BY_PROPOSAL_PK(proposalId))
-				.setParameter("proposalPk", proposalId);		
+
+		Query query = entityManager.createQuery("select vo from ProposalHasPerson3VO vo  where vo.proposalId = :pk", ProposalHasPerson3VO.class)
+				.setParameter("pk", proposalId);
 		return query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<ProposalHasPerson3VO> findByPersonPk(Integer personId)throws Exception {
-		
-		Query query = entityManager.createQuery(FIND_BY_PERSON_PK(personId))
-				.setParameter("personPk", personId);		
+
+		Query query = entityManager.createQuery("select vo from ProposalHasPerson3VO vo  where vo.personId = :pk")
+				.setParameter("pk", personId);
 		return query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<ProposalHasPerson3VO> findByProposalAndPersonPk(Integer proposalId, Integer personId) throws Exception {
-		
-		Query query = entityManager.createQuery(FIND_BY_PERSON_AND_PROPOSAL_PK(proposalId, personId))
-				.setParameter("proposalPk", proposalId).setParameter("personPk", personId);		
+
+		Query query = entityManager.createQuery("select vo from ProposalHasPerson3VO vo  where vo.personId = :personId and vo.proposalId = :proposalId")
+				.setParameter("proposalId", proposalId)
+				.setParameter("personId", personId);
 		return query.getResultList();
 	}
 

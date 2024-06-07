@@ -24,13 +24,11 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -39,26 +37,6 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	/** SQL common clauses **/
-	private String dateClause = "((BLSession_startDate >= :startDate and BLSession_startDate <= :endDate) "
-			+ "or "
-			+ " (BLSession_endDate >= :startDate and BLSession_endDate <= :endDate)"
-			+ "or "
-			+ " (BLSession_endDate >= :endDate and BLSession_startDate <= :startDate)"
-			+ "or "
-			+ " (BLSession_endDate <= :endDate and BLSession_startDate >= :startDate))";
-	                            
-	/** SQL QUERIES **/
-	private  String BySessionId = getViewTableQuery() + " where v_session.sessionId = :sessionId and proposalId = :proposalId order by v_session.sessionId DESC"; 
-	private  String ByProposalId = getViewTableQuery() + " where v_session.proposalId = :proposalId order by v_session.sessionId DESC";
-	private  String ByDates = getViewTableQuery() + " where " + dateClause + " order by v_session.sessionId DESC";
-	
-	private  String ByDatesAndSiteId = getViewTableQuery() + " where " + dateClause + " and v_session.operatorSiteNumber=:siteId order by v_session.sessionId DESC";
-	
-	private  String ByProposalAndDates = getViewTableQuery() + " where v_session.proposalId = :proposalId and " + dateClause + " order by v_session.sessionId DESC";
-	
-	private  String ByBeamlineOperator = getViewTableQuery() + " where v_session.beamLineOperator LIKE :beamlineOperator order by v_session.sessionId DESC";
-	
 	private String getViewTableQuery(){
 		return this.getQueryFromResourceFile("/queries/session/getViewTableQuery.sql");
 	}
@@ -66,59 +44,79 @@ public class SessionServiceBean extends WsServiceBean  implements SessionService
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewBySessionId(int proposalId, int sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		/** Setting the parameters **/
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);	
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery() + " where v_session.sessionId = ?1 and proposalId = ?2 order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, sessionId)
+				.setParameter(2, proposalId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByProposalId(int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProposalId);
-		/** Setting the parameters **/
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery() + " where v_session.proposalId = ?1 order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDates);
-		query.setParameter("startDate", startDate);
-		query.setParameter("endDate", endDate);
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery() + " where " + "((BLSession_startDate >= ?1 and BLSession_startDate <= ?2) "
+				+ "or "
+				+ " (BLSession_endDate >= ?1 and BLSession_endDate <= ?2)"
+				+ "or "
+				+ " (BLSession_endDate >= ?2 and BLSession_startDate <= ?1)"
+				+ "or "
+				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))"
+				+ " order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, startDate)
+				.setParameter(2, endDate);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public List<Map<String, Object>> getSessionViewByProposalAndDates(int proposalId, String startDate, String endDate) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProposalAndDates);
-		query.setParameter("startDate", startDate);
-		query.setParameter("endDate", endDate);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery() + " where v_session.proposalId = ?1 and " + "((BLSession_startDate >= ?2 and BLSession_startDate <= ?3) "
+				+ "or "
+				+ " (BLSession_endDate >= ?2 and BLSession_endDate <= ?3)"
+				+ "or "
+				+ " (BLSession_endDate >= ?3 and BLSession_startDate <= ?2)"
+				+ "or "
+				+ " (BLSession_endDate <= ?3 and BLSession_startDate >= ?2))"
+				+ " order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(2, startDate)
+				.setParameter(3, endDate)
+				.setParameter(1, String.valueOf(proposalId));
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByBeamlineOperator( String beamlineOperator) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByBeamlineOperator);
-		query.setParameter("beamlineOperator", "%" +  beamlineOperator + "%");
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery()
+				+ " where v_session.beamLineOperator LIKE ?1 order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, "%" +  beamlineOperator + "%");
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 	@Override
 	public List<Map<String, Object>> getSessionViewByDates(String startDate, String endDate, String siteId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDatesAndSiteId);
-		query.setParameter("startDate", startDate);
-		query.setParameter("endDate", endDate);
-		query.setParameter("siteId", siteId);
-		return executeSQLQuery(query);
-	}
+		String session = getViewTableQuery() + " where " + "((BLSession_startDate >= ?1 and BLSession_startDate <= ?2) "
+				+ "or "
+				+ " (BLSession_endDate >= ?1 and BLSession_endDate <= ?2)"
+				+ "or "
+				+ " (BLSession_endDate >= ?2 and BLSession_startDate <= ?1)"
+				+ "or "
+				+ " (BLSession_endDate <= ?2 and BLSession_startDate >= ?1))"
+				+ " and v_session.operatorSiteNumber=?3 order by v_session.sessionId DESC";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, startDate)
+				.setParameter(2, endDate)
+				.setParameter(3, siteId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 }

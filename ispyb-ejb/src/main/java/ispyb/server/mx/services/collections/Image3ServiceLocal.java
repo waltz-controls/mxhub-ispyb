@@ -18,7 +18,7 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Image3ServiceLocal extends Image3Service {

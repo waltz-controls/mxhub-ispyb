@@ -23,13 +23,13 @@ import ispyb.server.mx.vos.screening.ScreeningStrategy3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
@@ -45,16 +45,9 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 
 	// Generic HQL request to find instances of ScreeningStrategy3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchScreeningStrategyWedge) {
-		return "from ScreeningStrategy3VO vo " + (fetchScreeningStrategyWedge ? "left join fetch vo.screeningStrategyWedgeVOs " : "")
-				 + "where vo.screeningStrategyId = :pk";
-	}
 
 	// Generic HQL request to find all instances of ScreeningStrategy3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchScreeningStrategyWedge) {
-		return "from ScreeningStrategy3VO vo " + (fetchScreeningStrategyWedge ? "left join fetch vo.screeningStrategyWedgeVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -74,7 +67,10 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	 */
 	public ScreeningStrategy3VO create(final ScreeningStrategy3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -89,8 +85,11 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	 * @return the updated entity.
 	 */
 	public ScreeningStrategy3VO update(final ScreeningStrategy3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -104,7 +103,10 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		ScreeningStrategy3VO vo = findByPk(pk, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -117,8 +119,11 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	 *            the entity to remove.
 	 */
 	public void delete(final ScreeningStrategy3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -135,10 +140,16 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	public ScreeningStrategy3VO findByPk(final Integer pk, final boolean withScreeningStrategyWedge)
 			throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
-			return (ScreeningStrategy3VO) entityManager.createQuery(FIND_BY_PK(withScreeningStrategyWedge))
+			String qlString = "SELECT vo from ScreeningStrategy3VO vo "
+					+ (withScreeningStrategyWedge ? "left join fetch vo.screeningStrategyWedgeVOs " : "")
+					+ "where vo.screeningStrategyId = :pk";
+			return entityManager.createQuery(qlString, ScreeningStrategy3VO.class)
 				.setParameter("pk", pk).getSingleResult();
 		}catch(NoResultException e){
 			return null;
@@ -153,25 +164,11 @@ public class ScreeningStrategy3ServiceBean implements ScreeningStrategy3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<ScreeningStrategy3VO> findAll(final boolean withScreeningStrategyWedge) throws Exception {
-	
-		List<ScreeningStrategy3VO> foundEntities = entityManager.createQuery(FIND_ALL(withScreeningStrategyWedge)).getResultList();
-		return foundEntities;
-	}
 
-	/**
-	 * Check if user has access rights to create, change and remove ScreeningStrategy3 entities. If not set rollback
-	 * only and throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-	
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
+		String qlString = "SELECT vo from ScreeningStrategy3VO vo "
+				+ (withScreeningStrategyWedge ? "left join fetch vo.screeningStrategyWedgeVOs " : "");
+		return entityManager.createQuery(qlString, ScreeningStrategy3VO.class).getResultList();
 	}
 
 	public ScreeningStrategy3VO loadEager(ScreeningStrategy3VO vo) throws Exception{

@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

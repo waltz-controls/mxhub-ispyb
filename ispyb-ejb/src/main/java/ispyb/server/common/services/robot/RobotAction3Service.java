@@ -21,7 +21,7 @@ package ispyb.server.common.services.robot;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.common.vos.robot.RobotAction3VO;
 

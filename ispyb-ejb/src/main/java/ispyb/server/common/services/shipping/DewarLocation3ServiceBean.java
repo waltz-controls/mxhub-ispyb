@@ -20,10 +20,10 @@ package ispyb.server.common.services.shipping;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
@@ -40,20 +40,6 @@ import ispyb.server.common.vos.shipping.DewarLocation3VO;
 public class DewarLocation3ServiceBean implements DewarLocation3Service, DewarLocation3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarLocation3ServiceBean.class);
-
-	// Generic HQL request to find instances of DewarLocation3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarLocation3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.eventId = :pk";
-	}
-
-	// Generic HQL request to find all instances of DewarLocation3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarLocation3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -123,12 +109,15 @@ public class DewarLocation3ServiceBean implements DewarLocation3Service, DewarLo
 	 * @param withLink1
 	 * @param withLink2
 	 * @return the DewarLocation3 value object
+	 * 	// Generic HQL request to find instances of DewarLocation3 by pk
+	 * 	// TODO choose between left/inner join
 	 */
 	public DewarLocation3VO findByPk(final Integer pk, final boolean withLink1, final boolean withLink2) throws Exception {
 		
 		checkCreateChangeRemoveAccess();
 		try{
-			return (DewarLocation3VO) entityManager.createQuery(FIND_BY_PK(withLink1, withLink2))
+			return (DewarLocation3VO) entityManager.createQuery("select vo from DewarLocation3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+							+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.eventId = :pk")
 				.setParameter("pk", pk).getSingleResult();
 		}catch(NoResultException e){
 			return null;
@@ -138,14 +127,18 @@ public class DewarLocation3ServiceBean implements DewarLocation3Service, DewarLo
 	// TODO remove following method if not adequate
 	/**
 	 * Find all DewarLocation3s and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find all instances of DewarLocation3
+	 * 	// TODO choose between left/inner join
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<DewarLocation3VO> findAll(final boolean withLink1, final boolean withLink2) throws Exception {
-		
-		List<DewarLocation3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1, withLink2)).getResultList();
+
+		List<DewarLocation3VO> foundEntities = entityManager.createQuery("select vo from DewarLocation3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+				+ (withLink2 ? "<inner|left> join fetch vo.link2 " : ""))
+				.getResultList();
 		return foundEntities;
 	}
 

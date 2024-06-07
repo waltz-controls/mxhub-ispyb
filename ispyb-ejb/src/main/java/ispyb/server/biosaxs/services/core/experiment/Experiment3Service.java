@@ -28,7 +28,7 @@ import ispyb.server.biosaxs.vos.utils.comparator.SaxsDataCollectionComparator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Experiment3Service {

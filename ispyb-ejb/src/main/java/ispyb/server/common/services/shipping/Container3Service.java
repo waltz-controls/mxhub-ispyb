@@ -22,7 +22,7 @@ package ispyb.server.common.services.shipping;
 import ispyb.server.common.vos.shipping.Container3VO;
 import ispyb.server.common.vos.shipping.Dewar3VO;
 import java.util.List;
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 import ispyb.server.common.vos.shipping.Container3VO;
 
 @Remote

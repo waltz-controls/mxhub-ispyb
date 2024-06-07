@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.core.analysis;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Analysis3ServiceLocal extends Analysis3Service {

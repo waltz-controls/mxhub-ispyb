@@ -21,7 +21,7 @@ package ispyb.server.common.services.ws.rest.session;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface SessionServiceLocal extends SessionService {

@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.autoproc.phasingStep;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.mx.vos.autoproc.PhasingStepVO;
 

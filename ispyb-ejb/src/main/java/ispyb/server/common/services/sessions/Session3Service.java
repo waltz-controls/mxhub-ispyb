@@ -25,7 +25,7 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Session3Service {

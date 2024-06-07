@@ -30,7 +30,7 @@ import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.biosaxs.vos.dataAcquisition.Measurement3VO;
 import ispyb.server.biosaxs.vos.datacollection.Model3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

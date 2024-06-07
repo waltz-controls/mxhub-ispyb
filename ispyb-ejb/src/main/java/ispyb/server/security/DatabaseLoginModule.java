@@ -1,6 +1,7 @@
 package ispyb.server.security;
 
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +16,6 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.apache.log4j.Logger;
-import org.jboss.security.SimpleGroup;
 
 /**
  * An implementation of LoginModule that authenticates against a database
@@ -56,7 +56,7 @@ public class DatabaseLoginModule implements LoginModule {
 	/** debug */
 	protected static boolean debug = false;
 		
-	protected transient SimpleGroup userRoles = new SimpleGroup("Roles");
+	protected transient Set<Principal> userRoles = new HashSet<>();
 	
 	private final Logger LOG = Logger.getLogger(DatabaseLoginModule.class);
 	
@@ -131,8 +131,7 @@ public class DatabaseLoginModule implements LoginModule {
 
 		// Add the user roles to the Subject's principal set
 		Set<Principal> principal = subject.getPrincipals();
-		if (!principal.contains(userRoles))
-			principal.add(userRoles);
+		principal.addAll(userRoles);
 
 		commited = true;
 		

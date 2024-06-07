@@ -20,16 +20,14 @@ package ispyb.server.mx.services.autoproc;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.autoproc.PhasingProgramRun3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -151,18 +149,29 @@ public class PhasingProgramAttachment3ServiceBean implements PhasingProgramAttac
 
 	@SuppressWarnings("unchecked")
 	public List<PhasingProgramAttachment3VO> findFiltered(final Integer phasingProgramRunId)throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(PhasingProgramAttachment3VO.class);
-		
+
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<PhasingProgramAttachment3VO> cq = cb.createQuery(PhasingProgramAttachment3VO.class);
+		Root<PhasingProgramAttachment3VO> root = cq.from(PhasingProgramAttachment3VO.class);
+
+// Joining with PhasingProgramRunVO
+		Join<PhasingProgramAttachment3VO, PhasingProgramRun3VO> phasingProgramRun = root.join("phasingProgramRunVO");
+
+// Conditional check
 		if (phasingProgramRunId != null) {
-			Criteria subCrit = criteria.createCriteria("phasingProgramRunVO");
-			subCrit.add(Restrictions.eq("phasingProgramRunId", phasingProgramRunId));
-			subCrit.addOrder(Order.asc("phasingProgramRunId"));
+			Predicate condition = cb.equal(phasingProgramRun.get("phasingProgramRunId"), phasingProgramRunId);
+			cq.where(condition);
+			cq.orderBy(cb.asc(phasingProgramRun.get("phasingProgramRunId")));
 		}
 
-		List<PhasingProgramAttachment3VO> foundEntities = criteria.list();
+// Selecting the root ensures distinct results implicitly and fetches the entities
+		cq.select(root);
+
+// Execute the query and return the results
+		List<PhasingProgramAttachment3VO> foundEntities = em.createQuery(cq).getResultList();
 		return foundEntities;
+
 	}
 
 	/* Private methods ------------------------------------------------------ */

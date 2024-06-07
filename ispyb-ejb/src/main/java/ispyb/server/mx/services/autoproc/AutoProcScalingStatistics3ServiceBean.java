@@ -21,15 +21,16 @@ package ispyb.server.mx.services.autoproc;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.autoproc.AutoProc3VO;
+import ispyb.server.mx.vos.autoproc.AutoProcScaling3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -162,22 +163,32 @@ public class AutoProcScalingStatistics3ServiceBean implements AutoProcScalingSta
 	public List<AutoProcScalingStatistics3VO> findByAutoProcId(final Integer autoProcId, final String string)
 			throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager; // Ensure your EntityManager is injected or created as needed
 
-		Criteria crit = session.createCriteria(AutoProcScalingStatistics3VO.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<AutoProcScalingStatistics3VO> cq = cb.createQuery(AutoProcScalingStatistics3VO.class);
+		Root<AutoProcScalingStatistics3VO> root = cq.from(AutoProcScalingStatistics3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-
+// Joining with AutoProcScalingVO and AutoProcVO conditionally if autoProcId is provided
 		if (autoProcId != null) {
-			Criteria subCrit = crit.createCriteria("autoProcScalingVO");
-			Criteria subCritAutoProc = subCrit.createCriteria("autoProcVO");
-			subCritAutoProc.add(Restrictions.eq("autoProcId", autoProcId));
+			Join<AutoProcScalingStatistics3VO, AutoProcScaling3VO> autoProcScalingJoin = root.join("autoProcScalingVO", JoinType.INNER);
+			Join<AutoProcScaling3VO, AutoProc3VO> autoProcJoin = autoProcScalingJoin.join("autoProcVO", JoinType.INNER);
+			cq.where(cb.equal(autoProcJoin.get("autoProcId"), autoProcId));
 		}
-		if (string != null)
-			crit.add(Restrictions.like("scalingStatisticsType", string));
 
-		List<AutoProcScalingStatistics3VO> foundEntities = crit.list();
+// Applying filter on the 'scalingStatisticsType' if string is not null
+		if (string != null) {
+			cq.where(cb.like(root.get("scalingStatisticsType"), string));
+		}
+
+// Setting distinct true to emulate Criteria.DISTINCT_ROOT_ENTITY
+		cq.select(root).distinct(true);
+
+// Preparing and executing the query
+		TypedQuery<AutoProcScalingStatistics3VO> query = em.createQuery(cq);
+		List<AutoProcScalingStatistics3VO> foundEntities = query.getResultList();
 		return foundEntities;
+
 	}
 
 	public AutoProcScalingStatistics3VO getBestAutoProcScalingStatistic(List<AutoProcScalingStatistics3VO> values) {

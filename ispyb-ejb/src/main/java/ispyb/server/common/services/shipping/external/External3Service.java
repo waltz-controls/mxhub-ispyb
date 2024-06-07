@@ -25,7 +25,7 @@ import java.util.Map;
 
 import ispyb.server.common.vos.shipping.Shipping3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import com.google.gson.JsonElement;
 

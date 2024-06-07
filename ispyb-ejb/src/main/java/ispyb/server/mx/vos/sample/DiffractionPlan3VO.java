@@ -23,18 +23,7 @@ import ispyb.server.common.vos.ISPyBValueObject;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import jakarta.persistence.*;
 
 /**
  * DiffractionPlan3 value object mapping table DiffractionPlan
@@ -49,7 +38,7 @@ public class DiffractionPlan3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "diffractionPlanId")
 	protected Integer diffractionPlanId;
 
@@ -153,7 +142,6 @@ public class DiffractionPlan3VO extends ISPyBValueObject implements Cloneable {
 	protected Double axisRange;
 	
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "diffractionPlanId")
 	private Set<ExperimentKindDetails3VO> experimentKindVOs;

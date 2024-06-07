@@ -22,7 +22,7 @@ package ispyb.server.biosaxs.services.core.specimen;
 
 import ispyb.server.biosaxs.vos.dataAcquisition.Specimen3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

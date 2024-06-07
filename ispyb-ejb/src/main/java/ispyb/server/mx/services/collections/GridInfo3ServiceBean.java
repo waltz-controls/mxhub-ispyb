@@ -25,18 +25,20 @@ import ispyb.server.mx.vos.collections.GridInfo3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.collections.WorkflowMesh3VO;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -176,17 +178,21 @@ public class GridInfo3ServiceBean implements GridInfo3Service,
 	 */
 	@SuppressWarnings("unchecked")
 	public List<GridInfo3VO> findByWorkflowMeshId(final Integer workflowMeshId) throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(GridInfo3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager entityManager = this.entityManager;  // Assuming EntityManager is injected or retrieved beforehand
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<GridInfo3VO> cq = cb.createQuery(GridInfo3VO.class);
+		Root<GridInfo3VO> root = cq.from(GridInfo3VO.class);
 
 		if (workflowMeshId != null) {
-			Criteria subCrit = crit.createCriteria("workflowMeshVO");
-			subCrit.add(Restrictions.eq("workflowMeshId", workflowMeshId));
+			Join<GridInfo3VO, WorkflowMesh3VO> workflowMeshJoin = root.join("workflowMeshVO");
+			cq.where(cb.equal(workflowMeshJoin.get("workflowMeshId"), workflowMeshId));
 		}
-		List<GridInfo3VO> foundEntities = crit.list();
+
+		cq.distinct(true);  // Ensures that the results returned are distinct
+
+// Execute the query
+		List<GridInfo3VO> foundEntities = entityManager.createQuery(cq).getResultList();
 		return foundEntities;
 	}
 

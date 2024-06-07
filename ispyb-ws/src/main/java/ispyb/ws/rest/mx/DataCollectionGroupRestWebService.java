@@ -5,20 +5,21 @@ import ispyb.ws.soap.em.ToolsForEMDataCollection;
 
 import java.io.File;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.apache.cxf.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class DataCollectionGroupRestWebService extends MXRestWebService {
 
 
@@ -47,7 +48,6 @@ public class DataCollectionGroupRestWebService extends MXRestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollectiongroup/{dataCollectionGroupId}/xtal/thumbnail")
 	@Produces("image/png")
 	public Response getXtalThumbnailByDataCollectionGroupId(@PathParam("token") String token, @PathParam("proposal") String proposal,

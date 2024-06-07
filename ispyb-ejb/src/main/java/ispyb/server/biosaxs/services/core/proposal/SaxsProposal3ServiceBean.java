@@ -23,16 +23,15 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.assembly.Assembly3VO;
 import ispyb.server.biosaxs.vos.assembly.AssemblyHasMacromolecule3VO;
 import ispyb.server.biosaxs.vos.assembly.Macromolecule3VO;
@@ -100,12 +99,12 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 */
 	@Override
 	public List<Additive3VO> findAdditivesByBufferId(int bufferId) {
-		StringBuilder ejbQLQuery = new StringBuilder("SELECT DISTINCT(additive) FROM Additive3VO additive ");
-		ejbQLQuery.append("LEFT JOIN FETCH additive.bufferhasadditive3VOs b ");
-		ejbQLQuery.append("LEFT JOIN FETCH b.buffer3VO ");
-		ejbQLQuery.append("WHERE b.buffer3VO.bufferId = :bufferId ");
-		TypedQuery<Additive3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Additive3VO.class).setParameter("bufferId",
-				bufferId);
+		String ejbQLQuery = "SELECT DISTINCT(additive) FROM Additive3VO additive "
+				+ "LEFT JOIN FETCH additive.bufferhasadditive3VOs LEFT JOIN additive.bufferhasadditive3VOs b " +
+				"LEFT JOIN FETCH b.buffer3VO " +
+				"WHERE b.buffer3VO.bufferId = :bufferId ";
+		TypedQuery<Additive3VO> query = entityManager.createQuery(ejbQLQuery, Additive3VO.class)
+				.setParameter("bufferId", bufferId);
 		return query.getResultList();
 	}
 	@Override
@@ -155,12 +154,12 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 
 	@Override
 	public List<Assembly3VO> findAssembliesByProposalId(Integer proposalId) {
-		StringBuilder ejbQLQuery = new StringBuilder("SELECT DISTINCT(assembly) FROM Assembly3VO assembly ");
-		ejbQLQuery.append("LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs m ");
-		ejbQLQuery.append("LEFT JOIN FETCH m.macromolecule3VO ");
-		ejbQLQuery.append("WHERE m.macromolecule3VO.proposalId = :proposalId ");
-		TypedQuery<Assembly3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Assembly3VO.class).setParameter("proposalId",
-				proposalId);
+		String ejbQLQuery = "SELECT DISTINCT(assembly) FROM Assembly3VO assembly "
+				+ "LEFT JOIN FETCH assembly.assemblyHasMacromolecules3VOs LEFT JOIN assembly.assemblyHasMacromolecules3VOs m " +
+				"LEFT JOIN FETCH m.macromolecule3VO " +
+				"WHERE m.macromolecule3VO.proposalId = :proposalId ";
+		TypedQuery<Assembly3VO> query = entityManager.createQuery(ejbQLQuery, Assembly3VO.class)
+				.setParameter("proposalId", proposalId);
 		return query.getResultList();
 	}
 
@@ -185,8 +184,9 @@ public class SaxsProposal3ServiceBean implements SaxsProposal3Service, SaxsPropo
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StockSolution3VO> findStockSolutionsByBoxId(String dewarId) {
-		String query = SQLQueryKeeper.getStockSolutionsByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT st FROM StockSolution3VO st WHERE st.boxId = :dewarId";
+		Query EJBQuery = this.entityManager.createQuery(query, StockSolution3VO.class)
+				.setParameter("dewarId", dewarId);
 		return EJBQuery.getResultList();
 
 	}

@@ -22,13 +22,10 @@ package ispyb.server.mx.services.ws.rest.energyscan;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -38,35 +35,26 @@ public class EnergyScanRestWsServiceBean implements EnergyScanRestWsService, Ene
 	private EntityManager entityManager;
 
 
-	private String BySessionId = "SELECT * FROM v_energyScan WHERE sessionId = :sessionId and BLSession_proposalId=:proposalId";
-	private String ById = "SELECT * FROM v_energyScan WHERE energyScanId = :energyScanId and BLSession_proposalId=:proposalId";
-	
 	@Override
 	public List<Map<String, Object>> getViewBySessionId(int proposalId, int sessionId) {
+		String sqlQuery = "SELECT * FROM v_energyScan WHERE sessionId = ?1 AND BLSession_proposalId=?2";
 
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
-		
-		return executeSQLQuery(query);
-	}
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query ){
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, sessionId);
+
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
 		return aliasToValueMapList;
 	}
 
 	@Override
 	public List<Map<String, Object>> getViewById(int proposalId, int energyScanId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ById);
+		String sqlQuery = "SELECT * FROM v_energyScan WHERE energyScanId = ?1 and BLSession_proposalId=?2";
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, energyScanId);
 		
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("energyScanId", energyScanId);
-		
-		return executeSQLQuery(query);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 }

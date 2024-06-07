@@ -21,7 +21,7 @@ package ispyb.server.mx.services.sample;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.mx.vos.sample.BLSampleImage3VO;
 

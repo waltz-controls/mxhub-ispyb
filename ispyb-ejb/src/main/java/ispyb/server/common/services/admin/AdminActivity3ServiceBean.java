@@ -20,16 +20,15 @@ package ispyb.server.common.services.admin;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.admin.AdminActivity3VO;
@@ -43,18 +42,6 @@ import ispyb.server.common.vos.admin.AdminActivity3VO;
 public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminActivity3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AdminActivity3ServiceBean.class);
-
-	// Generic HQL request to find instances of AdminActivity3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from AdminActivity3VO vo " + "where vo.adminActivityId = :pk";
-	}
-
-	// Generic HQL request to find all instances of AdminActivity3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from AdminActivity3VO vo ";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -116,7 +103,8 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 
 	/**
 	 * Finds a Scientist entity by its primary key and set linked value objects if necessary
-	 * 
+	 * // Generic HQL request to find instances of AdminActivity3 by pk
+	 * 	// TODO choose between left/inner join
 	 * @param pk
 	 *            the primary key
 	 * @param withLink1
@@ -126,8 +114,9 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	public AdminActivity3VO findByPk(final Integer pk, final boolean withLink1, final boolean withLink2) throws Exception {
 		checkCreateChangeRemoveAccess();
 		try {
-			return (AdminActivity3VO) entityManager.createQuery(FIND_BY_PK())
-					.setParameter("pk", pk).getSingleResult();
+			return (AdminActivity3VO) entityManager.createQuery("from AdminActivity3VO vo " + "where vo.adminActivityId = :pk ")
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -148,14 +137,17 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	// TODO remove following method if not adequate
 	/**
 	 * Find all AdminActivity3s and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find all instances of AdminActivity3
+	 * 	// TODO choose between left/inner join
+	 *
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AdminActivity3VO> findAll() throws Exception {
-		
-		List<AdminActivity3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery("from AdminActivity3VO vo ").getResultList();
 		return foundEntities;
 	}
 
@@ -167,35 +159,42 @@ public class AdminActivity3ServiceBean implements AdminActivity3Service, AdminAc
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AdminActivity3VO> findByAction(final String action) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminActivity3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager entityManager = this.entityManager;  // Assuming EntityManager is injected or retrieved beforehand
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AdminActivity3VO> cq = cb.createQuery(AdminActivity3VO.class);
+		Root<AdminActivity3VO> root = cq.from(AdminActivity3VO.class);
 
 		if (action != null && !action.isEmpty()) {
-			crit.add(Restrictions.eq("action", action));
+			cq.where(cb.equal(root.get("action"), action));
 		}
 
-		return crit.list();
+		cq.distinct(true);  // Ensures that the results returned are distinct
+
+// Execute the query
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery(cq).getResultList();
+		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<AdminActivity3VO> findByUsername(final String username) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminActivity3VO.class);
-
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager entityManager = this.entityManager;  // Assumed to be injected or retrieved somehow
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AdminActivity3VO> cq = cb.createQuery(AdminActivity3VO.class);
+		Root<AdminActivity3VO> root = cq.from(AdminActivity3VO.class);
 
 		if (username != null && !username.isEmpty()) {
-			String bla = username;
-			bla = username.toLowerCase();
-			crit.add(Restrictions.eq("username", bla));
-			crit.addOrder(Order.desc("action"));
+			String usernameLower = username.toLowerCase();
+			cq.where(cb.equal(cb.lower(root.get("username")), usernameLower));
+			cq.orderBy(cb.desc(root.get("action")));
 		}
 
-		return crit.list();
+		cq.distinct(true);  // Ensure distinct results are returned
+
+// Execute the query
+		List<AdminActivity3VO> foundEntities = entityManager.createQuery(cq).getResultList();
+		return foundEntities;
 	}
 
 	/**

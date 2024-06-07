@@ -62,33 +62,6 @@ public class SqlTableMapper {
 				+ " Protein.isCreatedBySampleSheet as Protein_isCreatedBySampleSheet\r\n";
 	}
 
-	public static String getBLSessionTable() {
-		return "BLSession.sessionId as BLSession_sessionId,\r\n"
-				+ "BLSession.expSessionPk as BLSession_expSessionPk,\r\n"
-				+ "BLSession.beamLineSetupId as BLSession_beamLineSetupId,\r\n"
-				+ "BLSession.proposalId as BLSession_proposalId,\r\n"
-				+ "BLSession.projectCode as BLSession_projectCode,\r\n"
-				+ "BLSession.startDate as BLSession_startDate,\r\n"
-				+ "BLSession.endDate as BLSession_endDate,\r\n"
-				+ "BLSession.beamLineName as BLSession_beamLineName,\r\n"
-				+ "BLSession.scheduled as BLSession_scheduled,\r\n"
-				+ "BLSession.nbShifts as BLSession_nbShifts,\r\n"
-				+ "BLSession.comments as BLSession_comments,\r\n"
-				+ "BLSession.beamLineOperator as BLSession_beamLineOperator,\r\n"
-				+ "BLSession.visit_number as BLSession_visit_number,\r\n"
-				+ "BLSession.bltimeStamp as BLSession_bltimeStamp,\r\n"
-				+ "BLSession.usedFlag as BLSession_usedFlag,\r\n"
-				+ "BLSession.sessionTitle as BLSession_sessionTitle,\r\n"
-				+ "BLSession.structureDeterminations as BLSession_structureDeterminations,\r\n"
-				+ "BLSession.dewarTransport as BLSession_dewarTransport,\r\n"
-				+ "BLSession.databackupFrance as BLSession_databackupFrance,\r\n"
-				+ "BLSession.databackupEurope as BLSession_databackupEurope,\r\n"
-				+ "BLSession.operatorSiteNumber as BLSession_operatorSiteNumber,\r\n"
-				+ "BLSession.lastUpdate as BLSession_lastUpdate,\r\n"
-				+ "BLSession.nbReimbDewars as BLSession_nbReimbDewars,\r\n"
-				+ "BLSession.protectedData as BLSession_protectedData";
-	}
-
 	public static String getProposalTable() {
 		return "	Proposal.proposalId as Proposal_proposalId,\r\n"
 				+ "	Proposal.personId as Proposal_personId,\r\n"

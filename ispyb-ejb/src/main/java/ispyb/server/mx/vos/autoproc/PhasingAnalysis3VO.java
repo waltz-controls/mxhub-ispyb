@@ -23,11 +23,7 @@ import ispyb.server.common.vos.ISPyBValueObject;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -47,7 +43,7 @@ public class PhasingAnalysis3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="phasingAnalysisId")	
 	protected Integer phasingAnalysisId;
 

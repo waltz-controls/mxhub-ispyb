@@ -26,7 +26,7 @@ import ispyb.server.biosaxs.vos.dataAcquisition.plate.PlateGroup3VO;
 import ispyb.server.biosaxs.vos.dataAcquisition.plate.Sampleplate3VO;
 import ispyb.server.biosaxs.vos.dataAcquisition.plate.Sampleplateposition3VO;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

@@ -5,50 +5,41 @@ import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 import ispyb.server.common.vos.login.Login3VO;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.ext.Provider;
+
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.core.Headers;
-import org.jboss.resteasy.core.ResourceMethodInvoker;
-import org.jboss.resteasy.core.ServerResponse;
 
 /**
  * This SecurityInterceptor verify the access permissions for a user based on user name and method annotations
  * 
  * */
 @Provider
-public class SecurityInterceptor implements javax.ws.rs.container.ContainerRequestFilter {
+public class SecurityInterceptor implements ContainerRequestFilter {
 	private final static Logger logger = Logger.getLogger(SecurityInterceptor.class);
-	
-	private static final ServerResponse ACCESS_DENIED = new ServerResponse("Access denied for this resource", 401,new Headers<Object>());
-	private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse("Nobody can access this resource", 403,new Headers<Object>());
 
-	
-//	private Response getUnauthorizedResponse(){
-//		return Response.status(401) 
-//				.header("Access-Control-Allow-Origin", "*").build();
-//	}
-	
+	private static final Response ACCESS_DENIED = Response.status(Response.Status.UNAUTHORIZED).entity("Access denied for this resource").build();
+	private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN).entity("Nobody can access this resource").build();
+
+	@Context
+	private ResourceInfo info;
+
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-		ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
-		Method method = methodInvoker.getMethod();
+		Method method = info.getResourceMethod();
 
-		/** Allowing cross-domain **/
-		ArrayList<String> header = new ArrayList<String>();
-		header.add("*");
-		requestContext.getHeaders().put("Access-Control-Allow-Origin", header);
-		
 		if (method.isAnnotationPresent(PermitAll.class)) {
 			logger.info("PermitAll " + method.getName() + " "+ method.getDeclaredAnnotations() + " " + method.getAnnotations() + " " + method.getParameterAnnotations());
 			return;
@@ -110,9 +101,9 @@ public class SecurityInterceptor implements javax.ws.rs.container.ContainerReque
 			Login3Service service = (Login3Service) Ejb3ServiceLocator.getInstance().getLocalService(Login3Service.class);
 			return service.findByToken(token);
 		} catch (NamingException e) {
-			e.printStackTrace();
+			logger.error("", e);
+			return null;
 		}
-		return null;
 	}
 
 }

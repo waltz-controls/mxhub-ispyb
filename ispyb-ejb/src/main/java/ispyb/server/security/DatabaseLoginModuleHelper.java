@@ -4,21 +4,20 @@ package ispyb.server.security;
 import ispyb.common.util.Constants;
 import ispyb.common.util.StringUtils;
 
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 
+import com.sun.security.auth.UserPrincipal;
+
 import org.apache.log4j.Logger;
-import org.jboss.security.SimpleGroup;
-import org.jboss.security.SimplePrincipal;
 
 /**
  * Technical class to access database for {@link DatabaseLoginModule} connection, user's credentials and user's roles  
@@ -166,7 +165,7 @@ public class DatabaseLoginModuleHelper {
 		}
 	}
 	
-	public static SimpleGroup getRoleNamesForUser(Map<String, ?> options, String username, String password, String defaultGroup) throws LoginException {
+	public static Set<Principal> getRoleNamesForUser(Map<String, ?> options, String username, String password, String defaultGroup) throws LoginException {
 
 		Connection connection = null;
 		try {
@@ -188,12 +187,12 @@ public class DatabaseLoginModuleHelper {
 		}
 	}
 
-	private static SimpleGroup doGetRoleNamesForUser(Connection connection, Map<String, ?> options, String username, String password, String defaultGroup) throws NamingException, SQLException, LoginException {
+	private static Set<Principal> doGetRoleNamesForUser(Connection connection, Map<String, ?> options, String username, String password, String defaultGroup) throws NamingException, SQLException, LoginException {
 
-		SimpleGroup userRoles = new SimpleGroup("Roles");
-		userRoles.addMember(new SimplePrincipal(defaultGroup));
+		Set<Principal> userRoles = new HashSet<>();
+		userRoles.add(new UserPrincipal(defaultGroup));
 		for (String role : DatabaseLoginModuleHelper.doGetRoleNamesForUser(connection, options, username, password)) {
-			userRoles.addMember(new SimplePrincipal(role));
+			userRoles.add(new UserPrincipal(role));
 		}
 		return userRoles;
 	}

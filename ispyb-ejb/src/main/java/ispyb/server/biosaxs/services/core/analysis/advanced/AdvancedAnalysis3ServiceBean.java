@@ -20,12 +20,9 @@
 package ispyb.server.biosaxs.services.core.analysis.advanced;
 
 
-import ispyb.server.biosaxs.services.core.experiment.Experiment3ServiceBean;
 import ispyb.server.biosaxs.vos.advanced.FitStructureToExperimentalData3VO;
 import ispyb.server.biosaxs.vos.advanced.RigidBodyModeling3VO;
 import ispyb.server.biosaxs.vos.advanced.Superposition3VO;
-import ispyb.server.biosaxs.vos.assembly.Structure3VO;
-import ispyb.server.biosaxs.vos.dataAcquisition.Experiment3VO;
 import ispyb.server.mx.vos.collections.InputParameterWorkflow;
 import ispyb.server.mx.vos.collections.Workflow3VO;
 
@@ -35,10 +32,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 
 

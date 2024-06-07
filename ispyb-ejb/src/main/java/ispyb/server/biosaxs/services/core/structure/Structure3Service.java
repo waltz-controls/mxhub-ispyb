@@ -25,7 +25,7 @@ import ispyb.server.biosaxs.vos.assembly.Structure3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

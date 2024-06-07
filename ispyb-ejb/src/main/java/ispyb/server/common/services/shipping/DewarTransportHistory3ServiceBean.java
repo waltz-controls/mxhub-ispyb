@@ -20,15 +20,16 @@ package ispyb.server.common.services.shipping;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
 import ispyb.server.common.exceptions.AccessDeniedException;
@@ -44,17 +45,6 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 		DewarTransportHistory3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarTransportHistory3ServiceBean.class);
-	// Generic HQL request to find instances of DewarTransportHistory3 by pk
-	private static final String FIND_BY_PK(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarTransportHistory3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.dewarTransportHistory = :pk";
-	}
-
-	// Generic HQL request to find all instances of DewarTransportHistory3
-	private static final String FIND_ALL(boolean fetchLink1, boolean fetchLink2) {
-		return "from DewarTransportHistory3VO vo " + (fetchLink1 ? "<inner|left> join fetch vo.link1 " : "")
-				+ (fetchLink2 ? "<inner|left> join fetch vo.link2 " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -122,7 +112,7 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 
 	/**
 	 * Finds a Scientist entity by its primary key and set linked value objects if necessary
-	 * 
+	 * 	// Generic HQL request to find instances of DewarTransportHistory3 by pk
 	 * @param pk
 	 *            the primary key
 	 * @param withLink1
@@ -135,7 +125,8 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 		checkCreateChangeRemoveAccess();
 		// TODO Edit this business code
 		try{
-			return (DewarTransportHistory3VO) entityManager.createQuery(FIND_BY_PK(withLink1, withLink2))
+			return (DewarTransportHistory3VO) entityManager.createQuery("from DewarTransportHistory3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+							+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "") + "where vo.dewarTransportHistory = :pk")
 				.setParameter("pk", pk).getSingleResult();
 		}catch(NoResultException e){
 			return null;
@@ -145,14 +136,15 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 	// TODO remove following method if not adequate
 	/**
 	 * Find all DewarTransportHistory3s and set linked value objects if necessary
-	 * 
+	 * 	// Generic HQL request to find all instances of DewarTransportHistory3
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<DewarTransportHistory3VO> findAll(final boolean withLink1, final boolean withLink2) throws Exception {
 
-		List<DewarTransportHistory3VO> foundEntities = entityManager.createQuery(FIND_ALL(withLink1, withLink2)).getResultList();
+		List<DewarTransportHistory3VO> foundEntities = entityManager.createQuery("select vo from DewarTransportHistory3VO vo " + (withLink1 ? "<inner|left> join fetch vo.link1 " : "")
+				+ (withLink2 ? "<inner|left> join fetch vo.link2 " : "")).getResultList();
 		return foundEntities;
 	}
 	
@@ -175,14 +167,28 @@ public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3
 	public List<DewarTransportHistory3VO> findByDewarId(final Integer dewarId)
 			throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(DewarTransportHistory3VO.class);
-		
-		if (dewarId != null){
-			criteria.createCriteria("dewarVO").add(Restrictions.eq("dewarId", dewarId));
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery object for DewarTransportHistory3VO
+		CriteriaQuery<DewarTransportHistory3VO> criteriaQuery = criteriaBuilder.createQuery(DewarTransportHistory3VO.class);
+
+// Define the root of the query (the main entity to query from)
+		Root<DewarTransportHistory3VO> root = criteriaQuery.from(DewarTransportHistory3VO.class);
+
+// Optionally join related entities and add conditions
+		if (dewarId != null) {
+			Predicate dewarIdCondition = criteriaBuilder.equal(root.join("dewarVO").get("dewarId"), dewarId);
+			criteriaQuery.where(dewarIdCondition);
 		}
-		
-		return criteria.list();
+
+// Prepare the query to be executed
+		criteriaQuery.select(root);
+
+// Execute the query
+		List<DewarTransportHistory3VO> result = entityManager.createQuery(criteriaQuery).getResultList();
+
+		return result;
 	}
 	
 	

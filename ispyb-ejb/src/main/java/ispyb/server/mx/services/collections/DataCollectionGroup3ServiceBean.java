@@ -20,21 +20,19 @@ package ispyb.server.mx.services.collections;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.collections.Session3VO;
+import ispyb.server.mx.vos.collections.Workflow3VO;
+import ispyb.server.mx.vos.sample.BLSample3VO;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
-import ispyb.server.common.exceptions.AccessDeniedException;
 
 import ispyb.server.mx.vos.collections.DataCollectionGroup3VO;
 import ispyb.server.mx.vos.collections.DataCollectionGroupWS3VO;
@@ -48,18 +46,10 @@ import ispyb.server.mx.vos.collections.DataCollectionGroupWS3VO;
 public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Service, DataCollectionGroup3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DataCollectionGroup3ServiceBean.class);
-	
+
 	// Generic HQL request to find instances of DataCollectionGroup3 by pk
-	private static final String FIND_BY_PK(boolean fetchDataCollection, boolean fetchScreening) {
-		return "from DataCollectionGroup3VO vo " + (fetchDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
-				+ (fetchScreening ? "left join fetch vo.screeningVOs " : "")
-				+ "where vo.dataCollectionGroupId = :pk";
-	}
 
 	// Generic HQL request to find all instances of DataCollectionGroup3
-	private static final String FIND_ALL(boolean fetchDataCollection) {
-		return "from DataCollectionGroup3VO vo " + (fetchDataCollection ? "left join fetch vo.dataCollectionVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -78,8 +68,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @return the persisted entity.
 	 */
 	public DataCollectionGroup3VO create(final DataCollectionGroup3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -94,8 +88,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @return the updated entity.
 	 */
 	public DataCollectionGroup3VO update(final DataCollectionGroup3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -107,8 +105,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		DataCollectionGroup3VO vo = findByPk(pk, false, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -121,8 +123,12 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 *            the entity to remove.
 	 */
 	public void delete(final DataCollectionGroup3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		entityManager.remove(vo);
 	}
 
@@ -137,10 +143,17 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 */
 	public DataCollectionGroup3VO findByPk(final Integer pk, final boolean withDataCollection, final boolean withScreening) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			return (DataCollectionGroup3VO) entityManager.createQuery(FIND_BY_PK(withDataCollection, withScreening))
+			return (DataCollectionGroup3VO) entityManager.createQuery("SELECT vo from DataCollectionGroup3VO vo "
+							+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
+							+ (withScreening ? "left join fetch vo.screeningVOs " : "")
+							+ "where vo.dataCollectionGroupId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -157,11 +170,18 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @throws Exception
 	 */
 	public DataCollectionGroupWS3VO findForWSByPk(final Integer pk, final boolean withDataCollection, final boolean withScreening) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
+		// .getInstance().getService(
+		// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
+		// rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
-			DataCollectionGroup3VO found = (DataCollectionGroup3VO) entityManager.createQuery(FIND_BY_PK(withDataCollection, withScreening))
+			DataCollectionGroup3VO found = (DataCollectionGroup3VO) entityManager.createQuery("SELECT vo from DataCollectionGroup3VO vo "
+							+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : "")
+							+ (withScreening ? "left join fetch vo.screeningVOs " : "")
+							+ "where vo.dataCollectionGroupId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 			DataCollectionGroupWS3VO sesLight = getWSDataCollectionGroupVO(found);
 			return sesLight;
@@ -207,26 +227,11 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<DataCollectionGroup3VO> findAll(final boolean withDataCollection) throws Exception {
 
-		List<DataCollectionGroup3VO> foundEntities = entityManager.createQuery(FIND_ALL(withDataCollection)).getResultList();
-		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove DataCollectionGroup3 entities. If not set rollback
-	 * only and throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator
-				// .getInstance().getService(
-				// AuthorizationServiceLocalHome.class); // TODO change method to the one checking the needed access
-				// rights
-				// autService.checkUserRightToChangeAdminData();
+        return entityManager.createQuery("SELECT vo from DataCollectionGroup3VO vo "
+				+ (withDataCollection ? "left join fetch vo.dataCollectionVOs " : ""), DataCollectionGroup3VO.class)
+				.getResultList();
 	}
 
 
@@ -245,29 +250,41 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	public List<DataCollectionGroup3VO> findFiltered(final Integer sessionId, final boolean withDataCollection, final boolean withScreenings)
 			throws Exception {
 
-		List<DataCollectionGroup3VO> resultList;
+		EntityManager em = this.entityManager; // Assuming entityManager is already injected or retrieved
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(DataCollectionGroup3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<DataCollectionGroup3VO> cq = cb.createQuery(DataCollectionGroup3VO.class);
+		Root<DataCollectionGroup3VO> root = cq.from(DataCollectionGroup3VO.class);
+
+// Handling the condition to filter by sessionId
 		if (sessionId != null) {
-			Criteria subCritSession = crit.createCriteria("sessionVO");
-			subCritSession.add(Restrictions.eq("sessionId", sessionId));
+			Join<DataCollectionGroup3VO, Session3VO> sessionJoin = root.join("sessionVO", JoinType.INNER);
+			cq.where(cb.equal(sessionJoin.get("sessionId"), sessionId));
 		}
+
+// Fetch related entities if required
 		if (withDataCollection) {
-			crit.setFetchMode("dataCollectionVOs", FetchMode.JOIN);
+			root.fetch("dataCollectionVOs", JoinType.LEFT);
 		}
 		if (withScreenings) {
-			crit.setFetchMode("screeningVOs", FetchMode.JOIN);
+			root.fetch("screeningVOs", JoinType.LEFT);
 		}
 
-		crit.addOrder(Order.desc("startTime"));
+// Order by startTime in descending order
+		cq.orderBy(cb.desc(root.get("startTime")));
 
-		resultList = crit.list();
+// Create the query
+		TypedQuery<DataCollectionGroup3VO> query = em.createQuery(cq);
+
 		// TODO understand why crit.setMaxResults does not work ???
+// Note: For setting maximum results, you would do this on the TypedQuery
+// For example, to set max results to 10 you would uncomment the following:
+// query.setMaxResults(10);
 
-		List<DataCollectionGroup3VO> foundEntities = crit.list();
+// Execute the query and get the result list
+		List<DataCollectionGroup3VO> foundEntities = query.getResultList();
 		return foundEntities;
+
 	}
 
 	/**
@@ -280,21 +297,34 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	@SuppressWarnings("unchecked")
 	public List<DataCollectionGroup3VO> findByWorkflow(final Integer workflowId) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(DataCollectionGroup3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager em = this.entityManager; // Ensure your EntityManager is injected or created as needed
 
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<DataCollectionGroup3VO> cq = cb.createQuery(DataCollectionGroup3VO.class);
+		Root<DataCollectionGroup3VO> root = cq.from(DataCollectionGroup3VO.class);
+
+// Handling the condition to filter by workflowId
 		if (workflowId != null) {
-			Criteria subCritWorkflow = crit.createCriteria("workflowVO");
-			subCritWorkflow.add(Restrictions.eq("workflowId", workflowId));
+			Join<DataCollectionGroup3VO, Workflow3VO> workflowJoin = root.join("workflowVO", JoinType.INNER); // Adjust join type as needed
+			cq.where(cb.equal(workflowJoin.get("workflowId"), workflowId));
 		}
 
-		crit.addOrder(Order.desc("startTime"));
+// Ordering by startTime in descending order
+		cq.orderBy(cb.desc(root.get("startTime")));
+
+// Create a distinct true query to mimic 'DISTINCT_ROOT_ENTITY'
+		cq.select(root).distinct(true);
+
+// Create the query and get results
+		TypedQuery<DataCollectionGroup3VO> query = em.createQuery(cq);
 
 		// TODO understand why crit.setMaxResults does not work ???
+// If you need to limit the results you can uncomment the following line
+// query.setMaxResults(10); // Set the maximum number of results you want to fetch
 
-		List<DataCollectionGroup3VO> foundEntities = crit.list();
+		List<DataCollectionGroup3VO> foundEntities = query.getResultList();
 		return foundEntities;
+
 	}
 
 
@@ -309,27 +339,41 @@ public class DataCollectionGroup3ServiceBean implements DataCollectionGroup3Serv
 	public List<DataCollectionGroup3VO> findBySampleId(final Integer sampleId, final boolean withDataCollection, final boolean withScreenings)
 			throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(DataCollectionGroup3VO.class);
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-	
+		EntityManager em = this.entityManager; // Ensure your EntityManager is injected or created as needed
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<DataCollectionGroup3VO> cq = cb.createQuery(DataCollectionGroup3VO.class);
+		Root<DataCollectionGroup3VO> root = cq.from(DataCollectionGroup3VO.class);
+
+// Handling fetch joins if needed
 		if (withDataCollection) {
-			crit.setFetchMode("dataCollectionVOs", FetchMode.JOIN);
+			root.fetch("dataCollectionVOs", JoinType.LEFT); // Adjust join type based on your needs
 		}
 		if (withScreenings) {
-			crit.setFetchMode("screeningVOs", FetchMode.JOIN);
+			root.fetch("screeningVOs", JoinType.LEFT); // Adjust join type based on your needs
 		}
 
+// Conditionally adding a filter for sampleId
 		if (sampleId != null) {
-			Criteria subCritSample = crit.createCriteria("blSampleVO");
-			subCritSample.add(Restrictions.eq("blSampleId", sampleId));
+			Join<DataCollectionGroup3VO, BLSample3VO> sampleJoin = root.join("blSampleVO", JoinType.INNER); // Adjust join type as needed
+			cq.where(cb.equal(sampleJoin.get("blSampleId"), sampleId));
 		}
-		crit.addOrder(Order.desc("startTime"));
+
+// Ordering by startTime in descending order
+		cq.orderBy(cb.desc(root.get("startTime")));
+
+// Ensuring distinct results
+		cq.select(root).distinct(true);
+
+// Prepare the query
+		TypedQuery<DataCollectionGroup3VO> query = em.createQuery(cq);
 
 		// TODO understand why crit.setMaxResults does not work ???
 
-		List<DataCollectionGroup3VO> foundEntities = crit.list();
+// Execute the query and get results
+		List<DataCollectionGroup3VO> foundEntities = query.getResultList();
 		return foundEntities;
+
 	}
 
 

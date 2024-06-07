@@ -25,19 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * ScreeningOutput3 value object mapping table ScreeningOutput
@@ -54,7 +44,7 @@ public class ScreeningOutput3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "screeningOutputId")
 	protected Integer screeningOutputId;
 
@@ -131,12 +121,10 @@ public class ScreeningOutput3VO extends ISPyBValueObject implements Cloneable {
 	@Column(name = "rFriedel")
 	protected Double rFriedel;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningOutputId")
 	private Set<ScreeningStrategy3VO> screeningStrategyVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningOutputId")
 	private Set<ScreeningOutputLattice3VO> screeningOutputLatticeVOs;

@@ -18,17 +18,19 @@
  ****************************************************************************************************/
 package ispyb.server.common.services.proposals;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.exceptions.AccessDeniedException;
@@ -44,21 +46,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 
 	private final static Logger LOG = Logger.getLogger(Laboratory3ServiceBean.class);
 
-	private static String SELECT_LABORATORY = "SELECT l.laboratoryId, l.laboratoryUUID, l.name, l.address, "
-			+ "l.city, l.country, l.url, l.organization, l.laboratoryExtPk  ";
-
-	private static String FIND_BY_PROPOSAL_CODE_NUMBER = SELECT_LABORATORY
-			+ " FROM Laboratory l, Person p, Proposal pro "
-			+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND pro.proposalCode like :code AND pro.proposalNumber = :number ";
-
 	// Generic HQL request to find instances of Laboratory3 by pk
-	private static final String FIND_BY_PK() {
-		return "from Laboratory3VO vo  where vo.laboratoryId = :pk";
-	}
-
-	private static final String FIND_BY_LABORATORY_EXT_PK() {
-		return "from Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -127,7 +115,7 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	public Laboratory3VO findByPk(final Integer pk) throws Exception {
 		try {
-			return (Laboratory3VO) entityManager.createQuery(FIND_BY_PK())
+			return (Laboratory3VO) entityManager.createQuery("SELECT vo FROM Laboratory3VO vo  where vo.laboratoryId = :pk")
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -141,8 +129,10 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 	 */
 	@SuppressWarnings("unchecked")
 	public Laboratory3VO findByLaboratoryExtPk(final Integer laboExtPk) {
-		List<Laboratory3VO> listVOs =  this.entityManager.createQuery(FIND_BY_LABORATORY_EXT_PK())
-					.setParameter("labExtPk", laboExtPk).getResultList();
+		String query = "SELECT vo FROM Laboratory3VO vo  where vo.laboratoryExtPk = :labExtPk order by vo.laboratoryId desc";
+		List<Laboratory3VO> listVOs =  this.entityManager.createQuery(query, Laboratory3VO.class)
+				.setParameter("labExtPk", laboExtPk)
+				.getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			return null;
 			
@@ -150,35 +140,66 @@ public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3Se
 		
 	}
 
+	//TODO test
 	@SuppressWarnings("unchecked")
 	public Laboratory3VO findLaboratoryByProposalCodeAndNumber(String code, String number) {
 		
-		String query = FIND_BY_PROPOSAL_CODE_NUMBER;
-		List<Laboratory3VO> listVOs = this.entityManager.createNativeQuery(query, "laboratoryNativeQuery")
-				.setParameter("code", code).setParameter("number", number).getResultList();
-		if (listVOs == null || listVOs.isEmpty())
+		String query = "SELECT l.laboratoryId, l.laboratoryUUID, l.name, l.address, "
+				+ "l.city, l.country, l.url, l.organization, l.laboratoryExtPk  "
+				+ " FROM Laboratory l, Person p, Proposal pro "
+				+ "WHERE l.laboratoryId = p.laboratoryId AND p.personId = pro.personId AND "
+				+ "pro.proposalCode like ?1 "
+				+ "AND pro.proposalNumber = ?2 ";
+
+		try {
+			return (Laboratory3VO) this.entityManager.createNativeQuery(query, Laboratory3VO.class)
+					.setParameter(1, code)
+					.setParameter(2, number)
+					.getSingleResult();
+		} catch (NoResultException noResultException){
 			return null;
-		
-		return (Laboratory3VO) listVOs.toArray()[0];
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Laboratory3VO> findFiltered(String laboratoryName, String city, String country) {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(Laboratory3VO.class);
+// Create a CriteriaQuery object for Laboratory3VO
+		CriteriaQuery<Laboratory3VO> criteriaQuery = criteriaBuilder.createQuery(Laboratory3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Define the root of the query (the main entity to query from)
+		Root<Laboratory3VO> root = criteriaQuery.from(Laboratory3VO.class);
 
-		if (!StringUtils.isEmpty(laboratoryName))
-			crit.add(Restrictions.like("name", laboratoryName));
-		if (!StringUtils.isEmpty(city))
-			crit.add(Restrictions.like("city", city));
-		if (!StringUtils.isEmpty(country))
-			crit.add(Restrictions.like("country", country));
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
 
-		return crit.list();
+// Add conditions based on method parameters
+		if (!StringUtils.isEmpty(laboratoryName)) {
+			predicates.add(criteriaBuilder.like(root.get("name"), "%" + laboratoryName + "%"));
+		}
+		if (!StringUtils.isEmpty(city)) {
+			predicates.add(criteriaBuilder.like(root.get("city"), "%" + city + "%"));
+		}
+		if (!StringUtils.isEmpty(country)) {
+			predicates.add(criteriaBuilder.like(root.get("country"), "%" + country + "%"));
+		}
+
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
+
+// Prepare the query to be executed
+		CriteriaQuery<Laboratory3VO> select = criteriaQuery.select(root);
+
+// Execute the query
+		List<Laboratory3VO> result = entityManager.createQuery(select).getResultList();
+
+		return result;
 
 	}
 

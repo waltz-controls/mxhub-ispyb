@@ -20,16 +20,16 @@ package ispyb.server.mx.services.autoproc;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 
@@ -47,23 +47,11 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 
 	// Generic HQL request to find instances of PhasingHasScaling3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK() {
-		return "from PhasingHasScaling3VO vo "
-				+ "where vo.phasingHasScalingId = :pk";
-	}
 
 	// Generic HQL request to find all instances of PhasingHasScaling3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from PhasingHasScaling3VO vo ";
-	}
 
-	private static final String FIND_BY_AUTOPROC = "SELECT * "
-			+ "FROM Phasing_has_Scaling, AutoProcScaling "
-			+ "WHERE Phasing_has_Scaling.autoProcScalingId = AutoProcScaling.autoProcScalingId AND "
-			+ "AutoProcScaling.autoProcId = :autoProcId ";
-	
-	
+
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -127,8 +115,10 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 	
 		checkCreateChangeRemoveAccess();
 		try {
-			return (PhasingHasScaling3VO) entityManager
-					.createQuery(FIND_BY_PK())
+			String qlString = "SELECT vo from PhasingHasScaling3VO vo "
+					+ "where vo.phasingHasScalingId = :pk";
+			return entityManager
+					.createQuery(qlString, PhasingHasScaling3VO.class)
 					.setParameter("pk", pk).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -140,11 +130,10 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<PhasingHasScaling3VO> findAll()throws Exception {
 
-		List<PhasingHasScaling3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
-		return foundEntities;
+		String qlString = "SELECT vo from PhasingHasScaling3VO vo ";
+        return entityManager.createQuery(qlString, PhasingHasScaling3VO.class).getResultList();
 	}
 
 	/**
@@ -159,24 +148,40 @@ public class PhasingHasScaling3ServiceBean implements PhasingHasScaling3Service,
 
 	@SuppressWarnings("unchecked")
 	public List<PhasingHasScaling3VO> findFiltered(final Integer autoProcScalingId)throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(PhasingHasScaling3VO.class);
-		
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+// Create a CriteriaQuery object for PhasingHasScaling3VO
+		CriteriaQuery<PhasingHasScaling3VO> criteriaQuery = criteriaBuilder.createQuery(PhasingHasScaling3VO.class);
+
+// Define the root of the query (the main entity to query from)
+		Root<PhasingHasScaling3VO> root = criteriaQuery.from(PhasingHasScaling3VO.class);
+
+// Optionally join related entities and add conditions
 		if (autoProcScalingId != null) {
-			Criteria subCritAutoProcScaling = criteria.createCriteria("autoProcScalingVO");
-			subCritAutoProcScaling.add(Restrictions.eq("autoProcScalingId", autoProcScalingId));
-			subCritAutoProcScaling.addOrder(Order.asc("autoProcScalingId"));
+			Predicate condition = criteriaBuilder.equal(root.join("autoProcScalingVO").get("autoProcScalingId"), autoProcScalingId);
+			criteriaQuery.where(condition);
+			criteriaQuery.orderBy(criteriaBuilder.asc(root.join("autoProcScalingVO").get("autoProcScalingId")));
 		}
-		List<PhasingHasScaling3VO> foundEntities = criteria.list();
-		return foundEntities;
+
+// Prepare the query to be executed
+		criteriaQuery.select(root);
+
+// Execute the query
+		List<PhasingHasScaling3VO> result = entityManager.createQuery(criteriaQuery).getResultList();
+
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<PhasingHasScaling3VO> findByAutoProc(final Integer autoProcId) throws Exception {
 		
-		String query = FIND_BY_AUTOPROC;
+		String query = "SELECT * "
+				+ "FROM Phasing_has_Scaling, AutoProcScaling "
+				+ "WHERE Phasing_has_Scaling.autoProcScalingId = AutoProcScaling.autoProcScalingId AND "
+				+ "AutoProcScaling.autoProcId = ?1 ";
 		List<PhasingHasScaling3VO> listVOs = this.entityManager.createNativeQuery(query, "phasingHasScalingNativeQuery")
-				.setParameter("autoProcId", autoProcId).getResultList();
+				.setParameter(1, autoProcId).getResultList();
 		if (listVOs == null || listVOs.isEmpty())
 			listVOs = null;
 		List<PhasingHasScaling3VO> foundEntities = listVOs;

@@ -24,7 +24,7 @@ import ispyb.server.mx.vos.screening.ScreeningOutputLatticeWS3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface ScreeningOutputLattice3Service {

@@ -20,15 +20,16 @@ package ispyb.server.common.services.admin;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.admin.AdminVar3VO;
@@ -42,16 +43,6 @@ import ispyb.server.common.vos.admin.AdminVar3VO;
 public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AdminVar3ServiceBean.class);
-
-	// Generic HQL request to find instances of AdminVar3 by pk
-	private static final String FIND_BY_PK() {
-		return "from AdminVar3VO vo where vo.adminVarId = :pk";
-	}
-
-	// Generic HQL request to find all instances of AdminVar3
-	private static final String FIND_ALL() {
-		return "from AdminVar3VO vo ";
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -114,7 +105,8 @@ public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceL
 
 	/**
 	 * Finds a Scientist entity by its primary key and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find instances of AdminVar3 by pk
 	 * @param pk
 	 *            the primary key
 	 * @param withLink1
@@ -125,7 +117,9 @@ public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceL
 		
 		checkCreateChangeRemoveAccess();
 		try {
-			return (AdminVar3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
+			return (AdminVar3VO) entityManager.createQuery("SELECT vo from AdminVar3VO vo where vo.adminVarId = :pk")
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -146,45 +140,69 @@ public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceL
 
 	/**
 	 * Find all AdminVar3s and set linked value objects if necessary
-	 * 
+	 *
+	 * // Generic HQL request to find all instances of AdminVar3
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AdminVar3VO> findAll() throws Exception {
-		
-		List<AdminVar3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<AdminVar3VO> foundEntities = entityManager.createQuery("select vo from AdminVar3VO vo ")
+				.getResultList();
 		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<AdminVar3VO> findByName(final String name) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminVar3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		// Obtain the CriteriaBuilder from the EntityManager
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+		// Create a CriteriaQuery object for AdminVar3VO
+		CriteriaQuery<AdminVar3VO> query = cb.createQuery(AdminVar3VO.class);
+
+		// Define the root of the query (i.e., AdminVar3VO)
+		Root<AdminVar3VO> root = query.from(AdminVar3VO.class);
+
+		// Create a CriteriaQuery object
+		query.select(root).distinct(true); // Enable distinct results
 
 		if (name != null && !name.isEmpty()) {
+			// Convert the name to lower case and create a 'like' predicate
 			String n = name.toLowerCase();
-			crit.add(Restrictions.like("name", n));
+			Predicate nameLike = cb.like(cb.lower(root.get("name")), "%" + n + "%");
+			query.where(nameLike); // Add the where clause to the query
 		}
-		return crit.list();
+
+		// Execute the query and return the result list
+		return entityManager.createQuery(query).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<AdminVar3VO> findByAction(final String statusLogon) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(AdminVar3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		// Obtain the CriteriaBuilder from the EntityManager
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+		// Create a CriteriaQuery object for AdminVar3VO
+		CriteriaQuery<AdminVar3VO> query = cb.createQuery(AdminVar3VO.class);
+
+		// Define the root of the query (i.e., AdminVar3VO)
+		Root<AdminVar3VO> root = query.from(AdminVar3VO.class);
+
+		// Create a CriteriaQuery object
+		query.select(root).distinct(true); // Enable distinct results
 
 		if (statusLogon != null && !statusLogon.isEmpty()) {
+			// Convert the statusLogon to lower case and create a 'like' predicate
 			String v = statusLogon.toLowerCase();
-			crit.add(Restrictions.like("value", v));
+			Predicate statusLogonLike = cb.like(cb.lower(root.get("value")), "%" + v + "%");
+			query.where(statusLogonLike); // Add the where clause to the query
 		}
-		return crit.list();
+
+		// Execute the query and return the result list
+		return entityManager.createQuery(query).getResultList();
 	}
 
 	/**

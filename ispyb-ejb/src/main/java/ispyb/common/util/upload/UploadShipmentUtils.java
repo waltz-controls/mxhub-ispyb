@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -229,7 +230,8 @@ public class UploadShipmentUtils {
 				if (getTemplateFilenameOnly && !populateForShipment)
 					return proposalCode + proposalNumber + ((populateDMCodes) ? "_#" : "") + today;
 
-				String requestPath = request.getRealPath("/");
+				ServletContext context = request.getServletContext();
+				String requestPath = context.getRealPath("/");
 				xlsPath = requestPath + xlsPath;
 				String prefix = new File(xlsPath).getParent();
 				populatedTemplateFileName	= (prefix + "/" + new File(populatedTemplateFileName).getName());

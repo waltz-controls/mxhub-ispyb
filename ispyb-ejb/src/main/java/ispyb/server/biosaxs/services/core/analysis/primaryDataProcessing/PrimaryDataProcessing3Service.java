@@ -27,7 +27,7 @@ import ispyb.server.biosaxs.vos.datacollection.Subtraction3VO;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

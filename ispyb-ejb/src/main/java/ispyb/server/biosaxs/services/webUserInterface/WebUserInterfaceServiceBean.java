@@ -43,10 +43,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * The goal of this class is to merge all the logic coming from BiosaxsDataAdapter

@@ -23,13 +23,13 @@ import ispyb.server.mx.vos.screening.ScreeningRankSet3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
@@ -45,16 +45,9 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 
 	// Generic HQL request to find instances of ScreeningRankSet3 by pk
 	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchScreeningRank) {
-		return "from ScreeningRankSet3VO vo " + (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
-				+ "where vo.screeningRankSetId = :pk";
-	}
 
 	// Generic HQL request to find all instances of ScreeningRankSet3
 	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchScreeningRank) {
-		return "from ScreeningRankSet3VO vo " + (fetchScreeningRank ? "left join fetch vo.screeningRankVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
@@ -73,8 +66,11 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	 * @return the persisted entity.
 	 */
 	public ScreeningRankSet3VO create(final ScreeningRankSet3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -90,7 +86,10 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	 */
 	public ScreeningRankSet3VO update(final ScreeningRankSet3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -104,7 +103,10 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		ScreeningRankSet3VO vo = findByPk(pk, false);
 		// TODO Edit this business code
 		delete(vo);
@@ -117,8 +119,11 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	 *            the entity to remove.
 	 */
 	public void delete(final ScreeningRankSet3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -135,11 +140,18 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	public ScreeningRankSet3VO findByPk(final Integer pk, final boolean withScreeningRank)
 			throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
-			return (ScreeningRankSet3VO) entityManager.createQuery(FIND_BY_PK(withScreeningRank))
-				.setParameter("pk", pk).getSingleResult();
+			String qlString = "SELECT vo from ScreeningRankSet3VO vo "
+					+ (withScreeningRank ? "left join fetch vo.screeningRankVOs " : "")
+					+ "where vo.screeningRankSetId = :pk";
+			return entityManager.createQuery(qlString, ScreeningRankSet3VO.class)
+					.setParameter("pk", pk)
+					.getSingleResult();
 		}catch(NoResultException e){
 			return null;
 		}
@@ -152,25 +164,11 @@ public class ScreeningRankSet3ServiceBean implements ScreeningRankSet3Service, S
 	 * @param withLink1
 	 * @param withLink2
 	 */
-	@SuppressWarnings("unchecked")
 	public List<ScreeningRankSet3VO> findAll(final boolean withScreeningRank) throws Exception {
 
-		List<ScreeningRankSet3VO> foundEntities = entityManager.createQuery(FIND_ALL(withScreeningRank)).getResultList();
-		return foundEntities;
-	}
-
-	/**
-	 * Check if user has access rights to create, change and remove ScreeningRankSet3 entities. If not set rollback only
-	 * and throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-		// to the one checking the needed access rights
-		// autService.checkUserRightToChangeAdminData();
+		String qlString = "SELECT vo from ScreeningRankSet3VO vo "
+				+ (withScreeningRank ? "left join fetch vo.screeningRankVOs " : "");
+        return entityManager.createQuery(qlString, ScreeningRankSet3VO.class).getResultList();
 	}
 
 	public ScreeningRankSet3VO loadEager(ScreeningRankSet3VO vo) throws Exception{

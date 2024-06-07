@@ -18,26 +18,18 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.autoproc;
 
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
-
+import ispyb.server.mx.vos.autoproc.GeometryClassname3VO;
 import ispyb.server.mx.vos.autoproc.SpaceGroup3VO;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -76,7 +68,10 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	 */
 	public SpaceGroup3VO create(final SpaceGroup3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -92,7 +87,10 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	 */
 	public SpaceGroup3VO update(final SpaceGroup3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -105,8 +103,11 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		SpaceGroup3VO vo = findByPk(pk);
 		// TODO Edit this business code
 		delete(vo);
@@ -120,7 +121,10 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	 */
 	public void delete(final SpaceGroup3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -136,7 +140,10 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	 */
 	public SpaceGroup3VO findByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try{
 			return (SpaceGroup3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
@@ -148,17 +155,24 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	@SuppressWarnings("unchecked")
 	public List<SpaceGroup3VO> findBySpaceGroupShortName(final String currSpaceGroup) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(SpaceGroup3VO.class);
+		EntityManager em = this.entityManager; // Assume EntityManager is already initialized
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<SpaceGroup3VO> cq = cb.createQuery(SpaceGroup3VO.class);
+		Root<SpaceGroup3VO> spaceGroup = cq.from(SpaceGroup3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-
-		if (currSpaceGroup != null){
-			crit.add(Restrictions.like("spaceGroupShortName", currSpaceGroup));
+// Adding conditions
+		if (currSpaceGroup != null) {
+			Predicate likeCondition = cb.like(spaceGroup.get("spaceGroupShortName"), currSpaceGroup);
+			cq.where(likeCondition);
 		}
 
-		List<SpaceGroup3VO> foundEntities = crit.list();
-		return foundEntities;
+// Ensuring distinct results
+		cq.select(spaceGroup).distinct(true);
+
+// Execute the query and return the list
+		List<SpaceGroup3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	// TODO remove following method if not adequate
@@ -176,39 +190,34 @@ public class SpaceGroup3ServiceBean implements SpaceGroup3Service, SpaceGroup3Se
 	}
 
 	/**
-	 * Check if user has access rights to create, change and remove SpaceGroup3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
-	}
-	
-	/**
 	 * returns the list of space groups allowed / used in MX (not all the spaceGroup table, only the mxUsed)
 	 * @return
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	public List<SpaceGroup3VO> findAllowedSpaceGroups() throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria crit = session.createCriteria(SpaceGroup3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		EntityManager em = this.entityManager; // Assume EntityManager is already initialized
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<SpaceGroup3VO> cq = cb.createQuery(SpaceGroup3VO.class);
+		Root<SpaceGroup3VO> spaceGroup = cq.from(SpaceGroup3VO.class);
 
-		crit.add(Restrictions.eq("mxUsed", 1));
-		Criteria subCritGeometryClassname = crit.createCriteria("geometryClassnameVO");
-		subCritGeometryClassname.addOrder(Order.asc("geometryOrder"));
-		crit.addOrder(Order.asc("spaceGroupShortName"));
-		
-		List<SpaceGroup3VO> foundEntities = crit.list();
-		return foundEntities;
+// Joining with the geometryClassnameVO
+		Join<SpaceGroup3VO, GeometryClassname3VO> geometryClassname = spaceGroup.join("geometryClassnameVO", JoinType.LEFT);
+
+// Adding condition
+		cq.where(cb.equal(spaceGroup.get("mxUsed"), 1));
+
+// Ensuring distinct results
+		cq.select(spaceGroup).distinct(true);
+
+// Ordering
+		cq.orderBy(cb.asc(geometryClassname.get("geometryOrder")), cb.asc(spaceGroup.get("spaceGroupShortName")));
+
+// Execute the query and return the list
+		List<SpaceGroup3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	/* Private methods ------------------------------------------------------ */

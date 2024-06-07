@@ -1,16 +1,39 @@
-FROM jboss/wildfly:17.0.1.Final
+# Start with a base image containing Java runtime 21
+FROM eclipse-temurin:21-jre
 
-# Copies the standalone.xml from the configuration directory into the WildFly configuration directory
-COPY configuration/standalone.xml /opt/jboss/wildfly/standalone/configuration/
+# Install necessary packages for downloading and managing Tomcat
+RUN apt-get update && apt-get install -y wget tar
 
-# Copies the MySQL module files from the local directory to the WildFly modules directory
-COPY configuration/mysql /opt/jboss/wildfly/modules/system/layers/base/com/mysql
+# Define environment variables for Tomcat version and installation directory
+ENV TOMCAT_VERSION 10.0.0-M1
+ENV CATALINA_HOME /usr/local/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
 
-# Copies the EAR file from the target directory to the WildFly deployments directory
-COPY ispyb-ear/target/ispyb.ear /opt/jboss/wildfly/standalone/deployments/
+# Download and install Tomcat
+RUN wget https://downloads.apache.org/tomee/tomee-10.0.0-M1/apache-tomee-$TOMCAT_VERSION-webprofile.tar.gz -O /tmp/tomcat.tar.gz \
+    && tar -xvf /tmp/tomcat.tar.gz -C /usr/local \
+    && mv /usr/local/apache-tomee-webprofile-$TOMCAT_VERSION $CATALINA_HOME \
+    && rm /tmp/tomcat.tar.gz \
+    && chmod +x $CATALINA_HOME/bin/catalina.sh
 
-# Expose the port WildFly will run on
+# Copy the EAR file from the builder stage to the Tomcat webapps directory
+COPY ispyb-ear/target/ispyb.ear $CATALINA_HOME/webapps/
+
+# Copy the pdf resource required for parcel label
+COPY ispyb-ejb/pdf/ParcelLabelsTemplate-WithWorldCourierCL.pdf /etc/ispyb/pdf/
+
+# Copy tomee.xml configuration file to the Tomcat conf directory
+COPY configuration/tomee/tomee.xml $CATALINA_HOME/conf/
+COPY configuration/tomee/server.xml $CATALINA_HOME/conf/
+
+# Copy JDBC driver to the Tomcat lib directory
+COPY configuration/mariadb/mariadb-java-client-3.3.3.jar $CATALINA_HOME/lib/
+
+# Expose the port Tomcat is running on
 EXPOSE 8080
 
-# Set the default command for the container (starts WildFly)
-ENTRYPOINT ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+# Environment variable for Java options, include serialization configs
+ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=* -Dispyb.properties=file:///etc/ispyb/ispyb.properties"
+
+# Start Tomcat server
+CMD ["catalina.sh", "run"]

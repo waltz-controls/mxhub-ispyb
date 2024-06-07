@@ -19,6 +19,7 @@
 
 package ispyb.server.common.test.services;
 
+import ispyb.common.util.UsernamePasswordHandler;
 import ispyb.server.common.util.ejb.Ejb3ServiceLocator;
 
 import java.io.File;
@@ -30,7 +31,6 @@ import java.util.Properties;
 
 import javax.security.auth.login.LoginContext;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.BeforeClass;
 
 public class Ejb3GenericRemoteTest {
@@ -48,11 +48,9 @@ public class Ejb3GenericRemoteTest {
 		
 		System.out.println("Setting environment up. Fix path is required " + jbossPath);
 		System.setProperty("java.security.auth.login.config", jbossPath);
-        UsernamePasswordHandler handler = null;
         String username = "mx415";
         String password = "pimx415";
-        handler = new UsernamePasswordHandler(username, password);
-        LoginContext lc = new LoginContext("testEJB", handler);
+        LoginContext lc = new LoginContext("testEJB", new UsernamePasswordHandler(username, password));
         lc.login();
         System.setProperty("java.security.policy", jbossPolicy);
         System.setSecurityManager(new RMISecurityManager());

@@ -16,7 +16,6 @@ import ispyb.server.common.vos.shipping.Shipping3VO;
 import ispyb.server.mx.services.ws.rest.dewar.DewarRestWsService;
 import ispyb.server.mx.vos.collections.Session3VO;
 import ispyb.ws.rest.RestWebService;
-import ispyb.server.common.vos.proposals.ProposalWS3VO;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
@@ -28,16 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
@@ -445,8 +444,8 @@ public class DewarRestWebService extends RestWebService {
 		fieldNamesAndValues.put("TF_shipmentName", shipping.getShippingName());
 		fieldNamesAndValues.put("TF_parcelsNumber",
 				Integer.toString(shipping.getDewarVOs().size()));
-		fieldNamesAndValues.put("TF_proposalNumber", proposal.getCode() + "-"
-				+ proposal.getNumber());
+		fieldNamesAndValues.put("TF_proposalNumber", proposal.getProposalCode() + "-"
+				+ proposal.getProposalNumber());
 
 		// Session values (only if they exist)
 		if (session != null) {

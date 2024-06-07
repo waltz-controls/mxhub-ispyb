@@ -10,7 +10,7 @@ New ejb:
 ```java
 package ispyb.server.data.ejb3.services.sample;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface BLSample3ServiceLocal extends BLSample3Service {

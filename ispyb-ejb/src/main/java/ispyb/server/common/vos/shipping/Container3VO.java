@@ -22,20 +22,9 @@ package ispyb.server.common.vos.shipping;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.common.vos.proposals.Person3VO;
@@ -57,7 +46,7 @@ public class Container3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "containerId")
 	protected Integer containerId;
 
@@ -97,7 +86,6 @@ public class Container3VO extends ISPyBValueObject implements Cloneable {
 	@JoinColumn(name = "ownerId")
 	private Person3VO personVO;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "containerId")
 	protected Set<BLSample3VO> sampleVOs;

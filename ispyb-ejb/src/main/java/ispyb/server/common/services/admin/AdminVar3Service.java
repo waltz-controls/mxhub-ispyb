@@ -23,7 +23,7 @@ import ispyb.server.common.vos.admin.AdminVar3VO;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface AdminVar3Service {

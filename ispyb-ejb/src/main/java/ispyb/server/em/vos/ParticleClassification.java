@@ -2,11 +2,7 @@ package ispyb.server.em.vos;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 
 @SuppressWarnings("serial")
@@ -15,7 +11,7 @@ import javax.persistence.Table;
 public class ParticleClassification implements Serializable{
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "particleClassificationId")
 	protected Integer particleClassificationId;
 	

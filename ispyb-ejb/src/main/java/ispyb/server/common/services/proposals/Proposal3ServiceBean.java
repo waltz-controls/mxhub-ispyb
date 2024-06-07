@@ -25,25 +25,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 
-import ispyb.common.util.Constants;
-import ispyb.common.util.StringUtils;
 import ispyb.server.biosaxs.services.sql.SqlTableMapper;
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.services.AuthorisationServiceLocal;
@@ -59,47 +55,11 @@ import ispyb.server.common.vos.proposals.ProposalWS3VO;
  */
 @Stateless
 public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceLocal {
-	
-	private static final String FIND_BY_PK(Integer pk, boolean fetchSessions, boolean fetchProteins,
-			boolean fetchShippings) {
-		return "from Proposal3VO vo  " + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
-				+ (fetchShippings ? " left join fetch vo.shippingVOs " : "")
-				+ (fetchProteins ? " left join fetch vo.proteinVOs " : "") + "where vo.proposalId = :pk";
-	}
-	
-	private static final String FIND_WITH_PARTICIPANTS_BY_PK(Integer pk) {
-		return "from Proposal3VO vo left join fetch vo.participants where vo.proposalId = :pk";
-	}
 
 	// Generic HQL request to find all instances of Proposal
 	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-		return "from Proposal3VO vo ";
-	}
 
-	
-	private static final String FIND_CODE_NUMBER(String code, String number, boolean fetchSessions,
-			boolean fetchProteins) {
-		return "from Proposal3VO vo" + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
-				+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
-				+ " where vo.code LIKE :code AND vo.number = :number ";
-	}
 
-	private static final String FIND_CODE(String code, boolean fetchSessions, boolean fetchProteins) {
-		return "from Proposal3VO vo" + (fetchSessions ? " left join fetch vo.sessionVOs " : "")
-				+ (fetchProteins ? " left join fetch vo.proteinVOs " : "") + " where vo.code LIKE :code ";
-	}
-
-	private final static String UPDATE_PROPOSALID_SESSIONS = " update BLSession  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	private final static String UPDATE_PROPOSALID_SHIPPINGS = " update Shipping  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	private final static String UPDATE_PROPOSALID_PROTEINS = " update Protein  set proposalId = :newProposalId "
-			+ " WHERE proposalId = :oldProposalId"; // 2 old value to be replaced
-
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -175,27 +135,24 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@WebMethod
 	public Proposal3VO findByPk(final Integer pk) throws Exception {
 
-		Query query = entityManager.createQuery(FIND_BY_PK(pk, false, false, false))
+		Query query = entityManager.createQuery("SELECT vo FROM Proposal3VO vo WHERE vo.proposalId = :pk", Proposal3VO.class)
 				.setParameter("pk", pk);
-		List listVOs = query.getResultList();
-		if (listVOs == null || listVOs.isEmpty())
-			return null;
+		Proposal3VO result = (Proposal3VO) query.getSingleResult();
 		
-		checkChangeRemoveAccess( (Proposal3VO) listVOs.toArray()[0]);
-		return (Proposal3VO) listVOs.toArray()[0];
+		checkChangeRemoveAccess(result);
+		return result;
 	}
 	
 	@WebMethod
 	public Proposal3VO findWithParticipantsByPk(final Integer pk) throws Exception {
 
-		Query query = entityManager.createQuery(FIND_WITH_PARTICIPANTS_BY_PK(pk))
+		Query query = entityManager.createQuery("SELECT vo FROM Proposal3VO vo " +
+						"LEFT JOIN FETCH vo.participants WHERE vo.proposalId = :pk", Proposal3VO.class)
 				.setParameter("pk", pk);
-		List listVOs = query.getResultList();
-		if (listVOs == null || listVOs.isEmpty())
-			return null;
-		
-		checkChangeRemoveAccess( (Proposal3VO) listVOs.toArray()[0]);
-		return (Proposal3VO) listVOs.toArray()[0];
+		Proposal3VO result = (Proposal3VO) query.getSingleResult();
+
+		checkChangeRemoveAccess( result);
+		return result;
 	}
 
 	/**
@@ -211,14 +168,17 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	public Proposal3VO findByPk(final Integer pk, final boolean fetchSessions, final boolean fetchProteins,
 			final boolean fetchShippings) throws Exception {
 
-		Query query = entityManager.createQuery(FIND_BY_PK(pk, fetchSessions, fetchProteins, fetchShippings))
+		String qlString = "SELECT vo FROM Proposal3VO vo  "
+				+ (fetchSessions ? " LEFT JOIN FETCH vo.sessionVOs " : "")
+				+ (fetchShippings ? " LEFT JOIN FETCH vo.shippingVOs " : "")
+				+ (fetchProteins ? " LEFT JOIN FETCH vo.proteinVOs " : "")
+				+ "WHERE vo.proposalId = :pk";
+		Query query = entityManager.createQuery(qlString, Proposal3VO.class)
 				.setParameter("pk", pk);
-		List listVOs = query.getResultList();
-		if (listVOs == null || listVOs.isEmpty())
-			return null;
+		Proposal3VO result = (Proposal3VO) query.getSingleResult();
 		
-		checkChangeRemoveAccess( (Proposal3VO) listVOs.toArray()[0]);
-		return (Proposal3VO) listVOs.toArray()[0];
+		checkChangeRemoveAccess( result);
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -227,11 +187,22 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 			final boolean fetchProteins, final boolean detachLight) throws Exception {
 
 		Query query;
-		if (number == null)
-			query = entityManager.createQuery(FIND_CODE(code, fetchSessions, fetchProteins)).setParameter("code", code);
-		else
-			query = entityManager.createQuery(FIND_CODE_NUMBER(code, number, fetchSessions, fetchProteins))
-					.setParameter("code", code).setParameter("number", number);
+		if (number == null) {
+			String qlString = "SELECT vo from Proposal3VO vo"
+					+ (fetchSessions ? " left join fetch vo.sessionVOs " : "")
+					+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
+					+ " where vo.proposalCode LIKE :code ";
+			query = entityManager.createQuery(qlString)
+					.setParameter("code", code);
+		} else {
+			String qlString = "SELECT vo from Proposal3VO vo"
+					+ (fetchSessions ? " left join fetch vo.sessionVOs " : "")
+					+ (fetchProteins ? " left join fetch vo.proteinVOs " : "")
+					+ " where vo.proposalCode LIKE :code AND vo.proposalNumber = :number ";
+			query = entityManager.createQuery(qlString)
+					.setParameter("code", code)
+					.setParameter("number", number);
+		}
 
 		List<Proposal3VO> foundEntities = query.getResultList();
 		List<Proposal3VO> vos;
@@ -247,23 +218,15 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@WebMethod
 	public List<Proposal3VO> findByLoginName(final String loginName) throws Exception {
 
-		String queryPerson = "SELECT person FROM Person3VO person WHERE login=:loginName";
-		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson);
-		EJBQueryPerson.setParameter("loginName", loginName);
+		String queryPerson = "SELECT person FROM Person3VO person WHERE person.login=:loginName";
+		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson, Proposal3VO.class)
+				.setParameter("loginName", loginName);
 		List<Person3VO> persons = EJBQueryPerson.getResultList();
 		List<Proposal3VO> proposals = new ArrayList<Proposal3VO>();
-		if (persons != null) {
-			if (persons.size() > 0) {
-				for (Person3VO person3vo : persons) {
-					if (person3vo.getProposalVOs() != null) {
-						if (person3vo.getProposalVOs().size() > 0) {
-							proposals.addAll(person3vo.getProposalVOs());
-						}
-						if (person3vo.getProposalDirectVOs().size() > 0) {
-							proposals.addAll(person3vo.getProposalDirectVOs());
-						}
-					}
-				}
+		for (Person3VO person3vo : persons) {
+			if (person3vo.getProposalVOs() != null) {
+				proposals.addAll(person3vo.getProposalVOs());
+				proposals.addAll(person3vo.getProposalDirectVOs());
 			}
 		}
 		return proposals;
@@ -307,7 +270,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@WebMethod
 	public List<Proposal3VO> findAll(final boolean detachLight) throws Exception {
 
-		Query query = entityManager.createQuery(FIND_ALL());
+		Query query = entityManager.createQuery("from Proposal3VO vo ");
 		List<Proposal3VO> vos;
 		List<Proposal3VO> foundEntities = query.getResultList();
 		if (detachLight)
@@ -329,40 +292,62 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@SuppressWarnings("unchecked")
 	@WebMethod
 	public List<Proposal3VO> findFiltered(final String code, final String number, final String title) throws Exception {
-		Session session = (Session) this.entityManager.getDelegate();
+		// Get the CriteriaBuilder from the EntityManager
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		Criteria crit = session.createCriteria(Proposal3VO.class);
+// Create a CriteriaQuery object for Proposal3VO
+		CriteriaQuery<Proposal3VO> criteriaQuery = criteriaBuilder.createQuery(Proposal3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Define the root of the query (the main entity to query from)
+		Root<Proposal3VO> root = criteriaQuery.from(Proposal3VO.class);
 
+// List to hold Predicate objects for query conditions
+		List<Predicate> predicates = new ArrayList<>();
+
+// Add conditions based on method parameters
 		if (code != null && !code.isEmpty()) {
-			crit.add(Restrictions.like("code", code.toUpperCase()));
+			predicates.add(criteriaBuilder.like(criteriaBuilder.upper(root.get("code")), "%" + code.toUpperCase() + "%"));
 		}
-
 		if (number != null && !number.isEmpty()) {
-			crit.add(Restrictions.eq("number", number));
+			predicates.add(criteriaBuilder.equal(root.get("number"), number));
+		}
+		if (title != null && !title.isEmpty()) {
+			predicates.add(criteriaBuilder.like(root.get("title"), "%" + title + "%"));
 		}
 
-		if (title != null && !title.isEmpty())
-			crit.add(Restrictions.like("title", title));
+// Apply the predicates to the CriteriaQuery
+		criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 
-		crit.addOrder(Order.desc("proposalId"));
+// Make sure results are distinct
+		criteriaQuery.distinct(true);
 
-		return crit.list();
+// Order the results
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("proposalId")));
+
+// Prepare the query to be executed
+		List<Proposal3VO> result = entityManager.createQuery(criteriaQuery).getResultList();
+
+		return result;
 	}
 
 	public Integer[] updateProposalFromIds(final Integer newProposalId, final Integer oldProposalId) throws Exception {
 		Integer[] nbUpdated = new Integer[3];
-		Query query = entityManager.createNativeQuery(UPDATE_PROPOSALID_SESSIONS)
-				.setParameter("newProposalId", newProposalId).setParameter("oldProposalId", oldProposalId);
+		String sqlUpdateBLSession = "UPDATE BLSession SET proposalId = ?1  WHERE proposalId = ?2";
+		Query query = entityManager.createNativeQuery(sqlUpdateBLSession)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[0] = query.executeUpdate();
 
-		query = entityManager.createNativeQuery(UPDATE_PROPOSALID_SHIPPINGS)
-				.setParameter("newProposalId", newProposalId).setParameter("oldProposalId", oldProposalId);
+		String sqlUpdateShipping = "UPDATE Shipping  SET proposalId = ?1 WHERE proposalId = ?2";
+		query = entityManager.createNativeQuery(sqlUpdateShipping)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[1] = query.executeUpdate();
 
-		query = entityManager.createNativeQuery(UPDATE_PROPOSALID_PROTEINS)
-				.setParameter("newProposalId", newProposalId).setParameter("oldProposalId", oldProposalId);
+		String sqlUpdateProtein = "UPDATE Protein  SET proposalId = ?1 WHERE proposalId = ?2";
+		query = entityManager.createNativeQuery(sqlUpdateProtein)
+				.setParameter(1, newProposalId)
+				.setParameter(2, oldProposalId);
 		nbUpdated[2] = query.executeUpdate();
 
 		return nbUpdated;
@@ -422,17 +407,17 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Proposal3VO> findProposalByCodeAndNumber(String loginName) {
-		String query = "SELECT proposal FROM Proposal3VO proposal WHERE concat(proposalCode, proposalNumber)=:loginName";
-		Query EJBQuery = this.entityManager.createQuery(query);
-		EJBQuery.setParameter("loginName", loginName);
+	private List<Proposal3VO> findProposalByCodeAndNumber(String codeAndNumber) {
+		String query = "SELECT proposal FROM Proposal3VO proposal WHERE concat(proposal.proposalCode, proposal.proposalNumber)=:codeAndNumber";
+		Query EJBQuery = this.entityManager.createQuery(query, Proposal3VO.class);
+		EJBQuery.setParameter("codeAndNumber", codeAndNumber);
 		return EJBQuery.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<Proposal3VO> findProposalByPerson(String loginName) {
-		String queryPerson = "SELECT person FROM Person3VO person WHERE login=:loginName";
-		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson);
+		String queryPerson = "SELECT person FROM Person3VO person WHERE person.login=:loginName";
+		Query EJBQueryPerson = this.entityManager.createQuery(queryPerson, Proposal3VO.class);
 		EJBQueryPerson.setParameter("loginName", loginName);
 		@SuppressWarnings("unchecked")
 		List<Person3VO> persons = EJBQueryPerson.getResultList();
@@ -465,17 +450,15 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	@Override
 	public List<Proposal3VO> findAllProposals() {
 		String query = "SELECT proposal FROM Proposal3VO proposal";
-		Query EJBQuery = this.entityManager.createQuery(query);
+		Query EJBQuery = this.entityManager.createQuery(query, Proposal3VO.class);
 		return EJBQuery.getResultList();
 	}
 	
 	@Override
 	public List<Map<String, Object>> findProposals() {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal");
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		Query query = this.entityManager.createNativeQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal", Map.class);
 		@SuppressWarnings("unchecked")
-		List<Map<String,Object>> aliasToValueMapList= query.list();
+		List<Map<String,Object>> aliasToValueMapList= query.getResultList();
 		return 	aliasToValueMapList;
 	}
 	
@@ -511,12 +494,12 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 	}
 
 	
-	private List findProposalByProposalId(Integer proposalId){
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery("select " + SqlTableMapper.getProposalTable() + " from Proposal where proposalId= :proposalId");
-		query.setParameter("proposalId", proposalId);
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		return query.list();
+	private List<Map<String, Object>> findProposalByProposalId(Integer proposalId){
+		String sqlQuery = "SELECT " + SqlTableMapper.getProposalTable()
+				+ " from Proposal where proposalId= ?1";
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(1, proposalId);
+		return query.getResultList();
 	}
 	
 	/*    end of coming from SaxsProposalService  */	

@@ -22,13 +22,10 @@ package ispyb.server.mx.services.ws.rest.sample;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -37,79 +34,91 @@ public class SampleRestWsServiceBean implements SampleRestWsService, SampleRestW
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	
-	private String ByProposalId = getDewarViewTableQuery() + " where v_mx_sample.Protein_proposalId = :proposalId";
-	private String BySessionId = getDewarViewTableQuery() + " where v_mx_sample.DataCollectionGroup_sessionId = :sessionId and v_mx_sample.Protein_proposalId = :proposalId";
-	private String ByContainerId = getDewarViewTableQuery() + " where v_mx_sample.Container_containerId = :containerId and v_mx_sample.Protein_proposalId = :proposalId";
-	private String ByShippingId = getDewarViewTableQuery() + " where v_mx_sample.Shipping_shippingId = :shipingId and v_mx_sample.Protein_proposalId = :proposalId";
-	private String ByDewarId = getDewarViewTableQuery() + " where v_mx_sample.Dewar_dewarId = :dewarId and v_mx_sample.Protein_proposalId = :proposalId";
-	
-	private String getDataCollectionIdQuery(){
-		return  "  (SELECT \n" + 
-				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" + 
-				"        FROM\n" + 
-				"            `DataCollectionGroup`\n" + 
-				"        WHERE\n" + 
-				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`";
-	}
-  
-            
-	private String getDewarViewTableQuery(){
-		return "select *, " + getDataCollectionIdQuery() + " from v_mx_sample";
-	}
-
-	
-	
-	private List<Map<String, Object>> executeSQLQuery(SQLQuery query ){
-		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
-		List<Map<String, Object>> aliasToValueMapList = query.list();
-		return aliasToValueMapList;
-	}
-
 
 	@Override
 	public List<Map<String, Object>> getSamplesByProposalId(int proposalId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByProposalId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = "select *, (SELECT \n" +
+				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" +
+				"        FROM\n" +
+				"            `DataCollectionGroup`\n" +
+				"        WHERE\n" +
+				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`" +
+				" from v_mx_sample" +
+				" where v_mx_sample.Protein_proposalId = ?1";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesBySessionId(int proposalId,int sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("sessionId", sessionId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		//TODO v_mx_sample.DataCollectionGroup_sessionId
+		String session = "select *, (SELECT \n" +
+				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" +
+				"        FROM\n" +
+				"            `DataCollectionGroup`\n" +
+				"        WHERE\n" +
+				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`"
+				+ " from v_mx_sample"
+				+ " where v_mx_sample.DataCollectionGroup_sessionId = ?1 and v_mx_sample.Protein_proposalId = ?2";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, sessionId);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByContainerId(int proposalId,int containerId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByContainerId);
-		query.setParameter("containerId", containerId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = "select *, (SELECT \n" +
+				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" +
+				"        FROM\n" +
+				"            `DataCollectionGroup`\n" +
+				"        WHERE\n" +
+				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`"
+				+ " from v_mx_sample"
+				+ " where v_mx_sample.Container_containerId = ?1 and v_mx_sample.Protein_proposalId = ?2";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, containerId);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 
 	@Override
-	public List<Map<String, Object>> getSamplesByShipmentId(int proposalId,int shipingId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByShippingId);
+	public List<Map<String, Object>> getSamplesByShipmentId(int proposalId,int shippingId) {
+		String session = "select *, (SELECT \n" +
+				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" +
+				"        FROM\n" +
+				"            `DataCollectionGroup`\n" +
+				"        WHERE\n" +
+				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`"
+				+ " from v_mx_sample"
+				+ " where v_mx_sample.Shipping_shippingId = ?1 and v_mx_sample.Protein_proposalId = ?2";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, shippingId);
 		
-		query.setParameter("shipingId", shipingId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 	
 	@Override
 	public List<Map<String, Object>> getSamplesByDewarId(int proposalId, int dewarId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDewarId);
-		query.setParameter("dewarId", dewarId);
-		query.setParameter("proposalId", proposalId);
-		return executeSQLQuery(query);
+		String session = "select *, (SELECT \n" +
+				"            MAX(`DataCollectionGroup`.`dataCollectionGroupId`)\n" +
+				"        FROM\n" +
+				"            `DataCollectionGroup`\n" +
+				"        WHERE\n" +
+				"            (`DataCollectionGroup`.`blSampleId` = `v_mx_sample`.`BLSample_blSampleId`)) AS `DataCollectionGroup_dataCollectionGroupId`"
+				+ " from v_mx_sample"
+				+ " where v_mx_sample.Dewar_dewarId = ?1 and v_mx_sample.Protein_proposalId = ?2";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, dewarId);
+		List<Map<String, Object>> aliasToValueMapList = query.getResultList();
+		return aliasToValueMapList;
 	}
 
 }

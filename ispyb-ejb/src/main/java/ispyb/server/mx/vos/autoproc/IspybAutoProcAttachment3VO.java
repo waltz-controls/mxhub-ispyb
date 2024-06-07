@@ -21,11 +21,7 @@ package ispyb.server.mx.vos.autoproc;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -44,7 +40,7 @@ public class IspybAutoProcAttachment3VO extends ISPyBValueObject implements Clon
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "autoProcAttachmentId")
 	private Integer autoProcAttachmentId;
 	

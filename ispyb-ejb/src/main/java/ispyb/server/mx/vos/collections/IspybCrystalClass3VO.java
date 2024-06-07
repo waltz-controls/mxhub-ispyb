@@ -22,11 +22,7 @@ package ispyb.server.mx.vos.collections;
 import ispyb.common.util.StringUtils;
 import ispyb.server.common.vos.ISPyBValueObject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +41,7 @@ public class IspybCrystalClass3VO extends ISPyBValueObject implements Cloneable 
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "crystalClassId")
 	protected Integer crystalClassId;
 	

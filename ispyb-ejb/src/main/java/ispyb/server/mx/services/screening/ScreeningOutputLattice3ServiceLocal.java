@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.screening;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface ScreeningOutputLattice3ServiceLocal extends ScreeningOutputLattice3Service {

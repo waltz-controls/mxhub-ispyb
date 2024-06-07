@@ -21,12 +21,12 @@ package ispyb.server.biosaxs.vos.dataAcquisition.plate;
 // Generated Sep 14, 2012 4:30:43 PM by Hibernate Tools 3.4.0.CR1
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import static javax.persistence.GenerationType.IDENTITY;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 
 /**

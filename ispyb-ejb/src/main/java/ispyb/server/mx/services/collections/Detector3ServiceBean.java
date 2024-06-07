@@ -18,25 +18,23 @@
  ****************************************************************************************************/
 package ispyb.server.mx.services.collections;
 
-import ispyb.server.common.util.ejb.EJBAccessCallback;
-import ispyb.server.common.util.ejb.EJBAccessTemplate;
-
 import ispyb.server.mx.vos.collections.Detector3VO;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * <p>
@@ -78,7 +76,8 @@ public class Detector3ServiceBean implements Detector3Service,
 	 */
 	public Detector3VO create(final Detector3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
@@ -91,8 +90,9 @@ public class Detector3ServiceBean implements Detector3Service,
 	 * @return the updated entity.
 	 */
 	public Detector3VO update(final Detector3VO vo) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
@@ -104,7 +104,8 @@ public class Detector3ServiceBean implements Detector3Service,
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		Detector3VO vo = findByPk(pk);
 		// TODO Edit this business code				
 		delete(vo);
@@ -116,7 +117,8 @@ public class Detector3ServiceBean implements Detector3Service,
 	 */
 	public void delete(final Detector3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		entityManager.remove(vo);
 	}
@@ -129,8 +131,9 @@ public class Detector3ServiceBean implements Detector3Service,
 	 * @return the Detector3 value object
 	 */
 	public Detector3VO findByPk(final Integer pk) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
 			return (Detector3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
@@ -166,16 +169,6 @@ public class Detector3ServiceBean implements Detector3Service,
 	}
 
 	/**
-	 * Check if user has access rights to create, change and remove Detector3 entities. If not set rollback only and throw AccessDeniedException
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-
-		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
-		//autService.checkUserRightToChangeAdminData();
-	}
-
-	/**
 	 * Find a dataCollectionGroup by its primary key -- webservices object
 	 * @param pk
 	 * @param withLink1
@@ -184,8 +177,9 @@ public class Detector3ServiceBean implements Detector3Service,
 	 * @throws Exception
 	 */
 	public Detector3VO findForWSByPk(final Integer pk) throws Exception{
-		
-		checkCreateChangeRemoveAccess();
+
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
 		// TODO Edit this business code
 		try {
 			return (Detector3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk).getSingleResult();
@@ -207,37 +201,46 @@ public class Detector3ServiceBean implements Detector3Service,
 	public Detector3VO findByCharacteristics(final String detectorType, final String detectorManufacturer, 
 			final String detectorModel, final Double detectorPixelSizeHorizontal, 
 			final Double detectorPixelSizeVertical) throws Exception {
-	
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Detector3VO.class);
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+		EntityManager em = this.entityManager; // Assuming EntityManager is provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Detector3VO> cq = cb.createQuery(Detector3VO.class);
+		Root<Detector3VO> root = cq.from(Detector3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
+// Adding conditions based on provided values
 		if (detectorType != null) {
-			crit.add(Restrictions.like("detectorType", detectorType));
+			predicates.add(cb.like(root.get("detectorType"), detectorType));
 		}
-
 		if (detectorManufacturer != null) {
-			crit.add(Restrictions.like("detectorManufacturer", detectorManufacturer));
+			predicates.add(cb.like(root.get("detectorManufacturer"), detectorManufacturer));
 		}
-
 		if (detectorModel != null) {
-			crit.add(Restrictions.like("detectorModel", detectorModel));
+			predicates.add(cb.like(root.get("detectorModel"), detectorModel));
+		}
+// For pixel size, convert float comparisons to string to avoid precision issues
+		if (detectorPixelSizeHorizontal != null) {
+			predicates.add(cb.like(root.get("detectorPixelSizeHorizontal").as(String.class),
+					detectorPixelSizeHorizontal.toString()));
+		}
+		if (detectorPixelSizeVertical != null) {
+			predicates.add(cb.like(root.get("detectorPixelSizeVertical").as(String.class),
+					detectorPixelSizeVertical.toString()));
 		}
 
-		/* problem with comparison of floats for equality */
-		if (detectorPixelSizeHorizontal != null)
-			crit.add(Restrictions.like("detectorPixelSizeHorizontal", detectorPixelSizeHorizontal));
+// Applying all predicates
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.select(root).distinct(true); // Ensuring distinct results
 
-		if (detectorPixelSizeVertical != null)
-			crit.add(Restrictions.like("detectorPixelSizeVertical", detectorPixelSizeVertical));
+// Executing the query
+		List<Detector3VO> vos = em.createQuery(cq).getResultList();
 
-		List<Detector3VO> vos = crit.list();
-		if (vos == null || vos.size() == 0)
-			return null;
-		return vos.get(0);
+// Returning the first result or null if no results found
+		return vos.isEmpty() ? null : vos.get(0);
+
 	}
 
 	/**
@@ -251,34 +254,40 @@ public class Detector3ServiceBean implements Detector3Service,
 	 */
 	public Detector3VO findDetector(final String detectorType, final String detectorManufacturer, 
 			final String detectorModel, final String detectorMode) throws Exception{
-	
-		checkCreateChangeRemoveAccess();
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Detector3VO.class);
+		//AuthorizationServiceLocal autService = (AuthorizationServiceLocal) ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class);			// TODO change method to the one checking the needed access rights
+		//autService.checkUserRightToChangeAdminData();
+		EntityManager em = this.entityManager; // Assuming EntityManager is provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Detector3VO> cq = cb.createQuery(Detector3VO.class);
+		Root<Detector3VO> root = cq.from(Detector3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+		List<Predicate> predicates = new ArrayList<>();
 
+// Adding conditions based on provided values
 		if (detectorType != null) {
-			crit.add(Restrictions.like("detectorType", detectorType));
+			predicates.add(cb.like(root.get("detectorType"), detectorType));
 		}
-
 		if (detectorManufacturer != null) {
-			crit.add(Restrictions.like("detectorManufacturer", detectorManufacturer));
+			predicates.add(cb.like(root.get("detectorManufacturer"), detectorManufacturer));
 		}
-
 		if (detectorModel != null) {
-			crit.add(Restrictions.like("detectorModel", detectorModel));
+			predicates.add(cb.like(root.get("detectorModel"), detectorModel));
+		}
+		if (detectorMode != null && !detectorMode.isEmpty()) {
+			predicates.add(cb.like(root.get("detectorMode"), detectorMode));
 		}
 
-		if (detectorMode != null && !detectorMode.equals("")) {
-			crit.add(Restrictions.like("detectorMode", detectorMode));
-		}
+// Applying all predicates
+		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+		cq.select(root).distinct(true); // Ensuring distinct results
 
-		List<Detector3VO> vos = crit.list();
-		if (vos == null || vos.size() == 0)
-			return null;
-		return vos.get(0);
+// Executing the query
+		List<Detector3VO> vos = em.createQuery(cq).getResultList();
+
+// Returning the first result or null if no results found
+		return vos.isEmpty() ? null : vos.get(0);
+
 	}
 
 	/* Private methods ------------------------------------------------------ */

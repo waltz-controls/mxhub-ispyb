@@ -1,30 +1,30 @@
 package file;
 
-import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.ws.rs.FormParam;
+import java.io.InputStream;
 
 public class FileUploadForm {
 
-	@FormParam("file")
+	@Multipart("file")
 	private InputStream inputStream;
 
-	@FormParam("description")
+	@Multipart("description")
 	private String description;
 
-	@FormParam("fileName")
+	@Multipart("fileName")
 	private String fileName;
 	
-	@FormParam("groupName")
+	@Multipart("groupName")
 	private String groupName;
 
-	@FormParam("type")
+	@Multipart("type")
 	private String type;
 
-	@FormParam("multiplicity")
+	@Multipart("multiplicity")
 	private String multiplicity;
 
-	@FormParam("uniprotId")
+	@Multipart("uniprotId")
 	private String uniprotId;
 
 	public InputStream getInputStream() {

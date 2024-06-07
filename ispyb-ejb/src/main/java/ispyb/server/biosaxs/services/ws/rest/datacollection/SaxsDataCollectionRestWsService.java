@@ -22,7 +22,7 @@ package ispyb.server.biosaxs.services.ws.rest.datacollection;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 @Remote

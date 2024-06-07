@@ -25,10 +25,10 @@ import ispyb.server.biosaxs.vos.dataAcquisition.plate.Sampleplateposition3VO;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
 
@@ -70,8 +70,9 @@ public class Sampleplate3ServiceBean implements Sampleplate3Service, Sampleplate
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Sampleplate3VO> getSamplePlatesByBoxId(String dewarId) {
-		String query = "SELECT plate FROM Sampleplate3VO plate where plate.boxId = " + dewarId;// SQLQueryKeeper.getSamplePlatesByBoxId(dewarId);
-		Query EJBQuery = this.entityManager.createQuery(query);
+		String query = "SELECT plate FROM Sampleplate3VO plate where plate.boxId = :dewarId";
+		Query EJBQuery = this.entityManager.createQuery(query, Sampleplate3VO.class)
+				.setParameter("dewarId", dewarId);
 		List<Sampleplate3VO> samplePlates = EJBQuery.getResultList();
 		return samplePlates;
 	}

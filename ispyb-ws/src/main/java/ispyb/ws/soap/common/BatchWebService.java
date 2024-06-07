@@ -21,20 +21,19 @@ package ispyb.ws.soap.common;
 
 import java.util.Date;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.jws.WebMethod;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 
+import jakarta.transaction.UserTransaction;
 import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ejb3.annotation.TransactionTimeout;
-import org.jboss.ws.api.annotation.WebContext;
 
 import ispyb.server.common.services.admin.AdminVar3Service;
 import ispyb.server.common.services.sessions.Session3Service;
@@ -52,8 +51,7 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
 @Stateless
 @RolesAllowed({ "WebService", "User", "Industrial" })
 // allow special access roles
-@SecurityDomain("ispyb")
-@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
+//@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
 public class BatchWebService {
 
 	private final static Logger LOG = Logger.getLogger(BatchWebService.class);
@@ -173,7 +171,7 @@ public class BatchWebService {
 
 	@WebMethod
 	@TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
-	@TransactionTimeout(3600)
+	//@TransactionTimeout(3600)
 	public void protectSession(Integer sessionId) throws Exception {
 
 		try {

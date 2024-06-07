@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.autoproc.phasingStep;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface PhasingStep3ServiceLocal extends  PhasingStep3Service {

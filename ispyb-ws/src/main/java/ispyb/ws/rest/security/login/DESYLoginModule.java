@@ -26,7 +26,7 @@ public class DESYLoginModule {
     public static List<String> authenticate(String username, String password)
             throws IOException {
 
-        Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
+        Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, Constants.CLASSPATH_ISPYB_PROPERTIES));
         String serverUrl = ispybProp.getProperty("userportal.webservices.url");
         // Build the endpoint url for door authentication
         StringBuilder url = new StringBuilder(serverUrl).append("/doorauth/auth");
@@ -71,7 +71,7 @@ public class DESYLoginModule {
 
     private static List<String> doorAuthorization(Integer userid) throws IOException {
         List<String> myRoles = new ArrayList<String>();
-        Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
+        Properties ispybProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, Constants.CLASSPATH_ISPYB_PROPERTIES));
         String serverUrl = ispybProp.getProperty("userportal.webservices.url");
         String door_token = ispybProp.getProperty("userportal.webservices.token");
         String door_service_account = ispybProp.getProperty("smis.ws.username");

@@ -24,7 +24,6 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 /**
  * <p>
@@ -35,6 +34,8 @@ import javax.rmi.PortableRemoteObject;
  * @author armanet, delageni
  */
 public class Ejb3ServiceLocator {
+	
+	public static final Ejb3ServiceLocator INSTANCE = new Ejb3ServiceLocator();
 
 	/* CONSTANTS */
 
@@ -61,10 +62,7 @@ public class Ejb3ServiceLocator {
 	 * @return the singleton instance of Ejb3ServiceLocator
 	 */
 	public static Ejb3ServiceLocator getInstance() {
-		if (serviceLocator == null) {
-			serviceLocator = new Ejb3ServiceLocator();
-		}
-		return serviceLocator;
+		return INSTANCE;
 	}
 
 	/* INSTANCE VARIABLES */
@@ -83,86 +81,25 @@ public class Ejb3ServiceLocator {
 	 * @throws NamingException
 	 */
 	public Object getLocalService(Class serviceClass) throws NamingException {
-		String serviceJndiNameOld = EJB3_CONTEXT + serviceClass.getSimpleName() + EJB3_COMMON_SUFFIX + EJB3_LOCAL_SUFFIX;
-		
 		String classname = serviceClass.getSimpleName();
 				
-        final String moduleName = "ispyb-ejb3";
-//        final String moduleName = "ispyb";
-        final String distinctName = "";
-               
-        // The EJB name which by default is the simple class name of the bean implementation class     
-
         final String beanName = classname + EJB3_COMMON_SUFFIX;
         
         // the view fully qualified class name
-        final String viewClassName = serviceClass.getName()   ;//+ "Local";
+        final String viewClassName = serviceClass.getName()   ;
               
-        // let's do the lookup        
-        String serviceJndiName = "java:app/" + moduleName + "/" + beanName + "!" + viewClassName;       
-//        String serviceJndiName = "java:app/" + beanName + "!" + viewClassName;
-        		
-		return getObjectRef(serviceJndiName, null);
-	}
+		String serviceJndiName = "java:global/ispyb/ispyb-ejb3/" + beanName + "!" + viewClassName;
 
-	/**
-	 * Returns the remote service from the service class.
-	 * 
-	 * @param serviceClass
-	 *            the service interface class.
-	 * @return the service object.
-	 * @throws NamingException
-	 */
-	public Object getRemoteService(Class serviceClass) throws NamingException {
-		//String serviceJndiNameOld = EJB3_CONTEXT + serviceClass.getSimpleName() + EJB3_COMMON_SUFFIX + EJB3_REMOTE_SUFFIX;
-		//Object ref = getObjectRef(serviceJndiNameOld, null);
-		//Object realized = PortableRemoteObject.narrow(ref, serviceClass);
-					
-			String classname = serviceClass.getSimpleName();
-						
-			final String appName = "ispyb";
-	        final String moduleName = "ispyb-ejb3";
-//	        final String moduleName = "ispyb";
-	        final String distinctName = "";
-	        	        
-	        // The EJB name which by default is the simple class name of the bean implementation class	        
-	        final String beanName = classname + EJB3_COMMON_SUFFIX;
-	        
-	        // the view fully qualified class name
-	        final String viewClassName = serviceClass.getName() ;
-	        
-	        // let's do the lookup
-	        String serviceJndiName = "ejb:"+ appName + "/" + moduleName + "/" + beanName + "!" + viewClassName;
-	        
-	        		
-			return getObjectRef(serviceJndiName, null);
-		//}
-		//return realized;
-	}
+		Context initialCtx = new InitialContext();
 
-	public Object getRemoteService(Class serviceClass, Properties props) throws NamingException {
-		String serviceJndiName = EJB3_CONTEXT + serviceClass.getSimpleName() + EJB3_COMMON_SUFFIX + EJB3_REMOTE_SUFFIX;
-		Object ref = getObjectRef(serviceJndiName, props);
-		Object realized = PortableRemoteObject.narrow(ref, serviceClass);
-		return realized;
-	}
-
-	/* PRIVATE METHODS */
-
-	private Object getObjectRef(String serviceJndiName, Properties properties) throws NamingException {
-		Context initialCtx;
-		if (properties == null) {
-			properties = new Properties();
-			properties.put(Context.URL_PKG_PREFIXES, PKG_INTERFACES);
-			properties.put("jboss.naming.client.ejb.context", true);
-		} else {
-			properties.put(Context.URL_PKG_PREFIXES, PKG_INTERFACES);
-		}
-		initialCtx = new InitialContext(properties);
-		
 		Object objref = initialCtx.lookup(serviceJndiName);
 		return objref;
 	}
 
-
+	//TODO move to SAX3Test
+	public Object getRemoteService(Class serviceClass, Properties props) throws NamingException {
+		String serviceJndiName = EJB3_CONTEXT + serviceClass.getSimpleName() + EJB3_COMMON_SUFFIX + EJB3_REMOTE_SUFFIX;
+		Context context = new InitialContext(props);
+		return serviceClass.cast(context.lookup(serviceJndiName));
+	}
 }

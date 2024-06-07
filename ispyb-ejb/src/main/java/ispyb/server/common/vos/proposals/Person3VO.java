@@ -23,23 +23,9 @@ import ispyb.server.common.vos.ISPyBValueObject;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityResult;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 /**
  * Person3 value object mapping table Person
@@ -57,7 +43,7 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "personId")
 	protected Integer personId;
 
@@ -96,7 +82,6 @@ public class Person3VO extends ISPyBValueObject implements Cloneable {
 	@JoinColumn(name = "personId")
 	private Set<Proposal3VO> proposalDirectVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "ProposalHasPerson", joinColumns = { @JoinColumn(name = "personId", referencedColumnName = "personId") }, inverseJoinColumns = { @JoinColumn(name = "proposalId", referencedColumnName = "proposalId") })
 	private Set<Proposal3VO> proposalVOs;

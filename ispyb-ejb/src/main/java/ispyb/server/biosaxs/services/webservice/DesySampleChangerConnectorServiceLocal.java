@@ -21,7 +21,7 @@ package ispyb.server.biosaxs.services.webservice;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface DesySampleChangerConnectorServiceLocal extends ATSASPipeline3Service {

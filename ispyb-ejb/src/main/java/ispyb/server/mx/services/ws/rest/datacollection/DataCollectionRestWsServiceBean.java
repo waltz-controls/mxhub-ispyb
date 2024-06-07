@@ -25,13 +25,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -46,23 +44,23 @@ public class DataCollectionRestWsServiceBean extends WsServiceBean implements Da
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getViewDataCollectionsByWorkflowId(int proposalId, Integer workflowId) {
-		String mySQLQuery = this.getViewTableQuery() + " where proposalId = :proposalId and workflowId = :workflowId  group by v_datacollection.dataCollectionId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("workflowId", workflowId);
-		return executeSQLQuery(query);
-	}
+		String mySQLQuery = this.getViewTableQuery()
+				+ " where proposalId = ?1 and workflowId = ?2  group by v_datacollection.dataCollectionId";
+		Query query = this.entityManager.createNativeQuery(mySQLQuery)
+				.setParameter(1, proposalId)
+				.setParameter(2, workflowId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionGroupId(int proposalId, Integer dataCollectionGroupId) {
-		String mySQLQuery = this.getViewTableQuery() + " where proposalId = :proposalId and dataCollectionGroupId = :dataCollectionGroupId  group by v_datacollection.dataCollectionId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("dataCollectionGroupId", dataCollectionGroupId);
-		return executeSQLQuery(query);
-	}
+		String mySQLQuery = this.getViewTableQuery()
+				+ " where proposalId = ?1 and dataCollectionGroupId = ?2  group by v_datacollection.dataCollectionId";
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter(1, proposalId)
+				.setParameter(2, dataCollectionGroupId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 }

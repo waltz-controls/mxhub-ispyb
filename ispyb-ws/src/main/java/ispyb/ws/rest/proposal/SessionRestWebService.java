@@ -13,20 +13,21 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
+import org.apache.cxf.annotations.GZIP;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.GZIP;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class SessionRestWebService extends RestWebService {
 	private final static Logger logger = Logger.getLogger(SessionRestWebService.class);
 
@@ -67,7 +68,7 @@ public class SessionRestWebService extends RestWebService {
 			List<Map<String, Object>> sessions = new ArrayList<Map<String,Object>>();
 			for (Map<String, Object> proposal : proposals) {			
 				logger.info("Getting sessions from proposal " + proposal.get("Proposal_proposalId"));
-				sessions.addAll(getSessionService().getSessionViewByProposalId((int) proposal.get("Proposal_proposalId")));
+				sessions.addAll(getSessionService().getSessionViewByProposalId(((Long)proposal.get("Proposal_proposalId")).intValue()));
 			}
 			this.logFinish(methodName, id, logger);
 			return this.sendResponse(sessions);
@@ -79,7 +80,6 @@ public class SessionRestWebService extends RestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/list")
 	@Produces({ "application/json" })
 	public Response getSessionByProposalId(@PathParam("token") String token, @PathParam("proposal") String proposal) throws Exception {
@@ -96,7 +96,6 @@ public class SessionRestWebService extends RestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/sessionId/{sessionId}/list")
 	@Produces({ "application/json" })
 	public Response getSessionById(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -124,7 +123,6 @@ public class SessionRestWebService extends RestWebService {
 	 */
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/session/date/{startdate}/{enddate}/list")
 	@Produces({ "application/json" })
 	public Response getSessionByDate(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -148,7 +146,6 @@ public class SessionRestWebService extends RestWebService {
 
 	@RolesAllowed({ "Manager", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/session/date/{startdate}/{enddate}/list")
 	@Produces({ "application/json" })
 	public Response getSessionsByDate(
@@ -176,7 +173,6 @@ public class SessionRestWebService extends RestWebService {
 		
 	@RolesAllowed({ "Manager", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/session/beamlineoperator/{beamlineOperator}/list")
 	@Produces({ "application/json" })
 	public Response getSessionsByBeamlineOperator(

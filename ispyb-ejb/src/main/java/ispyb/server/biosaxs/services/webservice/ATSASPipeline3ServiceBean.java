@@ -72,15 +72,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Stateless
@@ -146,8 +145,8 @@ public class ATSASPipeline3ServiceBean implements ATSASPipeline3Service, DesySam
 
 		Integer sessionId = null;
 
-		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getCode(),
-				proposal.getNumber(), Constants.getSAXSBeamline());
+		SessionWS3VO[] sessionTab = sessionService.findForWSByProposalCodeAndNumber(proposal.getProposalCode(),
+				proposal.getProposalNumber(), Constants.getSAXSBeamline());
 
 		if (sessionTab == null || sessionTab.length == 0) {
 			// No session found we have to create one to attach the experiment data to it
@@ -408,18 +407,6 @@ public class ATSASPipeline3ServiceBean implements ATSASPipeline3Service, DesySam
 			
 		}
 }
-//	private void removeFrameListById(int frameListId) {
-//		Framelist3VO frameList = this.entityManager.find(Framelist3VO.class, frameListId);
-//		/** Looking for FrameToListObjects **/
-//		
-//		String query = "select f from Frametolist3VO f where f.frameListId=:frameListId";
-//		Query EJBQuery = this.entityManager.createQuery(query).setParameter("frameListId", frameListId);
-//		List<Frametolist3VO> frameToListList =  (List<Frametolist3VO>)EJBQuery.getResultList();
-//		for (Frametolist3VO frametolist3vo : frameToListList) {
-//			System.out.println("Found " + frametolist3vo.getFrameToListId());
-//		}
-//		
-//	}
 
 	/**
 	 * True if a datacollection contains all the measurementIds otherwise false

@@ -25,22 +25,7 @@ import ispyb.server.mx.vos.collections.Session3VO;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityResult;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.OrderBy;
-
-
+import jakarta.persistence.*;
 
 
 /**
@@ -58,7 +43,7 @@ public class Dewar3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "dewarId")
 	protected Integer dewarId;
 
@@ -117,7 +102,7 @@ public class Dewar3VO extends ISPyBValueObject implements Cloneable {
 	
 	@OneToMany(cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "dewarId")
-	@OrderBy(clause = "dewarTransportHistoryId")
+	@OrderBy("dewarTransportHistoryId")
 	private Set<DewarTransportHistory3VO> dewarTransportHistoryVOs;
 	
 	@ManyToOne

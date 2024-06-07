@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.sample;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface  BLSubSample3ServiceLocal  extends BLSubSample3Service{

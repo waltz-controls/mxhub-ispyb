@@ -11,18 +11,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 @Path("/")
 public class MacromoleculeRestWebService extends SaxsRestWebService {
@@ -82,8 +82,14 @@ public class MacromoleculeRestWebService extends SaxsRestWebService {
 			@PathParam("token") String token,
 			@PathParam("proposal") String proposal,
 			@PathParam("macromoleculeId") int macromoleculeId,
-			@MultipartForm FileUploadForm form) throws IllegalStateException, IOException{
-				
+			MultipartBody multipartBody) throws IllegalStateException, IOException{
+
+		FileUploadForm form = new FileUploadForm();
+		form.setInputStream(multipartBody.getAttachment("file").getDataHandler().getInputStream());
+		form.setType(multipartBody.getAttachment("type").getDataHandler().getContent().toString());
+		form.setGroupName(multipartBody.getAttachment("groupName").getDataHandler().getContent().toString());
+
+
 		String methodName = "uploadContactDescriptionFile";
 		long id = this.logInit(methodName, logger, token, proposal, form);
 		try {
@@ -149,8 +155,13 @@ public class MacromoleculeRestWebService extends SaxsRestWebService {
 			@PathParam("token") String token,
 			@PathParam("proposal") String proposal,
 			@PathParam("macromoleculeId") int macromoleculeId,
-			@MultipartForm FileUploadForm form) throws IllegalStateException, IOException{
-				
+			MultipartBody multipartBody) throws IllegalStateException, IOException{
+
+		FileUploadForm form = new FileUploadForm();
+		form.setInputStream(multipartBody.getAttachment("file").getDataHandler().getInputStream());
+		form.setType(multipartBody.getAttachment("type").getDataHandler().getContent().toString());
+		form.setGroupName(multipartBody.getAttachment("groupName").getDataHandler().getContent().toString());
+
 		String methodName = "uploadPDBFile";
 		long id = this.logInit(methodName, logger, token, proposal, form, macromoleculeId);
 		try {

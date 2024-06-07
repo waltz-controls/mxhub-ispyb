@@ -19,7 +19,7 @@
 
 package ispyb.server.mx.services.sample;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import java.util.List;
 

@@ -23,20 +23,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.common.vos.proposals.Proposal3VO;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
-import ispyb.server.common.exceptions.AccessDeniedException;
-import ispyb.server.common.services.ws.rest.shipment.ShipmentRestWsService;
 import ispyb.server.common.vos.shipping.Container3VO;
 import ispyb.server.common.vos.shipping.Dewar3VO;
 import ispyb.server.common.vos.shipping.Shipping3VO;
@@ -55,22 +51,7 @@ import ispyb.server.mx.vos.sample.Protein3VO;
 public class Container3ServiceBean implements Container3Service, Container3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Container3ServiceBean.class);
-	
-	// Generic HQL request to find instances of Container3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchSamples) {
-		return "from Container3VO vo " 
-			//	+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
-				+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs sa LEFT JOIN FETCH sa.blSubSampleVOs LEFT JOIN FETCH sa.blsampleImageVOs  ": "") //  
-				+ " where vo.containerId = :pk";
-	}
 
-	// Generic HQL request to find all instances of Container3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL() {
-			return "from Container3VO vo ";
-	}
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 	
@@ -92,8 +73,11 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 * @return the persisted entity.
 	 */
 	public Container3VO create(final Container3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, true);
 		this.entityManager.persist(vo);
 		return vo;
@@ -108,8 +92,11 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 * @return the updated entity.
 	 */
 	public Container3VO update(final Container3VO vo) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		this.checkAndCompleteData(vo, false);
 		return entityManager.merge(vo);
 	}
@@ -121,8 +108,11 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 *            the entity to remove.
 	 */
 	public void deleteByPk(final Integer pk) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		Container3VO vo = findByPk(pk, false);
 		delete(vo);
 	}
@@ -135,7 +125,10 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 */
 	public void delete(final Container3VO vo) throws Exception {
 
-		checkCreateChangeRemoveAccess();
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		entityManager.remove(entityManager.merge(vo));
 	}
 
@@ -147,12 +140,24 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	 * @param withLink1
 	 * @param withLink2
 	 * @return the Container3 value object
+	 *
+	 * 	// Generic HQL request to find instances of Container3 by pk
+	 * 	// TODO choose between left/inner join
 	 */
 	public Container3VO findByPk(final Integer pk, final boolean fetchSamples) throws Exception {
-		
-		checkCreateChangeRemoveAccess();
+
+		// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
+		// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
+		// to the one checking the needed access rights
+		// autService.checkUserRightToChangeAdminData();
 		try {
-			return (Container3VO) entityManager.createQuery(FIND_BY_PK(fetchSamples)).setParameter("pk", pk)
+			return entityManager.createQuery("select vo from Container3VO vo "
+							//	+ (fetchSamples ? "left join fetch vo.sampleVOs " : "")
+							+ (fetchSamples ? "	LEFT JOIN FETCH vo.sampleVOs LEFT JOIN vo.sampleVOs sa " +
+							"LEFT JOIN FETCH sa.blSubSampleVOs " +
+							"LEFT JOIN FETCH sa.blsampleImageVOs  " : "") //
+							+ " where vo.containerId = :pk", Container3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -163,105 +168,144 @@ public class Container3ServiceBean implements Container3Service, Container3Servi
 	// TODO remove following method if not adequate
 	/**
 	 * Find all Container3s and set linked value objects if necessary
-	 * 
+	 *
+	 * 	// Generic HQL request to find all instances of Container3
+	 * 	// TODO choose between left/inner join
 	 * @param withLink1
 	 * @param withLink2
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findAll() throws Exception {
-		
-		List<Container3VO> foundEntities = entityManager.createQuery(FIND_ALL()).getResultList();
+
+		List<Container3VO> foundEntities = entityManager.createQuery("select vo from Container3VO vo ")
+				.getResultList();
 		return foundEntities;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findByDewarId(final Integer dewarId) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Container3VO.class);
-		Criteria subCrit = crit.createCriteria("dewarVO");
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Container3VO> cq = cb.createQuery(Container3VO.class);
+		Root<Container3VO> container = cq.from(Container3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		
-		subCrit.add(Restrictions.eq("dewarId", dewarId));
-		
-		crit.addOrder(Order.desc("containerId"));
+// Joining with the DewarVO entity
+		Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
 
-		List<Container3VO> foundEntities = crit.list();
-		return foundEntities;
+// Adding the condition for dewarId
+		cq.where(cb.equal(dewar.get("dewarId"), dewarId));
+
+// Ensuring distinct results
+		cq.select(container).distinct(true);
+
+// Ordering by containerId in descending order
+		cq.orderBy(cb.desc(container.get("containerId")));
+
+// Execute the query and return the list
+		List<Container3VO> results = em.createQuery(cq).getResultList();
+		return results;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findByProposalIdAndStatus(final Integer proposalId, final String containerStatusProcess) throws Exception {
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Container3VO.class);
-		Criteria subCrit = crit.createCriteria("dewarVO");
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Container3VO> cq = cb.createQuery(Container3VO.class);
+		Root<Container3VO> container = cq.from(Container3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
-		
-		Criteria subSubCrit = subCrit.createCriteria("shippingVO");
-		Criteria subSubSubCrit = subSubCrit.createCriteria("proposalVO");
-		subSubSubCrit.add(Restrictions.eq("proposalId", proposalId));
-		crit.add(Restrictions.like("containerStatus", containerStatusProcess));
-		crit.addOrder(Order.desc("containerId"));
+// Joining with DewarVO
+		Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
 
-		List<Container3VO> foundEntities = crit.list();
-		return foundEntities;
+// Further joining with ShippingVO
+		Join<Dewar3VO, Shipping3VO> shipping = dewar.join("shippingVO");
+
+// And joining with ProposalVO
+		Join<Shipping3VO, Proposal3VO> proposal = shipping.join("proposalVO");
+
+// Apply the conditions
+		cq.where(cb.and(
+				cb.equal(proposal.get("proposalId"), proposalId),
+				cb.like(container.get("containerStatus"), containerStatusProcess)
+		));
+
+// Ensuring distinct results
+		cq.select(container).distinct(true);
+
+// Ordering by containerId in descending order
+		cq.orderBy(cb.desc(container.get("containerId")));
+
+// Execute the query and return the list
+		List<Container3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findByProposalIdAndCode(final Integer proposalId, final String containerCode) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Container3VO> cq = cb.createQuery(Container3VO.class);
+		Root<Container3VO> container = cq.from(Container3VO.class);
 
-		Criteria crit = session.createCriteria(Container3VO.class);
-		Criteria subCrit = crit.createCriteria("dewarVO");
+// Joining with DewarVO
+		Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Further joining with ShippingVO
+		Join<Dewar3VO, Shipping3VO> shipping = dewar.join("shippingVO");
 
-		Criteria subSubCrit = subCrit.createCriteria("shippingVO");
-		Criteria subSubSubCrit = subSubCrit.createCriteria("proposalVO");
-		subSubSubCrit.add(Restrictions.eq("proposalId", proposalId));
-		crit.add(Restrictions.like("code", containerCode));
-		crit.addOrder(Order.desc("containerId"));
+// And joining with ProposalVO
+		Join<Shipping3VO, Proposal3VO> proposal = shipping.join("proposalVO");
 
-		List<Container3VO> foundEntities = crit.list();
-		return foundEntities;
+// Apply the conditions
+		cq.where(cb.and(
+				cb.equal(proposal.get("proposalId"), proposalId),
+				cb.like(container.get("code"), containerCode)
+		));
+
+// Ensuring distinct results
+		cq.select(container).distinct(true);
+
+// Ordering by containerId in descending order
+		cq.orderBy(cb.desc(container.get("containerId")));
+
+// Execute the query and return the list
+		List<Container3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 
-	/**
-	 * Check if user has access rights to create, change and remove Container3 entities. If not set rollback only and
-	 * throw AccessDeniedException
-	 * 
-	 * @throws AccessDeniedException
-	 */
-	private void checkCreateChangeRemoveAccess() throws Exception {
-				// AuthorizationServiceLocal autService = (AuthorizationServiceLocal)
-				// ServiceLocator.getInstance().getService(AuthorizationServiceLocalHome.class); // TODO change method
-				// to the one checking the needed access rights
-				// autService.checkUserRightToChangeAdminData();
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<Container3VO> findByCode(final Integer dewarId, final String code)throws Exception{
-		
-		Session session = (Session) this.entityManager.getDelegate();
 
-		Criteria crit = session.createCriteria(Container3VO.class);
-		Criteria subCrit = crit.createCriteria("dewarVO");
+		EntityManager em = this.entityManager; // Assuming EntityManager is already provided
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Container3VO> cq = cb.createQuery(Container3VO.class);
+		Root<Container3VO> container = cq.from(Container3VO.class);
 
-		crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Joining with DewarVO
+		Join<Container3VO, Dewar3VO> dewar = container.join("dewarVO");
 
-		subCrit.add(Restrictions.eq("dewarId", dewarId));
-		crit.add(Restrictions.like("code", code));
-		crit.addOrder(Order.desc("containerId"));
+// Adding conditions
+		Predicate dewarIdCondition = cb.equal(dewar.get("dewarId"), dewarId);
+		Predicate codeCondition = cb.like(container.get("code"), code);
 
-		List<Container3VO> foundEntities = crit.list();
-		return foundEntities;
+// Applying the conditions
+		cq.where(cb.and(dewarIdCondition, codeCondition));
+
+// Ensuring distinct results
+		cq.select(container).distinct(true);
+
+// Ordering by containerId in descending order
+		cq.orderBy(cb.desc(container.get("containerId")));
+
+// Execute the query and return the list
+		List<Container3VO> results = em.createQuery(cq).getResultList();
+		return results;
+
 	}
 
 	/**

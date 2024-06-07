@@ -3,6 +3,7 @@
 1. [Installing](#installing)
 2. [Database creation and update](#database-creation-and-update)
 3. [Database schema](#database-schema)
+4. [Running with TomEE](#Project-Setup-Guide-with-TomEE-(10.x))
 
 ## Installing
 
@@ -50,6 +51,18 @@
    ```
 
 ## Database creation and update
+
+### Prerequisites
+
+MariaDB docker container for local development:
+
+`docker pull mariadb:11.3-jammy`
+
+`docker run --rm -p 3306:3306 -e  MARIADB_ROOT_PASSWORD=root --name mariadb mariadb:11.3-jammy`
+
+`mysql` client: `sudo apt install mariadb-client`
+
+### Create tables and schemas
 
 Run the following creation scripts from the `ispyb-ejb` module (note
 that this requires the `pxadmin` database user to exist and have full
@@ -108,3 +121,61 @@ Workbench][mysql-workbench] (a free tool from MySQL).
 
 [schema-file]: https://github.com/ispyb/ISPyB/blob/master/documentation/database/ISPyB_DataModel.mwb
 [mysql-workbench]: https://www.mysql.com/products/workbench/
+
+## Project Setup Guide with TomEE (10.x)
+
+This README provides instructions on how to set up the database connection for your project using Apache TomEE.
+
+### Prerequisites
+
+- Apache TomEE (configured to run your project)
+- MariaDB or MySQL installed and running
+- JDBC driver for MariaDB/MySQL placed in the `lib` directory of TomEE
+
+### TomEE Configuration
+
+1. **Datasource Configuration in `tomee.xml`**:
+   - Navigate to the `conf` directory of your TomEE installation.
+   - Open or create the `tomee.xml` file and add the following configuration:
+     ```xml
+     <Resource id="ispyb" type="DataSource">
+       JdbcDriver org.mariadb.jdbc.Driver
+       JdbcUrl jdbc:mariadb://localhost:3306/ispyb_build
+       UserName pxuser
+       Password pxuser
+       JtaManaged true
+     </Resource>
+     ```
+
+### Persistence Configuration
+
+Ensure that your `persistence.xml` file is set up to use the JTA data source. Here is an example snippet:
+
+```xml
+<persistence-unit name="ispyb_db" transaction-type="JTA">
+    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+    <jta-data-source>ispyb</jta-data-source>
+    <properties>
+        <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
+    </properties>
+</persistence-unit>
+```
+
+### Deployment
+
+Build your project and deploy the resulting EAR file to TomEE.
+
+Start or restart TomEE to pick up the new configurations.
+
+### Using docker
+
+For CI/CD use .docker/Dockerfile as it uses multistaged build: `docker build . -f .docker/Dockerfile`
+
+For local development/testing use Dockerfile: `docker build .` [Optionaly provide name/tag etc]
+
+### Troubleshooting
+
+- Connection Issues: Ensure the database URL, username, and password are correct in tomee.xml.
+- JDBC Driver: Verify that the JDBC driver for MariaDB/MySQL is correctly placed in the lib folder of your TomEE installation.
+- For further assistance, consult the TomEE documentation or reach out to the community forums.
+

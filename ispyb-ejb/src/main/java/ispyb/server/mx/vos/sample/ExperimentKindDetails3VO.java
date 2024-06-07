@@ -21,11 +21,7 @@ package ispyb.server.mx.vos.sample;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 /**
  * ExperimentKindDetails3 value object mapping table ExperimentKindDetails
@@ -40,7 +36,7 @@ public class ExperimentKindDetails3VO extends ISPyBValueObject implements Clonea
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "experimentKindId")
 	private Integer experimentKindId;
 	

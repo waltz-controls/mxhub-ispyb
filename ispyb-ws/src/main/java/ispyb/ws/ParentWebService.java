@@ -34,7 +34,6 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,9 +43,9 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.NamingException;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -54,7 +53,6 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-@Path("/")
 public  class ParentWebService {
 	protected long now;
 	private final static Logger log = Logger.getLogger(ParentWebService.class);
@@ -116,14 +114,14 @@ public  class ParentWebService {
 		
 	/** TODO: it does not work when retrieving using Constants class **/
 	protected String getFolderForUploads() {
-		Properties mProp3 = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
+		Properties mProp3 = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, Constants.CLASSPATH_ISPYB_PROPERTIES));
 		return mProp3.getProperty("ISPyB.uploaded.root.folder");
 	}
 	
 	/** Folder where the pdb and all the other apriori information files will be uploaded **/
 	protected String getTargetFolder(int proposalId) throws Exception {
 		Proposal3VO proposal = this.getProposal3Service().findProposalById(proposalId);
-		String proposalName = proposal.getCode().toLowerCase() + proposal.getNumber();
+		String proposalName = proposal.getProposalCode().toLowerCase() + proposal.getProposalNumber();
 		return  this.getFolderForUploads() +  proposalName;
 	}
 	

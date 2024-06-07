@@ -24,7 +24,7 @@ import ispyb.server.common.vos.shipping.DewarAPIBean;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface DewarAPIService {

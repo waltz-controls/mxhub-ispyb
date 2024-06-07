@@ -29,7 +29,7 @@ import ispyb.server.common.vos.proposals.Proposal3VO;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface SaxsProposal3Service {

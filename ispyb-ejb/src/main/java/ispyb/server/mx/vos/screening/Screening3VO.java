@@ -24,19 +24,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 import ispyb.server.mx.vos.collections.DataCollection3VO;
@@ -58,7 +48,7 @@ public class Screening3VO extends ISPyBValueObject implements Cloneable {
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "screeningId")
 	protected Integer screeningId;
 
@@ -85,12 +75,10 @@ public class Screening3VO extends ISPyBValueObject implements Cloneable {
 	@Column(name = "xmlSampleInformation")
 	protected String xmlSampleInformation;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningId")
 	private Set<ScreeningRank3VO> screeningRankVOs;
 
-	@Fetch(value = FetchMode.SELECT)
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "screeningId")
 	private Set<ScreeningOutput3VO> screeningOutputVOs;

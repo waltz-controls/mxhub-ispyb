@@ -21,7 +21,7 @@ package ispyb.server.mx.services.ws.rest.xfefluorescencespectrum;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface XFEFluorescenSpectrumRestWsServiceLocal extends XFEFluorescenSpectrumRestWsService {

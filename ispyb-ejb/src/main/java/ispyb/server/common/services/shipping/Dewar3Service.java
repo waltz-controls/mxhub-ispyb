@@ -24,7 +24,7 @@ import ispyb.server.common.vos.shipping.Dewar3VO;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface Dewar3Service {

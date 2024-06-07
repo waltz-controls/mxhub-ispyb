@@ -21,7 +21,6 @@ package ispyb.server.biosaxs.services.core.analysis.primaryDataProcessing;
 
 
 import ispyb.server.biosaxs.services.core.measurementToDataCollection.MeasurementToDataCollection3Service;
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.dataAcquisition.Measurement3VO;
 import ispyb.server.biosaxs.vos.datacollection.Frame3VO;
 import ispyb.server.biosaxs.vos.datacollection.Framelist3VO;
@@ -41,11 +40,11 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.log4j.Logger;
 
@@ -194,8 +193,9 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 		
 		/** Checking if it exists **/
 		try{
-			String query = SQLQueryKeeper.getFrame3VOByFilePath(filePath);
-			Query EJBQuery = this.entityManager.createQuery(query);
+			String query = "SELECT frame FROM Frame3VO frame WHERE frame.filePath = :filePath";
+			Query EJBQuery = this.entityManager.createQuery(query, Frame3VO.class)
+					.setParameter("filePath", filePath);
 			List<Frame3VO> frames =  EJBQuery.getResultList();
 			if (frames.size() > 0){
 				return frames.get(0);
@@ -263,8 +263,10 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 	}
 
 	private Measurement3VO getMeasurementById(String measurementId){
-			String query = SQLQueryKeeper.getMeasurementById(Integer.parseInt(measurementId));//"SELECT measurement FROM Measurement3VO measurement where measurement.measurementId = :specimenId" ;
-			Query EJBQuery = this.entityManager.createQuery(query);
+		int measurementId1 = Integer.parseInt(measurementId);
+		String query = "SELECT measurement FROM Measurement3VO measurement WHERE measurement.measurementId = :measurementId1";
+			Query EJBQuery = this.entityManager.createQuery(query, Measurement3VO.class)
+					.setParameter("measurementId1", measurementId1);
 			Measurement3VO measurement = (Measurement3VO) EJBQuery.getSingleResult();	
 			return measurement;
 	}
@@ -387,9 +389,10 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Frame3VO> getFramesByIdList(List<Integer> frameIdList) {
-		if (frameIdList.size() > 0){
-			String query = "SELECT frames FROM Frame3VO frames where frames.frameId IN :frameIdList ";
-			Query EJBQuery = this.entityManager.createQuery(query).setParameter("frameIdList", frameIdList);
+		if (!frameIdList.isEmpty()){
+			String query = "SELECT frames FROM Frame3VO frames WHERE frames.frameId IN :frameIdList ";
+			Query EJBQuery = this.entityManager.createQuery(query, Frame3VO.class)
+					.setParameter("frameIdList", frameIdList);
 			return (List<Frame3VO>)EJBQuery.getResultList();
 		}
 		else{
@@ -408,8 +411,13 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Merge3VO> getMergesByIdsList(List<Integer> mergeIdList) {
-		String query = SQLQueryKeeper.getMergesByIdsList();
-		Query EJBQuery = this.entityManager.createQuery( query.toString()).setParameter("mergeIdList", mergeIdList);
+		String query = "SELECT DISTINCT(Merge) FROM Merge3VO Merge " +
+				"LEFT JOIN FETCH Merge.framelist3VO LEFT JOIN Merge.framelist3VO frameList " +
+				"LEFT JOIN FETCH frameList.frametolist3VOs LEFT JOIN frameList.frametolist3VOs frametolist3VOs " +
+				"LEFT JOIN FETCH frametolist3VOs.frame3VO " +
+				"WHERE Merge.mergeId IN :mergeIdList";
+		Query EJBQuery = this.entityManager.createQuery( query, Merge3VO.class)
+				.setParameter("mergeIdList", mergeIdList);
 		return (List<Merge3VO>)EJBQuery.getResultList();
 		
 	}
@@ -431,8 +439,9 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 	}
 	
 	private Subtraction3VO getSubtractionByDataCollectionId(Integer dataCollectionId) {
-		String query = "select s from Subtraction3VO s where s.dataCollectionId=:dataCollectionId";
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("dataCollectionId", dataCollectionId);
+		String query = "SELECT s FROM Subtraction3VO s WHERE s.dataCollectionId=:dataCollectionId";
+		Query EJBQuery = this.entityManager.createQuery(query, Subtraction3VO.class)
+				.setParameter("dataCollectionId", dataCollectionId);
 		return (Subtraction3VO)EJBQuery.getSingleResult();
 	}
 
@@ -441,8 +450,9 @@ public class PrimaryDataProcessing3ServiceBean implements PrimaryDataProcessing3
 
 	@Override
 	public List<Merge3VO> findByMeasurementId(int measurementId) {
-		String query = "select c from Merge3VO c where c.measurementId=:measurementId";
-		Query EJBQuery = this.entityManager.createQuery(query).setParameter("measurementId", measurementId);
+		String query = "SELECT c FROM Merge3VO c WHERE c.measurementId=:measurementId";
+		Query EJBQuery = this.entityManager.createQuery(query, Merge3VO.class)
+				.setParameter("measurementId", measurementId);
 		return (List<Merge3VO>)EJBQuery.getResultList();
 	}
 	

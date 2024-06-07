@@ -31,11 +31,12 @@ import java.util.Properties;
 public final class Constants {
 
 	public static final String ISPYB_PROPERTIES="ispyb.properties";
+	public static final String CLASSPATH_ISPYB_PROPERTIES="classpath:ISPyB.properties";
 
-	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES));
+	private static Properties mProp = PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, CLASSPATH_ISPYB_PROPERTIES));
 
 	public enum SITE {
-		DESY, LOCAL
+		DESY, DESY_LOCAL
 	}
 
 	/*
@@ -90,7 +91,7 @@ public final class Constants {
 
 	public static final String SITE_DESY = "DESY";
 
-	public static final String SITE_LOCAL = "LOCAL";
+	public static final String SITE_LOCAL = "DESY_LOCAL";
 
 	public static final boolean SITE_IS_LOCAL() {
 		return getProperty(SITE_PROPERTY).equals(SITE_LOCAL);
@@ -100,7 +101,7 @@ public final class Constants {
 		if (SITE_IS_DESY()) {
 			return SITE.DESY;
 		}
-		return SITE.LOCAL;
+		return SITE.DESY_LOCAL;
 	}
 
 	public static final boolean SITE_IS_DESY() {
@@ -141,7 +142,7 @@ public final class Constants {
 	public static final boolean isAuthorisationActive() {
 		String active = getProperty(AUTHORISATION_ACTIVE, "false");
 		if (active != null ) 
-			return new Boolean(active).booleanValue() ;
+			return Boolean.parseBoolean(active);
 		return false;
 	}
 
@@ -1022,7 +1023,7 @@ public final class Constants {
 	
 	public static final int UNIPUCK_SAMPLE_CAPACITY = 16;
 
-	public static final Double SILLY_NUMBER = new Double(-9999);// used to display N/A instead of no value from MXCube
+	public static final Double SILLY_NUMBER = -9999.;// used to display N/A instead of no value from MXCube
 
 	/*
 	 * Admin values
@@ -1240,11 +1241,11 @@ public final class Constants {
 	 */
 	
 	public final static String getUserSmisLoginName() {
-		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES)).getProperty("smis.ws.username");
+		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, Constants.CLASSPATH_ISPYB_PROPERTIES)).getProperty("smis.ws.username");
 	}
 	
 	public final static String getUserSmisPassword() {
-		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES)).getProperty("smis.ws.password");
+		return PropertyLoader.loadProperties(System.getProperty(Constants.ISPYB_PROPERTIES, Constants.CLASSPATH_ISPYB_PROPERTIES)).getProperty("smis.ws.password");
 	}
 			
 	public static String getProperty(String propertyName) {

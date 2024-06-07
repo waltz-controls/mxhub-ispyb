@@ -20,25 +20,16 @@
 package ispyb.server.biosaxs.vos.dataAcquisition;
 
 // Generated May 25, 2012 9:27:44 AM by Hibernate Tools 3.4.0.CR1
-import static javax.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import ispyb.server.biosaxs.vos.datacollection.Merge3VO;
 import ispyb.server.biosaxs.vos.datacollection.Run3VO;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.persistence.*;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import com.google.gson.annotations.Expose;
 
@@ -47,6 +38,7 @@ import com.google.gson.annotations.Expose;
  */
 @Entity
 @Table(name = "Measurement")
+@Access(AccessType.FIELD)
 public class Measurement3VO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -77,8 +69,16 @@ public class Measurement3VO implements java.io.Serializable {
 	}
 
 	@Expose
+	@XmlTransient
+	@ManyToOne(fetch=FetchType.EAGER)
+//	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="runId")
 	protected Run3VO run3VO;
 	@Expose
+	@XmlTransient
+//    @OneToMany(fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.LAZY)
+	@JoinColumn(name = "measurementId")
 	protected Set<Merge3VO> merge3VOs = new HashSet<Merge3VO>(0);
 	 
 	@Transient
@@ -238,10 +238,7 @@ public class Measurement3VO implements java.io.Serializable {
 		this.specimenId = specimenId;
 	}
 	
-	@XmlTransient
-//	@ManyToOne(fetch=FetchType.EAGER)
-	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="runId")
+
     public Run3VO getRun3VO() {
         return this.run3VO;
     }
@@ -250,10 +247,7 @@ public class Measurement3VO implements java.io.Serializable {
         this.run3VO = run3VO;
     }
     
-    @XmlTransient
-//    @OneToMany(fetch=FetchType.EAGER)
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "measurementId")
+
     public Set<Merge3VO> getMerge3VOs() {
         return this.merge3VOs;
     }

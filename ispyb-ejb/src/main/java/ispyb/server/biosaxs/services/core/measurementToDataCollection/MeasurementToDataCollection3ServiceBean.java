@@ -22,14 +22,13 @@ package ispyb.server.biosaxs.services.core.measurementToDataCollection;
 
 import java.util.List;
 
-import ispyb.server.biosaxs.services.sql.SQLQueryKeeper;
 import ispyb.server.biosaxs.vos.datacollection.MeasurementTodataCollection3VO;
 import ispyb.server.biosaxs.vos.datacollection.SaxsDataCollection3VO;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 
@@ -82,8 +81,9 @@ public class MeasurementToDataCollection3ServiceBean implements MeasurementToDat
 	@Override
 	public List<MeasurementTodataCollection3VO> findByMeasurementId(int measurementId) {
 		try {
-			String querySQL = SQLQueryKeeper.getMeasurementToDataCollectionByMeasurementId(measurementId);
-			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class);
+			String querySQL = "SELECT DISTINCT(measurementToDataCollection) FROM MeasurementTodataCollection3VO measurementToDataCollection " + " WHERE measurementToDataCollection.measurementId = :measurementId";
+			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class)
+					.setParameter("measurementId", measurementId);
 			return query.getResultList();
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
@@ -106,8 +106,9 @@ public class MeasurementToDataCollection3ServiceBean implements MeasurementToDat
 	@Override
 	public List<MeasurementTodataCollection3VO> findMeasurementToDataCollectionByDataCollectionId(Integer dataCollectionId) {
 		try {
-			String querySQL = SQLQueryKeeper.findMeasurementToDataCollectionByDataCollectionId(dataCollectionId);
-			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class);
+			String querySQL = "SELECT DISTINCT(measurementToDataCollection) FROM MeasurementTodataCollection3VO measurementToDataCollection WHERE measurementToDataCollection.dataCollectionId = :dataCollectionId";
+			TypedQuery<MeasurementTodataCollection3VO> query = entityManager.createQuery(querySQL, MeasurementTodataCollection3VO.class)
+					.setParameter("dataCollectionId", dataCollectionId);
 			return query.getResultList();
 		} catch (RuntimeException re) {
 			log.error("get failed", re);

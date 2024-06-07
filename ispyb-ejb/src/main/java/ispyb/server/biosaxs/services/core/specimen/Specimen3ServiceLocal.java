@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.specimen;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Specimen3ServiceLocal extends Specimen3Service {

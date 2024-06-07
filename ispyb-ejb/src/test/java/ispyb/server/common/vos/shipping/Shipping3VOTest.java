@@ -56,8 +56,8 @@ public class Shipping3VOTest extends EJB3Test {
 		this.shippings = shipping3Service.findByProposalCode(proposalCode, true);
 
 		for (Shipping3VO shipping3VO : shippings) {
-			assertTrue(shipping3VO.getProposalVO().getCode().toUpperCase().equals(proposalCode));
-			if (shipping3VO.getProposalVO().getNumber().equals("1"))
+			assertTrue(shipping3VO.getProposalVO().getProposalCode().toUpperCase().equals(proposalCode));
+			if (shipping3VO.getProposalVO().getProposalNumber().equals("1"))
 				assertTrue(shipping3VO.getDewarVOs() != null);
 		}
 		assertTrue(this.shippings.size() >= 1);
@@ -84,7 +84,7 @@ public class Shipping3VOTest extends EJB3Test {
 		this.shippings = shipping3Service.findFiltered(null, null, proposalCode, null, null, null, null, null, false);
 
 		for (Shipping3VO shipping3VO : shippings) {
-			assertTrue(shipping3VO.getProposalVO().getCode().equals(proposalCode));
+			assertTrue(shipping3VO.getProposalVO().getProposalCode().equals(proposalCode));
 			// if (shipping3VO.getProposalVO().getNumber() == 1)
 			// assertTrue(shipping3VO.getDewarVOs() != null);
 		}

@@ -93,19 +93,17 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ws.api.annotation.WebContext;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -121,8 +119,8 @@ import com.google.gson.reflect.TypeToken;
 @SOAPBinding(style = Style.DOCUMENT, use = SOAPBinding.Use.LITERAL, parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)
 @Stateless
 @RolesAllowed({ "WebService", "User", "Industrial"}) // allow special access roles
-@SecurityDomain("ispyb")
-@WebContext(authMethod="BASIC",  secureWSDLAccess=false, transportGuarantee="NONE")
+//@SecurityDomain("ispyb")
+//@WebContext(authMethod="BASIC",  secureWSDLAccess=false, transportGuarantee="NONE")
 public class ToolsForAutoprocessingWebService {
 	private final static Logger LOG = Logger.getLogger(ToolsForAutoprocessingWebService.class);
 

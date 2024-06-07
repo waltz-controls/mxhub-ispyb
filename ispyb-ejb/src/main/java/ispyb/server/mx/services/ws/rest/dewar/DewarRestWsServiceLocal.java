@@ -21,7 +21,7 @@ package ispyb.server.mx.services.ws.rest.dewar;
 
 
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface DewarRestWsServiceLocal extends DewarRestWsService {

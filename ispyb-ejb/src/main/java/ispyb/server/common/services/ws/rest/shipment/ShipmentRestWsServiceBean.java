@@ -24,33 +24,30 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
-
+@Deprecated(forRemoval = true)
 @Stateless
 public class ShipmentRestWsServiceBean extends WsServiceBean implements ShipmentRestWsService, ShipmentRestWsServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
-	
-	
-	public String getHistoryQuery = "select * from v_tracking_shipment_history";
-	
+
+
 	@Override
 	public List<Map<String, Object>> getShipmentHistoryByShipmentId(int proposalId, int shipmentId) {
-		
-		String mySQLQuery = getHistoryQuery + " where Shipping_shippingId = :shippingId and Shipping_proposalId = :proposalId";
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(mySQLQuery);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("shippingId", shipmentId);
-		return executeSQLQuery(query);
-	}
+		//TODO no such table
+		String mySQLQuery = "select * from v_tracking_shipment_history"
+				+ " where Shipping_shippingId = ?1 and Shipping_proposalId = ?2";
+		Query query = this.entityManager.createNativeQuery(mySQLQuery, Map.class)
+				.setParameter(2, proposalId)
+				.setParameter(1, shipmentId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 
 
 

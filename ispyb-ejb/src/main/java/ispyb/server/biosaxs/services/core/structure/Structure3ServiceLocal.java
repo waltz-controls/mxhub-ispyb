@@ -19,7 +19,7 @@
 
 package ispyb.server.biosaxs.services.core.structure;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface Structure3ServiceLocal extends Structure3Service {

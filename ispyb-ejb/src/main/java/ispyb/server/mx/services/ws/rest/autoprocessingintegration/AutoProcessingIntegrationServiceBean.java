@@ -24,12 +24,11 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
 
 @Stateless
@@ -38,8 +37,6 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	
-	private String ByDataCollectionId = getViewTableQuery() + " where v_datacollection_summary_phasing_dataCollectionId = :dataCollectionId and v_datacollection_summary_session_proposalId=:proposalId";
 
 	private String getViewTableQuery(){
 		return this.getQueryFromResourceFile("/queries/AutoProcessingIntegrationServiceBean/getViewTableQuery.sql");
@@ -47,12 +44,11 @@ public class AutoProcessingIntegrationServiceBean extends WsServiceBean implemen
 	
 	@Override
 	public List<Map<String, Object>> getViewByDataCollectionId(int proposalId, int dataCollectionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
-		query.setParameter("dataCollectionId", dataCollectionId);
-		query.setParameter("proposalId", proposalId);
-		System.out.println(query.toString());
-		return executeSQLQuery(query);
-	}
+		String sqlQuery = getViewTableQuery() + " where v_datacollection_summary_phasing_dataCollectionId = ?1 and v_datacollection_summary_session_proposalId= ?2";
+		Query query = this.entityManager.createNativeQuery(sqlQuery, Map.class)
+				.setParameter(1, dataCollectionId)
+				.setParameter(2, proposalId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 }

@@ -21,7 +21,7 @@ package ispyb.server.mx.services.collections;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import ispyb.server.mx.vos.collections.Detector3VO;
 

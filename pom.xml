@@ -28,14 +28,19 @@
 		<version.jboss.spec.javaee.7.0>1.0.0.Final</version.jboss.spec.javaee.7.0>
 
 		<!-- other plugin versions -->
-		<version.compiler.plugin>3.1</version.compiler.plugin>
+		<version.compiler.plugin>3.8.1</version.compiler.plugin>
 		<version.ear.plugin>2.6</version.ear.plugin>
 		<version.ejb.plugin>2.3</version.ejb.plugin>
 		<version.war.plugin>2.5</version.war.plugin>
 
+		<resteasy.version>6.2.3.Final</resteasy.version>
+		<jakartaee.version>10.0.0</jakartaee.version>
+		<jakarta.api.version>3.1.0</jakarta.api.version>
+		<openjpa.version>4.0.0</openjpa.version>
+		<org.apache.cxf.version>4.0.4</org.apache.cxf.version>
+
 		<!-- maven-compiler-plugin -->
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.source>21</maven.compiler.source>
 	</properties>
 
 	<repositories>
@@ -60,6 +65,11 @@
 			<version>1.2.17</version>
 		</dependency>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>2.0.13</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>
@@ -75,45 +85,47 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.19</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.openjpa</groupId>
+			<artifactId>openjpa</artifactId>
+			<version>${openjpa.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.3</version>
 		</dependency>
 
-			<dependency>
-				<groupId>org.jboss.spec</groupId>
-				<artifactId>jboss-javaee-7.0</artifactId>
-				<version>${version.jboss.spec.javaee.7.0}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.spec.javax.rmi</groupId>
-				<artifactId>jboss-rmi-api_1.0_spec</artifactId>
-				<version>1.0.6.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.jws</groupId>
-				<artifactId>javax.jws-api</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.xml.ws</groupId>
-				<artifactId>jaxws-api</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>2.1.1</version>
-			</dependency>
+		<dependency>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-web-api</artifactId>
+			<version>${jakartaee.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.jws</groupId>
+			<artifactId>jakarta.jws-api</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.ws</groupId>
+			<artifactId>jakarta.xml.ws-api</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+			<version>${jakarta.api.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.jhdf</groupId> <!--jhdf-->
 			<artifactId>jhdf</artifactId>
@@ -150,9 +162,9 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.7</version>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+			<version>2.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.rpc</groupId>
@@ -160,9 +172,14 @@
 			<version>1.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0</version>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>${jakarta.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.json</groupId>
+			<artifactId>jakarta.json-api</artifactId>
+			<version>2.1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.lowagie</groupId>
@@ -202,19 +219,8 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.5</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>jaxws-maven-plugin</artifactId>
-			<version>1.12</version>
+			<version>2.0.12</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
@@ -222,42 +228,35 @@
 			<version>4.0.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.ejb3</groupId>
-			<artifactId>jboss-ejb3-ext-api</artifactId>
-			<version>2.2.0.Final</version>
+			<groupId>jakarta.security.enterprise</groupId>
+			<artifactId>jakarta.security.enterprise-api</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.as</groupId>
-			<artifactId>jboss-as-security</artifactId>
-			<version>7.1.1.Final</version>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>${org.apache.cxf.version}</version> <!-- TODO Check for the latest version -->
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.ws</groupId>
-			<artifactId>jbossws-spi</artifactId>
-			<version>2.3.1.Final</version>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+			<version>${org.apache.cxf.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>javax.ejb-api</artifactId>
-			<version>3.2</version>
+			<groupId>jakarta.ejb</groupId>
+			<artifactId>jakarta.ejb-api</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+		<!-- RestEasy support -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-databinding-jaxb</artifactId>
+			<version>${org.apache.cxf.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>3.0.4.Final</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- JAXB support -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxb-provider</artifactId>
-			<version>3.0.4.Final</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-multipart-provider</artifactId>
-			<version>3.0.4.Final</version>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-extension-providers</artifactId>
+			<version>${org.apache.cxf.version}</version>
 		</dependency>
 
 		<dependency>
@@ -269,21 +268,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>5.0.10.Final</version>
-			<exclusions>
-				<exclusion>
-					<groupId>antlr</groupId>
-					<artifactId>antlr</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -299,6 +283,7 @@
 	</dependencyManagement>
 
 	<build>
+		<pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -320,28 +305,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Compiler plugin enforces Java 1.6 compatibility and activates annotation processors -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.compiler.plugin}</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-				</configuration>
-			</plugin>
-			<!-- The WildFly plugin deploys your ear to a local JBoss AS container -->
-			<!-- Due to Maven's lack of intelligence with EARs we need to configure 
-				the wildfly maven plugin to skip deployment for all modules. We then enable 
-				it specifically in the ear module. -->
-			<plugin>
-				<groupId>org.wildfly.plugins</groupId>
-				<artifactId>wildfly-maven-plugin</artifactId>
-				<version>${version.wildfly.maven.plugin}</version>
-				<configuration>
-					<skip>true</skip>
+					<release>${maven.compiler.source}</release>
 				</configuration>
 			</plugin>
 		</plugins>
+		</pluginManagement>
 	</build>
 
 </project>

@@ -28,21 +28,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.Style;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.Style;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.ws.api.annotation.WebContext;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -74,8 +72,8 @@ import ispyb.server.smis.UpdateFromSMIS;
 @SOAPBinding(style = Style.DOCUMENT, use = SOAPBinding.Use.LITERAL, parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)
 @Stateless
 @RolesAllowed({ "WebService", "User", "Industrial" })
-@SecurityDomain("ispyb")
-@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
+//@SecurityDomain("ispyb")
+//@WebContext(authMethod = "BASIC", secureWSDLAccess = false, transportGuarantee = "NONE")
 public class CrimsWebService {
 	private final static Logger LOG = Logger.getLogger(CrimsWebService.class);
 
@@ -126,10 +124,10 @@ public class CrimsWebService {
 			HashMap<String, List<String>> listProteinAcronyms = new HashMap<String, List<String>>();
 			
 			for (Proposal3VO proposal3vo : proposals) {
-				List<Proposal3VO> filled = getProposal3Service().findByCodeAndNumber(proposal3vo.getCode(), proposal3vo.getNumber(), false, true, false);
+				List<Proposal3VO> filled = getProposal3Service().findByCodeAndNumber(proposal3vo.getProposalCode(), proposal3vo.getProposalNumber(), false, true, false);
 				if (filled.size() > 0){
 					for (Proposal3VO proposal3vo2 : filled) {
-						listProteinAcronyms.put(proposal3vo2.getCode() + proposal3vo2.getNumber(), this.getProteinAcronymByProposal(proposal3vo2));
+						listProteinAcronyms.put(proposal3vo2.getProposalCode() + proposal3vo2.getProposalNumber(), this.getProteinAcronymByProposal(proposal3vo2));
 					}
 				}
 			}

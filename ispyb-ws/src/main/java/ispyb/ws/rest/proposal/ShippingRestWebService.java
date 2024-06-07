@@ -20,14 +20,14 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
@@ -50,7 +50,7 @@ public class ShippingRestWebService extends MXRestWebService {
 
 			int proposalId = this.getProposalId(proposal);
 			Proposal3VO proposal3VO = this.getProposal3Service().findByPk(proposalId);
-			ProposalParticipantInfoLightVO[] scientists = ScientistsFromSMIS.findScientistsForProposalByNameAndFirstName(StringUtils.getUoCode(proposal3VO.getCode()), Long.parseLong(proposal3VO.getNumber()), null, null);
+			ProposalParticipantInfoLightVO[] scientists = ScientistsFromSMIS.findScientistsForProposalByNameAndFirstName(StringUtils.getUoCode(proposal3VO.getProposalCode()), Long.parseLong(proposal3VO.getProposalNumber()), null, null);
 			this.logFinish(methodName, id, logger);
 			return sendResponse(scientists);
 		} catch (Exception e) {

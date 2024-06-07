@@ -22,18 +22,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnit;
+import ispyb.server.common.vos.config.MenuGroup3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceUnit;
 
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.common.vos.config.Menu3VO;
@@ -48,19 +46,7 @@ public class Menu3ServiceBean implements Menu3Service,
 		Menu3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Menu3ServiceBean.class);
-	
 
-	// Generic HQL request to find instances of Menu3 by pk
-	// TODO choose between left/inner join
-	private static final String FIND_BY_PK(boolean fetchMenuGroup) {
-		return "from Menu3VO vo " + (fetchMenuGroup ? "left join fetch vo.menuGroupVOs " : "") + "where vo.menuId = :pk";
-	}
-
-	// Generic HQL request to find all instances of Menu3
-	// TODO choose between left/inner join
-	private static final String FIND_ALL(boolean fetchMenuGroup) {
-		return "from Menu3VO vo " + (fetchMenuGroup ? "left join fetch vo.menuGroupVOs " : "");
-	}
 
 	@PersistenceContext(unitName = "ispyb_config")
 	private EntityManager entityManager;
@@ -123,13 +109,20 @@ public class Menu3ServiceBean implements Menu3Service,
 	 * @param withLink1
 	 * @param withLink2
 	 * @return the Menu3 value object
+	 *
+	 * 	// Generic HQL request to find instances of Menu3 by pk
+	 * 	// TODO choose between left/inner join
 	 */
 	public Menu3VO findByPk(final Integer pk, final boolean withMenuGroup) throws Exception {
 		
 		checkCreateChangeRemoveAccess();
 		try {
 			entityManager = entitymanagerFactory.createEntityManager();
-			return (Menu3VO) entityManager.createQuery(FIND_BY_PK(withMenuGroup)).setParameter("pk", pk).getSingleResult();
+			return (Menu3VO) entityManager.createQuery("select vo from Menu3VO vo "
+							+ (withMenuGroup ? "left join fetch vo.menuGroupVOs " : "")
+							+ "where vo.menuId = :pk")
+					.setParameter("pk", pk)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		} finally {
@@ -155,13 +148,18 @@ public class Menu3ServiceBean implements Menu3Service,
 	 * Find all Menu3s and set linked value objects if necessary
 	 * @param withLink1
 	 * @param withLink2
+	 *
+	 * 	// Generic HQL request to find all instances of Menu3
+	 * 	// TODO choose between left/inner join
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Menu3VO> findAll(final boolean withMenuGroup, final boolean detachLight) throws Exception {
 		
 		entityManager = entitymanagerFactory.createEntityManager();
 		try {
-			Collection<Menu3VO> foundEntities = entityManager.createQuery(FIND_ALL(withMenuGroup)).getResultList();
+			Collection<Menu3VO> foundEntities = entityManager.createQuery("select vo from Menu3VO vo "
+							+ (withMenuGroup ? "left join fetch vo.menuGroupVOs " : ""))
+					.getResultList();
 			List<Menu3VO> vos;
 			if (detachLight){
 				vos = getLightMenu3VOs(foundEntities);
@@ -236,35 +234,54 @@ public class Menu3ServiceBean implements Menu3Service,
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Menu3VO> findFiltered(final Integer parentId, final Integer menuGroupId, final String proposalCode)throws Exception{
-		
-		entityManager = entitymanagerFactory.createEntityManager();
-		try {
-			Session session = (Session) entityManager.getDelegate();
+		//TODO NPE on this.entityManager
+		try(EntityManager em = entitymanagerFactory.createEntityManager()) {
+			// Create a CriteriaBuilder instance for creating the CriteriaQuery object
+			CriteriaBuilder cb = em.getCriteriaBuilder();
 
-			Criteria criteriaMenu = session.createCriteria(Menu3VO.class);
-			Criteria criteriaMenuGroup = criteriaMenu.createCriteria("menuGroupVOs");
+// Create a query object for Menu3VO
+			CriteriaQuery<Menu3VO> cq = cb.createQuery(Menu3VO.class);
 
-			criteriaMenu.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // DISTINCT RESULTS !
+// Define the root of the query indicating the query is from the Menu3VO entity
+			Root<Menu3VO> menuRoot = cq.from(Menu3VO.class);
+
+// Join with the MenuGroupVOs if needed
+			Join<Menu3VO, MenuGroup3VO> menuGroupJoin = menuRoot.join("menuGroupVOs", JoinType.LEFT);
+
+// Prepare the conditions (predicates for the criteria query)
+			List<Predicate> predicates = new ArrayList<>();
 
 			if (proposalCode != null) {
-				criteriaMenu.add(Restrictions.or(Restrictions.eq("expType", "MB"), Restrictions.eq("expType", proposalCode)));
+				predicates.add(
+						cb.or(
+								cb.equal(menuRoot.get("expType"), "MB"),
+								cb.equal(menuRoot.get("expType"), proposalCode)
+						)
+				);
 			}
 
 			if (menuGroupId != null) {
-				criteriaMenuGroup.add(Restrictions.eq("menuGroupId", menuGroupId));
+				predicates.add(cb.equal(menuGroupJoin.get("menuGroupId"), menuGroupId));
 			}
 
 			if (parentId != null) {
-				criteriaMenu.add(Restrictions.eq("parentId", parentId));
+				predicates.add(cb.equal(menuRoot.get("parentId"), parentId));
 			}
-			criteriaMenu.addOrder(Order.asc("parentId"));
-			criteriaMenu.addOrder(Order.asc("sequence"));
 
-			List<Menu3VO> vos = getMenu3VOs(criteriaMenu.list());
+// Apply the predicates to the query
+			cq.select(menuRoot).where(predicates.toArray(new Predicate[0]));
+
+// Order by parentId and sequence
+			cq.orderBy(cb.asc(menuRoot.get("parentId")), cb.asc(menuRoot.get("sequence")));
+
+// Create the query and get the results
+			List<Menu3VO> vos = em.createQuery(cq).getResultList();
+
+// If there's a method to transform results further
+// List<Menu3VO> transformedVos = getMenu3VOs(vos);
+
 			return vos;
 			
-		} finally {
-			entityManager.close();
 		}
 	}
 

@@ -23,18 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import ispyb.server.common.vos.ISPyBValueObject;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.OrderBy;
 
 /**
  * GeometryClassname3 value object mapping table GeometryClassname
@@ -51,7 +44,7 @@ public class GeometryClassname3VO extends ISPyBValueObject implements Cloneable 
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "geometryClassnameId")
 	protected Integer geometryClassnameId;
 
@@ -63,7 +56,7 @@ public class GeometryClassname3VO extends ISPyBValueObject implements Cloneable 
 	
 	@OneToMany
 	@JoinColumn(name = "geometryClassnameId")
-	@OrderBy(clause = "spaceGroupShortName")
+	@OrderBy("spaceGroupShortName")
 	private Set<SpaceGroup3VO> spaceGroupVOs;
 
 	public GeometryClassname3VO() {

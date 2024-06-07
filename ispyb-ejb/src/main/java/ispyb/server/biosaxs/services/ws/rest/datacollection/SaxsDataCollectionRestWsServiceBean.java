@@ -22,72 +22,74 @@ package ispyb.server.biosaxs.services.ws.rest.datacollection;
 import ispyb.server.mx.services.ws.rest.WsServiceBean;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import jakarta.persistence.Query;
 
-
+/**
+ * TODO this bean does not work as there is no such table: pydb.v_saxs_datacollection
+ */
+@Deprecated(forRemoval = true)
 @Stateless
 public class SaxsDataCollectionRestWsServiceBean extends WsServiceBean implements SaxsDataCollectionRestWsService, SaxsDataCollectionRestWsServiceLocal {
 	/** The entity manager. */
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
-	private String ByExperimentId = this.getViewTableQuery() + " where Experiment_proposalId = :proposalId and Experiment_experimentId = :experimentId group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
-	
-	private String BySessionId = this.getViewTableQuery() + " where Experiment_proposalId = :proposalId and Experiment_sessionId = :sessionId group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
-	
-	private String ByDataCollectionId = this.getViewTableQuery() + " where Experiment_proposalId = :proposalId and MeasurementToDataCollection_dataCollectionId = :dataCollectionId group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
-	
-	private String ByMacromoleculeId = this.getViewTableQuery() + "  where Experiment_proposalId = :proposalId and MeasurementToDataCollection_dataCollectionId IN (select MeasurementToDataCollection_dataCollectionId from v_saxs_datacollection where Macromolecule_macromoleculeId =:macromoleculeId) group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
-	
-	
-	
-	private String getViewTableQuery(){
-		return this.getQueryFromResourceFile("/queries/biosaxs/DataCollectionRestWsServiceBean/getViewTableQuery.sql");
-	}
-	
+
+
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByExperimentId(int proposalId, Integer experimentId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByExperimentId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("experimentId", experimentId);
-		return executeSQLQuery(query);
-	}
+		String session = "select v_saxs_datacollection.*,\n"
+				+ "(select SubtractionToAbInitioModel.abinitioId from SubtractionToAbInitioModel where SubtractionToAbInitioModel.subtractionId = v_saxs_datacollection.Subtraction_subtractionId) as SubtractionToAbInitioModel_abinitioId\n"
+				+ "from v_saxs_datacollection "
+				+ " where Experiment_proposalId = ?1 and Experiment_experimentId = ?2 group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId)
+				.setParameter(2, experimentId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionBySessionId(int proposalId, Integer sessionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(BySessionId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("sessionId", sessionId);
-		return executeSQLQuery(query);
-	}
+		String session = "select v_saxs_datacollection.*,\n"
+				+ "(select SubtractionToAbInitioModel.abinitioId from SubtractionToAbInitioModel where SubtractionToAbInitioModel.subtractionId = v_saxs_datacollection.Subtraction_subtractionId) as SubtractionToAbInitioModel_abinitioId\n"
+				+ "from v_saxs_datacollection "
+				+ " where Experiment_proposalId = ?1 and Experiment_sessionId = ?2 group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId)
+				.setParameter(2, sessionId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByMacromoleculeId(int proposalId, Integer macromoleculeId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByMacromoleculeId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("macromoleculeId", macromoleculeId);
-		System.out.println(query);
-		return executeSQLQuery(query);
-	}
+		String session = "select v_saxs_datacollection.*,\n"
+				+ "(select SubtractionToAbInitioModel.abinitioId from SubtractionToAbInitioModel where SubtractionToAbInitioModel.subtractionId = v_saxs_datacollection.Subtraction_subtractionId) as SubtractionToAbInitioModel_abinitioId\n"
+				+ "from v_saxs_datacollection "
+				+ "  where Experiment_proposalId = ?1 and MeasurementToDataCollection_dataCollectionId IN (select MeasurementToDataCollection_dataCollectionId from v_saxs_datacollection where Macromolecule_macromoleculeId = ?2) group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId)
+				.setParameter(2, macromoleculeId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	@Override
 	public Collection<? extends Map<String, Object>> getDataCollectionByDataCollectionId(int proposalId, Integer dataCollectionId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(ByDataCollectionId);
-		query.setParameter("proposalId", proposalId);
-		query.setParameter("dataCollectionId", dataCollectionId);
-		return executeSQLQuery(query);
-	}
+		String session = "select v_saxs_datacollection.*,\n"
+				+ "(select SubtractionToAbInitioModel.abinitioId from SubtractionToAbInitioModel where SubtractionToAbInitioModel.subtractionId = v_saxs_datacollection.Subtraction_subtractionId) as SubtractionToAbInitioModel_abinitioId\n"
+				+ "from v_saxs_datacollection "
+				+ " where Experiment_proposalId = ?1 and MeasurementToDataCollection_dataCollectionId = ?2 group by MeasurementToDataCollection_measurementToDataCollectionId order by Measurement_measurementId DESC;";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, proposalId)
+				.setParameter(2, dataCollectionId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 
 	

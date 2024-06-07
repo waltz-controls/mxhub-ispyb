@@ -20,16 +20,15 @@ package ispyb.server.mx.services.autoproc;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import ispyb.server.mx.vos.autoproc.PhasingAnalysis3VO;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import ispyb.server.common.exceptions.AccessDeniedException;
 import ispyb.server.mx.vos.autoproc.PreparePhasingData3VO;
@@ -161,16 +160,23 @@ public class PreparePhasingData3ServiceBean implements PreparePhasingData3Servic
 	@SuppressWarnings("unchecked")
 	public List<PreparePhasingData3VO> findFiltered(final Integer phasingAnalysisId) throws Exception {
 
-		Session session = (Session) this.entityManager.getDelegate();
-		Criteria criteria = session.createCriteria(PreparePhasingData3VO.class);
-		
+		EntityManager em = this.entityManager; // Make sure your EntityManager is properly initialized
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<PreparePhasingData3VO> cq = cb.createQuery(PreparePhasingData3VO.class);
+		Root<PreparePhasingData3VO> root = cq.from(PreparePhasingData3VO.class);
+
+// Joining with PhasingAnalysisVO if phasingAnalysisId is provided
 		if (phasingAnalysisId != null) {
-			Criteria subCrit = criteria.createCriteria("phasingAnalysisVO");
-			subCrit.add(Restrictions.eq("phasingAnalysisId", phasingAnalysisId));
-			subCrit.addOrder(Order.asc("phasingAnalysisId"));
+			Join<PreparePhasingData3VO, PhasingAnalysis3VO> phasingAnalysisJoin = root.join("phasingAnalysisVO", JoinType.INNER);
+			Predicate phasingAnalysisIdCondition = cb.equal(phasingAnalysisJoin.get("phasingAnalysisId"), phasingAnalysisId);
+			cq.where(phasingAnalysisIdCondition);
+			cq.orderBy(cb.asc(phasingAnalysisJoin.get("phasingAnalysisId")));
 		}
-		
-		List<PreparePhasingData3VO> foundEntities = criteria.list();
+
+// Execute the query and get the results
+		TypedQuery<PreparePhasingData3VO> query = em.createQuery(cq);
+		List<PreparePhasingData3VO> foundEntities = query.getResultList();
 		return foundEntities;
 	}
 

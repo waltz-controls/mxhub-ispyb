@@ -9,19 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
 
+import org.apache.cxf.annotations.GZIP;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.annotations.GZIP;
 
 import ispyb.common.util.Constants;
 import ispyb.common.util.SendMailUtils;
@@ -31,13 +31,13 @@ import ispyb.server.mx.vos.collections.DataCollection3VO;
 import ispyb.server.mx.vos.collections.Session3VO;
 
 @Path("/")
+@GZIP(threshold = 1024)
 public class DataCollectionRestWebService extends MXRestWebService {
 
 	private final static Logger logger = Logger.getLogger(DataCollectionRestWebService.class);
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/{dataCollectionIdList}/list")
 	@Produces({ "application/json" })
 	public Response getDataCollectionById(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -199,7 +199,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/session/{sessionIdList}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionBySessionId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -417,7 +416,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 		
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/workflowstep/{workflowstepId}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionByWorkflowStepId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -441,7 +439,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/datacollectiongroupid/{datacollectiongroupids}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionByDataCollectionId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -465,7 +462,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 	
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/workflow/{workflowIdList}/list")
 	@Produces({ "application/json" })
 	public Response getDataCollectionsByWorkflowId(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -491,7 +487,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/protein_acronym/{protein_acronyms}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionByProteinAcronym(@PathParam("token") String token, @PathParam("proposal") String proposal,
@@ -516,7 +511,6 @@ public class DataCollectionRestWebService extends MXRestWebService {
 
 	@RolesAllowed({ "User", "Manager", "Industrial", "Localcontact" })
 	@GET
-	@GZIP
 	@Path("{token}/proposal/{proposal}/mx/datacollection/sample/{sampleId}/list")
 	@Produces({ "application/json" })
 	public Response getViewDataCollectionBySampleId(@PathParam("token") String token, @PathParam("proposal") String proposal,

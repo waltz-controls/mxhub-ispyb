@@ -28,17 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 
 import ispyb.server.biosaxs.services.core.ExperimentScope;
 import ispyb.server.biosaxs.services.core.plateType.PlateType3Service;
@@ -61,14 +56,7 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	private final static Logger log = Logger.getLogger(Experiment3ServiceBean.class);
 
-	
-	/**
-	 * QUERIES
-	 */
-	private String GetExperimentDescriptionByExperimentId = getViewExperimentDescriptionTableQuery() + " where experimentId = :experimentId";
-	
-	
-	
+
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 
@@ -96,31 +84,28 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 			throw re;
 		}
 	}
-	
-	private String getViewExperimentDescriptionTableQuery(){
-		return this.getQueryFromResourceFile("/queries/biosaxs/Experiment3ServiceBean/getViewExperimentDescriptionTableQuery.sql");
-	}
-	
-	
+
+
 	@Override
 	public List<Experiment3VO> findByProposalId(int proposalId, ExperimentScope scope) {
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-		ejbQLQuery.append("WHERE experiment.proposalId = :proposalId");
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class).setParameter("proposalId", proposalId);
+		String ejbQLQuery = getQueryByScope(scope)
+				+ "WHERE experiment.proposalId = :proposalId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+				.setParameter("proposalId", proposalId);
 		return query.getResultList();
 	}
 
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope, Integer proposalId) {
 		try {
-			StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-			ejbQLQuery.append("WHERE experiment.experimentId = :experimentId ");
+			String ejbQLQuery = getQueryByScope(scope) +
+					"WHERE experiment.experimentId = :experimentId ";
 			// if coming from manager account, proposalId can be null
 			if (proposalId != null)  {
-				ejbQLQuery.append(" and experiment.proposalId = :proposalId");
+				ejbQLQuery += " AND experiment.proposalId = :proposalId";
 			}
-			TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
-			query.setParameter("experimentId", experimentId);
+			TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+					.setParameter("experimentId", experimentId);
 			if (proposalId != null) {
 				query.setParameter("proposalId", proposalId);
 			}
@@ -138,50 +123,62 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 			}
 		return vo;
 	}
-	
-	public static StringBuilder getQueryByScope(ExperimentScope scope){
+
+	//TODO this method produces invalid query that fails with "Unknown column 't7.id' in 'field list'"
+	private String getQueryByScope(ExperimentScope scope){
 		StringBuilder ejbQLQuery = new StringBuilder();
 		ejbQLQuery.append("SELECT DISTINCT(experiment) FROM Experiment3VO experiment ");
-		
+
 		switch (scope) {
 			case MINIMAL:
+				// No additional joins are appended.
 				break;
 			case MEDIUM:
-				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples samples ");
-				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO macromolecule ");
-				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.stoichiometry st ");
-//				ejbQLQuery.append("LEFT JOIN FETCH st.macromolecule3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO LEFT JOIN samples.macromolecule3VO macromolecule ");
+				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.stoichiometry ");
 				ejbQLQuery.append("LEFT JOIN FETCH macromolecule.structure3VOs ");
-				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements specimens ");
-				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs samplePlates ");
-				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
-				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
-				
-				ejbQLQuery.append("LEFT JOIN FETCH specimens.merge3VOs merges ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+				ejbQLQuery.append("LEFT JOIN FETCH specimens.merge3VOs ");
 				ejbQLQuery.append("LEFT JOIN FETCH specimens.run3VO ");
-				break;
-			case PREPARE_EXPERIMENT:
-				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples samples ");
-				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO ");
-				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements specimens ");
-				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs samplePlates ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
 				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
-				ejbQLQuery.append("LEFT JOIN FETCH experiment.dataCollections dataCollections ");
+
+
+				break;
+
+			case PREPARE_EXPERIMENT:
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samples LEFT JOIN experiment.samples samples ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.macromolecule3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH samples.measurements LEFT JOIN samples.measurements specimens ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.samplePlate3VOs LEFT JOIN experiment.samplePlate3VOs samplePlates ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.plategroup3VO ");
+				ejbQLQuery.append("LEFT JOIN FETCH samplePlates.sampleplateposition3VOs ");
+
+				ejbQLQuery.append("LEFT JOIN FETCH experiment.dataCollections LEFT JOIN experiment.dataCollections dataCollections ");
 				ejbQLQuery.append("LEFT JOIN FETCH dataCollections.measurementtodatacollection3VOs ");
 				break;
-		default:
-			break;
+
+			default:
+				// No additional actions for default case
+				break;
 		}
-		return ejbQLQuery;
+
+		return ejbQLQuery.toString();
 	}
-	
-	
+
+
 	@Override
 	public Experiment3VO findByMeasurementId(int measurementId){
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(ExperimentScope.MEDIUM);
-		ejbQLQuery.append(" wHERE specimens.measurementId = " + measurementId);
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
+		String ejbQLQuery = getQueryByScope(ExperimentScope.MEDIUM)
+				+ " WHERE specimens.measurementId = :measurementId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+				.setParameter("measurementId", measurementId);
 		return query.getSingleResult();
 	}
 	
@@ -199,10 +196,10 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	@Override
 	public Experiment3VO findById(Integer experimentId, ExperimentScope scope) {
-		StringBuilder ejbQLQuery = Experiment3ServiceBean.getQueryByScope(scope);
-		ejbQLQuery.append("WHERE experiment.experimentId = :experimentId");
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery.toString(), Experiment3VO.class);
-		query.setParameter("experimentId", experimentId);
+		String ejbQLQuery = getQueryByScope(scope)
+				+ "WHERE experiment.experimentId = :experimentId";
+		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
+				.setParameter("experimentId", experimentId);
 		List<Experiment3VO> results = query.getResultList();
 		if (results.isEmpty()) {
 		    return null; // handle no-results case
@@ -211,14 +208,14 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 		}
 	}
 	
-	
+	@Deprecated(forRemoval = true)
 	@Override
 	public List<Map<String, Object>> getExperimentDescription(Integer experimentId) {
-		Session session = (Session) this.entityManager.getDelegate();
-		SQLQuery query = session.createSQLQuery(GetExperimentDescriptionByExperimentId);
-		query.setParameter("experimentId", experimentId);
-		return executeSQLQuery(query);
-	}
+		String session = "select * from v_saxs_datacollection  where experimentId = ?1";
+		Query query = this.entityManager.createNativeQuery(session, Map.class)
+				.setParameter(1, experimentId);
+        return (List<Map<String, Object>>) ((Query) query).getResultList();
+    }
 	
 	
 

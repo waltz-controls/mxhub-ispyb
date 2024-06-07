@@ -25,26 +25,17 @@ package ispyb.server.common.services.robot;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
-import ispyb.server.common.vos.proposals.Person3VO;
 import ispyb.server.common.vos.robot.RobotAction3VO;
 
 @Stateless
 public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction3ServiceLocal {
 
-	private static final String FIND_BY_PK() {
-		return "from RobotAction3VO vo where vo.robotActionId = :pk";
-	}
 
-	private static String FIND_BY_SESSION() { 
-		return "from RobotAction3VO vo where vo.sessionId = :sessionId order by vo.startTime desc";
-	}
-
-	
 	@PersistenceContext(unitName = "ispyb_db")
 	private EntityManager entityManager;
 	
@@ -76,7 +67,9 @@ public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction
 	@Override
 	public RobotAction3VO findByPk(Integer pk) throws Exception {
 		try {
-			return (RobotAction3VO) entityManager.createQuery(FIND_BY_PK()).setParameter("pk", pk)
+			String query = "SELECT RobotAction3VO FROM RobotAction3VO vo WHERE vo.robotActionId = :pk";
+			return entityManager.createQuery(query, RobotAction3VO.class)
+					.setParameter("pk", pk)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
@@ -87,8 +80,10 @@ public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction
 	@SuppressWarnings("unchecked")
 	public List<RobotAction3VO> findBySession(Integer sessionId) throws Exception {	
 		try {
-			List<RobotAction3VO> listVOs = this.entityManager.createQuery(FIND_BY_SESSION())
-			.setParameter("sessionId", sessionId).getResultList();
+			String query = "SELECT RobotAction3VO FROM RobotAction3VO vo WHERE vo.sessionVO.sessionId = :sessionId ORDER BY vo.startTime DESC";
+			List<RobotAction3VO> listVOs = this.entityManager.createQuery(query, RobotAction3VO.class)
+					.setParameter("sessionId", sessionId)
+					.getResultList();
 			return listVOs;
 		} catch (NoResultException e) {
 			return null;

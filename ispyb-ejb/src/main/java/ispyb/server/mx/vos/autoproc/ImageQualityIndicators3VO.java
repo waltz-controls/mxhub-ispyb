@@ -24,15 +24,7 @@ import ispyb.server.mx.vos.collections.Image3VO;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityResult;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -52,7 +44,7 @@ public class ImageQualityIndicators3VO extends ISPyBValueObject implements Clone
 	private static final long serialVersionUID = 1234567901234567890L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "imageQualityIndicatorsId")
 	protected Integer imageQualityIndicatorsId;
 	

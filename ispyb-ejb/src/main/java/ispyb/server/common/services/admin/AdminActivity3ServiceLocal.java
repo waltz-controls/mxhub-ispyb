@@ -18,7 +18,7 @@
  ******************************************************************************************************************************/
 package ispyb.server.common.services.admin;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 
 @Local
 public interface AdminActivity3ServiceLocal extends AdminActivity3Service {
