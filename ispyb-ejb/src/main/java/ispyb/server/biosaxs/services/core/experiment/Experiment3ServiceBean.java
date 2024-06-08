@@ -178,7 +178,27 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 //		String ejbQLQuery = getQueryByScope(ExperimentScope.MEDIUM)
 //				+ " WHERE specimens.measurementId = :measurementId";
 
-		String sqlQLQuery = "SELECT DISTINCT t0.experimentId, t5.specimenId, t5.bufferId, t5.code, t5.comments, t5.concentration, t5.experimentId, t6.macromoleculeId, t6.acronym, t6.comments, t6.contactsDescriptionFilePath, t6.creationDate, t6.electronDensity, t6.extintionCoefficient, t6.molecularMass, t6.name, t6.proposalId, t6.refractiveIndex, t6.safetyLevelId, t6.sequence, t6.solventViscosity, t6.symmetry, t5.safetyLevelId, t7.samplePlatePositionId, t7.columnNumber, t7.rowNumber, t7.samplePlateId, t7.volume, t5.stockSolutionId, t5.volume, t8.specimenId, t8.code, t8.comments, t8.exposureTemperature, t8.extraFlowTime, t8.flow, t8.imageDirectory, t8.measurementId, t8.pathToH5, t8.priorityLevelId, t9.runId, t9.beamCenterX, t9.beamCenterY, t9.creationDate, t9.energy, t9.exposureTemperature, t9.normalization, t9.pixelSizeX, t9.pixelSizeY, t9.radiationAbsolute, t9.radiationRelative, t9.spectrophotometer, t9.storageTemperature, t9.timeEnd, t9.timePerFrame, t9.timeStart, t9.transmission, t8.transmission, t8.viscosity, t8.volumeToLoad, t8.waitTime FROM Experiment t0 LEFT OUTER JOIN Specimen t1 ON t0.experimentId = t1.experimentId LEFT OUTER JOIN SamplePlate t3 ON t0.experimentId = t3.experimentId INNER JOIN Specimen t5 ON t0.experimentId = t5.experimentId LEFT OUTER JOIN Measurement t2 ON t1.specimenId = t2.specimenId LEFT OUTER JOIN Macromolecule t4 ON t1.macromoleculeId = t4.macromoleculeId LEFT OUTER JOIN Macromolecule t6 ON t5.macromoleculeId = t6.macromoleculeId LEFT OUTER JOIN SamplePlatePosition t7 ON t5.samplePlatePositionId = t7.samplePlatePositionId LEFT OUTER JOIN Measurement t8 ON t5.specimenId = t8.specimenId LEFT OUTER JOIN Run t9 ON t8.runId = t9.runId WHERE (t2.measurementId = ?1) ORDER BY t0.experimentId ASC, t8.specimenId ASC";
+		String sqlQLQuery = 
+		  """
+		  SELECT DISTINCT
+          experiment.experimentId, 
+          speciment2.specimenId, speciment2.bufferId, speciment2.code, speciment2.comments, speciment2.concentration, speciment2.experimentId, speciment2.safetyLevelId, speciment2.stockSolutionId, speciment2.volume, 
+          macromolecule2.macromoleculeId, macromolecule2.acronym, macromolecule2.comments, macromolecule2.contactsDescriptionFilePath, macromolecule2.creationDate, macromolecule2.electronDensity, macromolecule2.extintionCoefficient, macromolecule2.molecularMass, macromolecule2.name, macromolecule2.proposalId, macromolecule2.refractiveIndex, macromolecule2.safetyLevelId, macromolecule2.sequence, macromolecule2.solventViscosity, macromolecule2.symmetry, 
+          samplePlatePosition.samplePlatePositionId, samplePlatePosition.columnNumber, samplePlatePosition.rowNumber, samplePlatePosition.samplePlateId, samplePlatePosition.volume,
+          measurement2.specimenId, measurement2.code, measurement2.comments, measurement2.exposureTemperature, measurement2.extraFlowTime, measurement2.flow, measurement2.imageDirectory, measurement2.measurementId, measurement2.pathToH5, measurement2.priorityLevelId, measurement2.transmission, measurement2.viscosity, measurement2.volumeToLoad, measurement2.waitTime,
+          run.runId, run.beamCenterX, run.beamCenterY, run.creationDate, run.energy, run.exposureTemperature, run.normalization, run.pixelSizeX, run.pixelSizeY, run.radiationAbsolute, run.radiationRelative, run.spectrophotometer, run.storageTemperature, run.timeEnd, run.timePerFrame, run.timeStart, run.transmission
+          FROM Experiment experiment 
+          LEFT OUTER JOIN Specimen speciment ON experiment.experimentId = speciment.experimentId 
+          LEFT OUTER JOIN SamplePlate samplePlate ON experiment.experimentId = samplePlate.experimentId INNER JOIN Specimen speciment2 ON experiment.experimentId = speciment2.experimentId 
+          LEFT OUTER JOIN Measurement measurement ON speciment.specimenId = measurement.specimenId 
+          LEFT OUTER JOIN Macromolecule macromolecule ON speciment.macromoleculeId = macromolecule.macromoleculeId 
+          LEFT OUTER JOIN Macromolecule macromolecule2 ON speciment2.macromoleculeId = macromolecule2.macromoleculeId 
+          LEFT OUTER JOIN SamplePlatePosition samplePlatePosition ON speciment2.samplePlatePositionId = samplePlatePosition.samplePlatePositionId 
+          LEFT OUTER JOIN Measurement measurement2 ON speciment2.specimenId = measurement2.specimenId 
+          LEFT OUTER JOIN Run run ON measurement2.runId = run.runId 
+          WHERE (measurement.measurementId = ?1) 
+          ORDER BY experiment.experimentId ASC, measurement2.specimenId ASC
+		  """;
 
 		return (Experiment3VO) entityManager.createNativeQuery(sqlQLQuery, Experiment3VO.class)
 //				.setParameter("measurementId", measurementId);
