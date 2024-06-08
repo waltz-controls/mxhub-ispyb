@@ -175,11 +175,15 @@ public class Experiment3ServiceBean  extends WsServiceBean implements Experiment
 
 	@Override
 	public Experiment3VO findByMeasurementId(int measurementId){
-		String ejbQLQuery = getQueryByScope(ExperimentScope.MEDIUM)
-				+ " WHERE specimens.measurementId = :measurementId";
-		TypedQuery<Experiment3VO> query = entityManager.createQuery(ejbQLQuery, Experiment3VO.class)
-				.setParameter("measurementId", measurementId);
-		return query.getSingleResult();
+//		String ejbQLQuery = getQueryByScope(ExperimentScope.MEDIUM)
+//				+ " WHERE specimens.measurementId = :measurementId";
+
+		String sqlQLQuery = "SELECT DISTINCT t0.experimentId, t5.specimenId, t5.bufferId, t5.code, t5.comments, t5.concentration, t5.experimentId, t6.macromoleculeId, t6.acronym, t6.comments, t6.contactsDescriptionFilePath, t6.creationDate, t6.electronDensity, t6.extintionCoefficient, t6.molecularMass, t6.name, t6.proposalId, t6.refractiveIndex, t6.safetyLevelId, t6.sequence, t6.solventViscosity, t6.symmetry, t5.safetyLevelId, t7.samplePlatePositionId, t7.columnNumber, t7.rowNumber, t7.samplePlateId, t7.volume, t5.stockSolutionId, t5.volume, t8.specimenId, t8.code, t8.comments, t8.exposureTemperature, t8.extraFlowTime, t8.flow, t8.imageDirectory, t8.measurementId, t8.pathToH5, t8.priorityLevelId, t9.runId, t9.beamCenterX, t9.beamCenterY, t9.creationDate, t9.energy, t9.exposureTemperature, t9.normalization, t9.pixelSizeX, t9.pixelSizeY, t9.radiationAbsolute, t9.radiationRelative, t9.spectrophotometer, t9.storageTemperature, t9.timeEnd, t9.timePerFrame, t9.timeStart, t9.transmission, t8.transmission, t8.viscosity, t8.volumeToLoad, t8.waitTime FROM Experiment t0 LEFT OUTER JOIN Specimen t1 ON t0.experimentId = t1.experimentId LEFT OUTER JOIN SamplePlate t3 ON t0.experimentId = t3.experimentId INNER JOIN Specimen t5 ON t0.experimentId = t5.experimentId LEFT OUTER JOIN Measurement t2 ON t1.specimenId = t2.specimenId LEFT OUTER JOIN Macromolecule t4 ON t1.macromoleculeId = t4.macromoleculeId LEFT OUTER JOIN Macromolecule t6 ON t5.macromoleculeId = t6.macromoleculeId LEFT OUTER JOIN SamplePlatePosition t7 ON t5.samplePlatePositionId = t7.samplePlatePositionId LEFT OUTER JOIN Measurement t8 ON t5.specimenId = t8.specimenId LEFT OUTER JOIN Run t9 ON t8.runId = t9.runId WHERE (t2.measurementId = ?1) ORDER BY t0.experimentId ASC, t8.specimenId ASC";
+
+		return (Experiment3VO) entityManager.createNativeQuery(sqlQLQuery, Experiment3VO.class)
+//				.setParameter("measurementId", measurementId);
+				.setParameter(1, measurementId)
+				.getSingleResult();
 	}
 	
 	
