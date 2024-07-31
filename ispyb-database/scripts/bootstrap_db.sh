@@ -49,33 +49,6 @@ execute_sql "mysql $MYSQL_CONN -e \"CREATE USER 'pxuser'@'%' IDENTIFIED BY 'pxus
 execute_sql "mysql $MYSQL_CONN -e \"CREATE USER 'pxadmin'@'%' IDENTIFIED BY 'pxadmin'; GRANT ALL PRIVILEGES ON *.* TO 'pxadmin'@'%'; FLUSH PRIVILEGES;\"" "Creating user pxadmin and setting permissions."
 
 # Import schema SQL files
-execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/1_tables.sql" "Importing tables schema."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/2_lookups.sql" "Importing lookups schema."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/3_data.sql" "Importing base data."
-
-if [ -z "${NO_USERPORTAL_DATA}" ]; then
-    execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/4_data_user_portal.sql" "Importing User Portal Data."
-fi
-
-# Additional imports and grants
-execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/5_routines.sql" "Importing routines."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../grants/ispyb_acquisition.sql" "Setting acquisition grants."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../grants/ispyb_processing.sql" "Setting processing grants."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../grants/ispyb_web.sql" "Setting web grants."
-execute_sql "mysql $MYSQL_CONN -D $DB < ../grants/ispyb_import.sql" "Setting import grants."
-
-# Get this scripts dir
-dir=$(dirname $(realpath ${0}))
-
-# Checking for missed updates
-arr=$(${dir}/missed_updates.sh)
-if [ -n "$arr" ]; then
-    echo "Running missed updates:"
-    for sql_file in ${arr[@]}; do
-        execute_sql "mysql $MYSQL_CONN -D ${DB} < 'schema/updates/${sql_file}'" "Applying update from ${sql_file}."
-    done
-else
-    echo "No new schema/updates/*.sql files to apply."
-fi
+execute_sql "mysql $MYSQL_CONN -D $DB < ../schema/pydb_empty.sql" "Importing tables schema."
 
 echo "Script completed successfully!"
