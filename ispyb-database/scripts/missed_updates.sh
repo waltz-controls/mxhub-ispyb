@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# MySQL connection parameters
+HOST="127.0.0.1"
+PORT="3306"
+USERNAME="root"
+PASSWORD="root"  # Consider securing this better, e.g., using an environment variable or a secured option file
+MYSQL_CONN="-h $HOST -P $PORT -u $USERNAME -p$PASSWORD"
+
 # Get the database name
 if [ -z "${DB}" ]
 then
@@ -19,7 +26,7 @@ source ${dir}/functions.sh
 all_sql_files=`cd ${project_root}/schema/updates && ls *.sql && cd ../..`
 
 # Get a list of all update files recorded in the SchemaStatus table
-done_sql_files=`mysql --defaults-file=${project_root}/.my.cnf --host=localhost --port=3306 -D $DB --skip-column-names --silent --raw -e "SELECT scriptName FROM SchemaStatus WHERE schemaStatus = 'DONE' ORDER BY recordTimeStamp;"`
+done_sql_files=`mysql ${MYSQL_CONN} -D $DB --skip-column-names --silent --raw -e "SELECT scriptName FROM SchemaStatus WHERE schemaStatus = 'DONE' ORDER BY recordTimeStamp;"`
 
 # Make a list of all update files not recorded in the SchemaStatus table
 arr=()
