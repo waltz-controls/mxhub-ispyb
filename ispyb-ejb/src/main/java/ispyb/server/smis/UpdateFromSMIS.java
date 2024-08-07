@@ -165,7 +165,7 @@ public class UpdateFromSMIS {
 		}
 		Proposal3VO myProposal = proposal.findByPk(proposalId);
 
-		Long pk = new Long(1);
+		long pk = 1L;
 		
 		if (Constants.SITE_USERPORTAL_LINK_IS_SMIS()) {
 		

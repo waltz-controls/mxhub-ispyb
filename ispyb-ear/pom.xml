@@ -50,16 +50,16 @@
 					<!-- </paths> -->
 					<!-- </modules-path> -->
 					<modules>
-						<ejbModule>
+						<ejbModule> <!--for back end-->
 							<groupId>ispyb</groupId>
 							<artifactId>ispyb-ejb3</artifactId>
 							<bundleDir>/</bundleDir>
 						</ejbModule>
 											  
-				 		<webModule>
+				 		<webModule> <!--for front-end-->
 							<groupId>ispyb</groupId>
 							<artifactId>ispyb-ws</artifactId>
-							<contextRoot>/ispyb/ispyb-ws</contextRoot>
+							<contextRoot>/ispyb/ispyb-ws</contextRoot> <!--goes to url link for REST and SOAP-->
 						</webModule>
 					</modules>
 					<fileNameMapping>no-version</fileNameMapping>
