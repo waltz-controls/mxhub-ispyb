@@ -97,7 +97,7 @@ public class DESYLoginModule {
             {
                 String role_name = roles.getJSONObject(i).getString("name");
                 String role_value = roles.getJSONObject(i).getString("value");
-                if(role_name.equals("Beamline Manager") && role_value.equals("PETRA III: P11")){
+                if((role_name.equals("Beamline Manager") || role_name.equals("Beamline Scientist")) && role_value.equals("PETRA III: P11")){
                     // Assign the Manager/Local Contact role
                     myRoles.add(Constants.ROLE_MANAGER);
                     myRoles.add(Constants.ROLE_LOCALCONTACT);
