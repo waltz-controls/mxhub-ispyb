@@ -140,8 +140,8 @@
                resourceName="UserDatabase"/>-->
         <Realm className="org.apache.catalina.realm.JAASRealm"
                appName="ispyb"
-               userClassNames="javax.security.auth.spi.LoginModule"
-               roleClassNames="javax.security.auth.spi.LoginModule"
+               userClassNames="org.apache.openejb.core.security.jaas.UserPrincipal"
+               roleClassNames="org.apache.openejb.core.security.jaas.GroupPrincipal"
                configFile="jaas.conf"/>
       </Realm>
 
