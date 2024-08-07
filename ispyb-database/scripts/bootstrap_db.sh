@@ -37,7 +37,7 @@ execute_sql() {
 }
 
 # Database configuration
-DB="ispyb_build"
+DB="pydb"
 
 echo "Starting database setup..."
 
