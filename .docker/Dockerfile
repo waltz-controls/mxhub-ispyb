@@ -24,15 +24,17 @@ FROM eclipse-temurin:21-jre
 RUN apt-get update && apt-get install -y wget tar
 
 # Define environment variables for Tomcat version and installation directory
-ENV TOMCAT_VERSION 10.0.0-M1
+ENV TOMCAT_VERSION 10.0.0-M2
+ENV TOMCAT_JAKARTA_PROFILE plume
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 
 # Download and install Tomcat
-RUN wget https://downloads.apache.org/tomee/tomee-10.0.0-M1/apache-tomee-$TOMCAT_VERSION-webprofile.tar.gz -O /tmp/tomcat.tar.gz \
+RUN wget https://dlcdn.apache.org/tomee/tomee-$TOMCAT_VERSION/apache-tomee-$TOMCAT_VERSION-$TOMCAT_JAKARTA_PROFILE.tar.gz -O /tmp/tomcat.tar.gz \
     && tar -xvf /tmp/tomcat.tar.gz -C /usr/local \
-    && mv /usr/local/apache-tomee-webprofile-$TOMCAT_VERSION $CATALINA_HOME \
+    && mv /usr/local/apache-tomee-$TOMCAT_JAKARTA_PROFILE-$TOMCAT_VERSION $CATALINA_HOME \
     && rm /tmp/tomcat.tar.gz \
+    && rm $CATALINA_HOME/lib/eclipselink* \
     && chmod +x $CATALINA_HOME/bin/catalina.sh
 
 # Copy the WAR file from the builder stage to the TomEE webapps directory
@@ -51,7 +53,7 @@ COPY configuration/mariadb/mariadb-java-client-3.3.3.jar $CATALINA_HOME/lib/
 # Expose the port TomEE is running on
 EXPOSE 8080
 
-ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=* -Dispyb.properties=file:///etc/ispyb/ispyb.properties"
+ENV JAVA_OPTS="-Dtomee.serialization.class.blacklist=- -Dtomee.serialization.class.whitelist=* -Dispyb.properties=file:///etc/ispyb/ispyb.properties -Dtomee.jaxws.subcontext=/ispybWS"
 
 # Start TomEE server
 CMD ["catalina.sh", "run"]
