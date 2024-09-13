@@ -24,7 +24,7 @@ import ispyb.server.common.vos.login.Login3VO;
 
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -34,6 +34,8 @@ import jakarta.persistence.criteria.Root;
 
 
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Login3ServiceBean implements Login3Service, Login3ServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

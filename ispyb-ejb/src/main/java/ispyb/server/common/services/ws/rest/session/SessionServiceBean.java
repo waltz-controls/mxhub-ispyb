@@ -24,7 +24,7 @@ import ispyb.server.mx.services.ws.rest.WsServiceBean;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -32,6 +32,8 @@ import jakarta.persistence.Query;
 
 
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class SessionServiceBean extends WsServiceBean  implements SessionService, SessionServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

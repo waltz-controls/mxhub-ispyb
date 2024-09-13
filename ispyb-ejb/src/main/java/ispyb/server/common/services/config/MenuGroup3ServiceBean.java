@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
@@ -43,6 +43,8 @@ import ispyb.server.common.vos.config.MenuGroup3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class MenuGroup3ServiceBean implements MenuGroup3Service,
 		MenuGroup3ServiceLocal {
 

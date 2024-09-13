@@ -32,9 +32,7 @@ import java.util.stream.Collectors;
 
 import ispyb.server.common.vos.proposals.Proposal3VO;
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.jws.WebMethod;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -65,6 +63,8 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 //@TransactionTimeout(3600)
 public class Session3ServiceBean implements Session3Service, Session3ServiceLocal {
 

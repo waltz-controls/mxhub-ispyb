@@ -22,9 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 
 import org.apache.log4j.Logger;
 
@@ -46,6 +44,8 @@ import ispyb.server.mx.vos.sample.Protein3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class AuthorisationServiceBean implements AuthorisationService, AuthorisationServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AuthorisationServiceBean.class);

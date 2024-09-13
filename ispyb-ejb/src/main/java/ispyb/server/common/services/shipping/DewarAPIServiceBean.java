@@ -40,8 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 
 import org.apache.log4j.Logger;
 
@@ -51,6 +50,8 @@ import org.apache.log4j.Logger;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarAPIServiceBean.class);

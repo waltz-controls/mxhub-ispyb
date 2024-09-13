@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ispyb.server.common.vos.proposals.Proposal3VO;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.*;
 
 import jakarta.persistence.criteria.*;
@@ -41,6 +41,8 @@ import ispyb.server.common.vos.proposals.LabContact3VO;
  * 
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class LabContact3ServiceBean implements LabContact3Service, LabContact3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(LabContact3ServiceBean.class);

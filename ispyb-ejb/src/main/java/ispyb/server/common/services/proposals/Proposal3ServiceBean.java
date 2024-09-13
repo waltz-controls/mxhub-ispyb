@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.jws.WebMethod;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -54,6 +52,8 @@ import ispyb.server.common.vos.proposals.ProposalWS3VO;
  * 
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceLocal {
 
 	// Generic HQL request to find all instances of Proposal
@@ -379,6 +379,7 @@ public class Proposal3ServiceBean implements Proposal3Service, Proposal3ServiceL
 		/**
 		 * If user is a proposal it is linked by proposalCode and proposalNumber in the proposal table
 		 */
+		//TODO here is the bug
 		proposals.addAll(this.findProposalByCodeAndNumber(userName));
 
 		/**

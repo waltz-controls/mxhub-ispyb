@@ -21,7 +21,7 @@ package ispyb.server.common.services.proposals;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -42,6 +42,8 @@ import ispyb.server.common.vos.proposals.Laboratory3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Laboratory3ServiceBean.class);

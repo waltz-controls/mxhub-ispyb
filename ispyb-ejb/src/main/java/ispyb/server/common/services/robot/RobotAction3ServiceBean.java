@@ -25,7 +25,7 @@ package ispyb.server.common.services.robot;
 
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -33,6 +33,8 @@ import jakarta.persistence.PersistenceContext;
 import ispyb.server.common.vos.robot.RobotAction3VO;
 
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction3ServiceLocal {
 
 

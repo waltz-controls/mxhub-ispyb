@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ispyb.server.mx.vos.collections.Session3VO;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.*;
 
 import jakarta.persistence.criteria.*;
@@ -50,6 +50,8 @@ import com.google.gson.GsonBuilder;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Shipping3ServiceBean.class);

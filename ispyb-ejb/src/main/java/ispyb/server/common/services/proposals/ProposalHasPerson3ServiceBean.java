@@ -23,9 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.jws.WebMethod;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -45,6 +43,8 @@ import ispyb.server.common.vos.proposals.ProposalHasPerson3VO;
  * 
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class ProposalHasPerson3ServiceBean implements ProposalHasPerson3Service, ProposalHasPerson3ServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

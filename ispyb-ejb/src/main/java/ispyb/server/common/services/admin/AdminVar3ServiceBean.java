@@ -20,7 +20,7 @@ package ispyb.server.common.services.admin;
 
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -40,6 +40,8 @@ import ispyb.server.common.vos.admin.AdminVar3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AdminVar3ServiceBean.class);

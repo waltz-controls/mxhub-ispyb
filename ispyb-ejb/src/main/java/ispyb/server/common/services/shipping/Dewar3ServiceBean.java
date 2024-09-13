@@ -26,7 +26,7 @@ import java.util.List;
 import ispyb.server.common.vos.proposals.Proposal3VO;
 import ispyb.server.common.vos.shipping.Shipping3VO;
 import ispyb.server.mx.vos.collections.Session3VO;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -46,6 +46,8 @@ import ispyb.server.common.vos.shipping.Dewar3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Dewar3ServiceBean.class);

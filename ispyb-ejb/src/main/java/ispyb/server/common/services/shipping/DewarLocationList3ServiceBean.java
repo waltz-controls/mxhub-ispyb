@@ -20,7 +20,7 @@ package ispyb.server.common.services.shipping;
 
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -37,6 +37,8 @@ import ispyb.server.common.vos.shipping.DewarLocationList3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class DewarLocationList3ServiceBean implements DewarLocationList3Service, DewarLocationList3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarLocationList3ServiceBean.class);

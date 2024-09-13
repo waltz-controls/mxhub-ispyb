@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import ispyb.server.common.vos.proposals.Proposal3VO;
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -48,6 +47,8 @@ import ispyb.server.mx.vos.sample.Protein3VO;
  * </p>
  */
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class Container3ServiceBean implements Container3Service, Container3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Container3ServiceBean.class);

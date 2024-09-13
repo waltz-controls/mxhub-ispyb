@@ -6,7 +6,7 @@ import ispyb.server.common.vos.admin.SchemaStatusVO;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -17,6 +17,8 @@ import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
 
 @Stateless
+@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class SchemaStatusServiceBean implements SchemaStatusService, SchemaStatusServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(SchemaStatusServiceBean.class);
