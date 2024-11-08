@@ -33,8 +33,6 @@ import jakarta.persistence.PersistenceContext;
 import ispyb.server.common.vos.robot.RobotAction3VO;
 
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class RobotAction3ServiceBean implements RobotAction3Service, RobotAction3ServiceLocal {
 
 

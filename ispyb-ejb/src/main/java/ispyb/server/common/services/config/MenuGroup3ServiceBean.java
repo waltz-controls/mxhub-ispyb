@@ -43,8 +43,6 @@ import ispyb.server.common.vos.config.MenuGroup3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class MenuGroup3ServiceBean implements MenuGroup3Service,
 		MenuGroup3ServiceLocal {
 

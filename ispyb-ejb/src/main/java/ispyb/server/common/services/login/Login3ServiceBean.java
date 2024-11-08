@@ -34,8 +34,6 @@ import jakarta.persistence.criteria.Root;
 
 
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Login3ServiceBean implements Login3Service, Login3ServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

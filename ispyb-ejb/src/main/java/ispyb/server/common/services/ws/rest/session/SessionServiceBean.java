@@ -32,8 +32,6 @@ import jakarta.persistence.Query;
 
 
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class SessionServiceBean extends WsServiceBean  implements SessionService, SessionServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

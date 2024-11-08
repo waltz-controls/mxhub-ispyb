@@ -63,8 +63,6 @@ import ispyb.server.mx.vos.collections.SessionWS3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value=TransactionAttributeType.NEVER)
 //@TransactionTimeout(3600)
 public class Session3ServiceBean implements Session3Service, Session3ServiceLocal {
 

@@ -41,8 +41,6 @@ import ispyb.server.common.vos.proposals.LabContact3VO;
  * 
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class LabContact3ServiceBean implements LabContact3Service, LabContact3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(LabContact3ServiceBean.class);

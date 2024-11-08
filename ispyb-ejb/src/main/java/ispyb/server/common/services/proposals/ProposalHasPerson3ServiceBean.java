@@ -43,8 +43,6 @@ import ispyb.server.common.vos.proposals.ProposalHasPerson3VO;
  * 
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class ProposalHasPerson3ServiceBean implements ProposalHasPerson3Service, ProposalHasPerson3ServiceLocal {
 
 	@PersistenceContext(unitName = "ispyb_db")

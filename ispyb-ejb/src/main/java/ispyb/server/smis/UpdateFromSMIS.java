@@ -166,20 +166,14 @@ public class UpdateFromSMIS {
 		Proposal3VO myProposal = proposal.findByPk(proposalId);
 
 		long pk = 1L;
-		
-		if (Constants.SITE_USERPORTAL_LINK_IS_SMIS()) {
-		
-			switch (Constants.getSite()) {
-			case DESY:
-				SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
-				pk = wsDESY.getProposalPK(myProposal.getProposalCode(), Long.parseLong(myProposal.getProposalNumber()));
-				break;
-			default:
-				break;
-			}
-			
-		} else {
-			// find a way to retrieve the user portal pk of the proposal from its proposalId
+
+		switch (Constants.getSite()) {
+		case DESY:
+			SMISWebService wsDESY = SMISWebServiceGenerator.getWs();
+			pk = wsDESY.getProposalPK(myProposal.getProposalCode(), Long.parseLong(myProposal.getProposalNumber()));
+			break;
+		default:
+			break;
 		}
 		
 		updateThisProposalFromSMISPk(pk);

@@ -50,8 +50,6 @@ import org.apache.log4j.Logger;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class DewarAPIServiceBean implements DewarAPIService, DewarAPIServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarAPIServiceBean.class);

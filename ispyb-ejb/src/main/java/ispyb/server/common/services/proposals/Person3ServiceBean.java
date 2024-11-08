@@ -43,8 +43,6 @@ import ispyb.server.common.vos.proposals.PersonWS3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Person3ServiceBean implements Person3Service, Person3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Person3ServiceBean.class);

@@ -46,8 +46,6 @@ import ispyb.server.common.vos.shipping.Dewar3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Dewar3ServiceBean implements Dewar3Service, Dewar3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Dewar3ServiceBean.class);

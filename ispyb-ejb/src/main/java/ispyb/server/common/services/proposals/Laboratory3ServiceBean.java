@@ -42,8 +42,6 @@ import ispyb.server.common.vos.proposals.Laboratory3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Laboratory3ServiceBean implements Laboratory3Service, Laboratory3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Laboratory3ServiceBean.class);

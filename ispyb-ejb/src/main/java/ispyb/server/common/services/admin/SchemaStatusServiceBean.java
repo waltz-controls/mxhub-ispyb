@@ -17,8 +17,6 @@ import jakarta.persistence.criteria.Root;
 import org.apache.log4j.Logger;
 
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class SchemaStatusServiceBean implements SchemaStatusService, SchemaStatusServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(SchemaStatusServiceBean.class);

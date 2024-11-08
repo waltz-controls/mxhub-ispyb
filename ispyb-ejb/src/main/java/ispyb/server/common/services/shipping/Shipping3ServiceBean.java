@@ -50,8 +50,6 @@ import com.google.gson.GsonBuilder;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Shipping3ServiceBean implements Shipping3Service, Shipping3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Shipping3ServiceBean.class);

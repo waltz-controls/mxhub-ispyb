@@ -37,8 +37,6 @@ import ispyb.server.common.vos.shipping.DewarLocationList3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class DewarLocationList3ServiceBean implements DewarLocationList3Service, DewarLocationList3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(DewarLocationList3ServiceBean.class);

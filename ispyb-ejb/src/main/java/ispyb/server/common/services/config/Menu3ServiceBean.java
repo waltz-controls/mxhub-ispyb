@@ -42,8 +42,6 @@ import ispyb.server.common.vos.config.Menu3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class Menu3ServiceBean implements Menu3Service,
 		Menu3ServiceLocal {
 

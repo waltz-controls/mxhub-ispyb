@@ -41,8 +41,6 @@ import ispyb.server.common.vos.shipping.DewarTransportHistory3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class DewarTransportHistory3ServiceBean implements DewarTransportHistory3Service,
 		DewarTransportHistory3ServiceLocal {
 

@@ -40,8 +40,6 @@ import ispyb.server.common.vos.admin.AdminVar3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value= TransactionAttributeType.NEVER)
 public class AdminVar3ServiceBean implements AdminVar3Service, AdminVar3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AdminVar3ServiceBean.class);

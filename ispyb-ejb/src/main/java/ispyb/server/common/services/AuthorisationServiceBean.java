@@ -44,8 +44,6 @@ import ispyb.server.mx.vos.sample.Protein3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class AuthorisationServiceBean implements AuthorisationService, AuthorisationServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(AuthorisationServiceBean.class);
@@ -174,7 +172,7 @@ public class AuthorisationServiceBean implements AuthorisationService, Authorisa
 		else
 			throw new AccessDeniedException("Access not authorised to protein:" + vo.toString() + " for user:"+ user);
 	}
-	
+	//TODO !!!ERROR!!!!  ERROR AS "user" IS ALWAYS = "guest". JAKARTA HAS WRONG CONTEXT WHICH DOESN'T HAVE USERS!!! In ISPYB.properties check: ISPyB.authorisation.active=true OR false
 	public String getLoggedUser()  {
 		String user = "guest";
 		

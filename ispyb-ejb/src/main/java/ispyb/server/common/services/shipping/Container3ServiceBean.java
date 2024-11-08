@@ -47,8 +47,6 @@ import ispyb.server.mx.vos.sample.Protein3VO;
  * </p>
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-@TransactionAttribute(value=TransactionAttributeType.NEVER)
 public class Container3ServiceBean implements Container3Service, Container3ServiceLocal {
 
 	private final static Logger LOG = Logger.getLogger(Container3ServiceBean.class);
