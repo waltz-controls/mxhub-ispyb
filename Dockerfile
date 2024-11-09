@@ -5,7 +5,7 @@ FROM eclipse-temurin:21-jre
 RUN apt-get update && apt-get install -y wget tar
 
 # Define environment variables for Tomcat version and installation directory
-ENV TOMCAT_VERSION 10.0.0-M2
+ENV TOMCAT_VERSION 10.0.0-M3
 ENV TOMCAT_JAKARTA_PROFILE plume
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
