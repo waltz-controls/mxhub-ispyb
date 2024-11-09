@@ -15,7 +15,8 @@ RUN wget https://dlcdn.apache.org/tomee/tomee-$TOMCAT_VERSION/apache-tomee-$TOMC
     && tar -xvf /tmp/tomcat.tar.gz -C /usr/local \
     && mv /usr/local/apache-tomee-$TOMCAT_JAKARTA_PROFILE-$TOMCAT_VERSION $CATALINA_HOME \
     && rm /tmp/tomcat.tar.gz \
-    && rm $CATALINA_HOME/lib/*eclipselink* \
+    && rm $CATALINA_HOME/lib/eclipselink* \
+    && rm $CATALINA_HOME/lib/openejb-core-eclipselink* \
     && chmod +x $CATALINA_HOME/bin/catalina.sh
 
 # Copy the EAR file from the builder stage to the Tomcat webapps directory
